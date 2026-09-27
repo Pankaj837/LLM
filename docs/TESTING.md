@@ -17,8 +17,9 @@
    synthetic-data tests (no zip needed) also pin the exact incompatible binary-header format found in that
    delivery (finding F-29), so a regression there is caught without the 24 MB dataset.
 6. **GPU handoff** (`test_gpu_handoff.py`, opt-in, needs CUDA) — see `docs/HANDOFF_GPU.md`.
-7. **C++ parity** (`test_cpp_parity.py`, opt-in via `TOK_CLI`/`TOK_VOCAB`) — skips until the team's binary and
-   vocabulary are available; ready to run the moment they are.
+7. **C++ parity** (`test_cpp_parity.py`, opt-in via `TOK_CLI`/`TOK_VOCAB`) — **verified**: the team's C++ source
+   (`native/tokenizer/`) is now in this repo and has been built and run for real. Full results and how to
+   reproduce: `docs/CPP_TOKENIZER_PARITY.md`. Still opt-in in CI because it needs a locally-built `encode_cli`.
 8. **Release gate** (`test_checkpoint.py -k trained`, opt-in via `LLM_CKPT`) — fails on a checkpoint that looks
    like random initialisation. Verified to **pass** on our trained biology checkpoint and to **fail** on the
    delivered `pretrain_model.pt`.
@@ -31,7 +32,8 @@ python -m pytest                                             # layers 1-4 (fast,
 BIO_ZIP="Biology Dataset.zip" python -m pytest tests/test_bio_smoke.py -s
 EARTH_ZIP="Earth and Environment Processed Dataset.zip" python -m pytest tests/test_prepare_earth.py -s
 python -m pytest tests/test_gpu_handoff.py -s                 # on a CUDA machine
-TOK_CLI=... TOK_VOCAB=... python -m pytest tests/test_cpp_parity.py
+cd native/tokenizer && cmake -B build && cmake --build build && cd ../..   # build the C++ tokenizer once
+TOK_CLI=native/tokenizer/build/encode_cli TOK_VOCAB=<a trained vocab.tok> python -m pytest tests/test_cpp_parity.py
 LLM_CKPT=runs/bio_small/ckpt_last.pt python -m pytest tests/test_checkpoint.py -k trained
 python scripts/mutation_check.py
 python scripts/lint.py
@@ -39,9 +41,11 @@ python scripts/smoke_test.py
 ```
 
 ## Current totals (CPU, this repository)
-- Without `BIO_ZIP`/`EARTH_ZIP`: 265 passed, 15 skipped (GPU 7, C++ parity 2, real-data 4, release gate 1, legacy checkpoint 1).
-- With both: 269 passed, 11 skipped.
-- Lint: 0 problems. Team smoke script: 29/29.
+- Without `BIO_ZIP`/`EARTH_ZIP`/a built C++ tokenizer: 265 passed, 15 skipped (GPU 7, C++ parity 2, real-data 4, release gate 1, legacy checkpoint 1).
+- With `BIO_ZIP` + `EARTH_ZIP`: 269 passed, 11 skipped.
+- **With the C++ tokenizer built and `TOK_CLI`/`TOK_VOCAB` set: 271 passed** (the 2 C++ parity tests run for real
+  instead of skipping) — see `docs/CPP_TOKENIZER_PARITY.md` for the actual output.
+- Lint: 0 problems. Team smoke script: 29/29. Team's C++ test suite (`native/tokenizer`): 46/46.
 - Mutation check: **25/25 mutants killed, 0 survived**.
 - Release gate: **passes** on `runs/bio_small/ckpt_last.pt` (trained here), **fails** on the delivered `pretrain_model.pt`
   (as it should — that file is random weights).
@@ -58,7 +62,7 @@ rewritten (`test_planned_context_changes_logits_and_cached_uncached_logits_agree
 pattern before it could tell the mutant from the original) — this is why the check exists: a passing assertion is
 not evidence unless it can also fail.
 
-One mutant (`llm/bpe_trainer.py`, flipping the merge-priority sign) originally broke the trainer's internal
+One mutant (`src/llm/bpe_trainer.py`, flipping the merge-priority sign) originally broke the trainer's internal
 stale-cache-entry invariant instead of just its priority order, which sent it into an infinite loop that ran
 for hours undetected before being found and killed manually. Fixed by mutating the sign and its paired
 consistency check together, and by adding a 90-second per-mutant `subprocess` timeout (a `TIMEOUT` result now

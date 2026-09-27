@@ -6,7 +6,7 @@ defined by this repository and the section says so.
 
 ---
 
-## C1 Configuration — `llm/model_config.py`
+## C1 Configuration — `src/llm/model_config.py`
 - **Purpose:** one validated, serialisable dataclass for every hyperparameter.
 - **Interface:** `ModelConfig(...)`, `.to_dict()`, `ModelConfig.from_dict(d)`, `.rope_mode`, `.trained_context_len`.
   Defaults = the 51.5M-parameter reference model (11 layers, d=640, 8 query / 2 KV heads, SwiGLU 1664, vocab 8000, ctx 2048).
@@ -17,14 +17,14 @@ defined by this repository and the section says so.
 - **Limits:** the removed `ntk_scale_factor` (a static factor invented during integration, in no spec) is gone;
   use `use_dynamic_ntk`.
 
-## C2 Core blocks — `llm/modules.py`, `llm/model.py`
+## C2 Core blocks — `src/llm/modules.py`, `src/llm/model.py`
 - **Purpose:** RMSNorm (weight-only), SwiGLU feed-forward, pre-norm residual block, tied-embedding output head.
 - **Interface:** `RMSNorm(dim)`, `SwiGLUFeedForward(hidden, intermediate)`, `TransformerModel(config)`.
 - **Verified by:** RMSNorm ≡ `torch.nn.RMSNorm` (1e-6); SwiGLU ≡ its formula; fresh-model initial loss ≈ ln V
   (GPT-style N(0, 0.02) init — without it the tied head starts at CE ≈ 570).
 - **Limits:** full-vocabulary logits for every position (memory grows with batch × seq × vocab).
 
-## C3 Positional encoding — `llm/rope.py`, `llm/dynamic_ntk.py`, `llm/rope_cache.py`
+## C3 Positional encoding — `src/llm/rope.py`, `src/llm/dynamic_ntk.py`, `src/llm/rope_cache.py`
 - **Purpose:** RoPE with optional context extension.
 - **Interface:** `RotaryEmbedding(config).get_cos_sin(position_ids, dtype, context_len)`; `DynamicNTK.get_theta(L)`;
   `RopeCache.build(seq_len, head_dim, theta, …)`.
@@ -38,7 +38,7 @@ defined by this repository and the section says so.
   scope for a 2048-token model. Dynamic NTK is defined by the *planned* context (see `docs/DECISIONS.md` D1). YaRN and
   Dynamic NTK have not been evaluated on a *trained* model (perplexity vs length) — GPU handoff item.
 
-## C4 Attention — `llm/gqa.py`
+## C4 Attention — `src/llm/gqa.py`
 - **Purpose:** grouped-query attention with an optional pre-allocated KV cache; RoPE applied to Q and K before the KV
   heads are repeated.
 - **Interface:** `GroupedQueryAttention(d_model, n_heads, n_kv_heads, head_dim, …)(x, position_ids, kv_cache, attention_mask,
@@ -49,7 +49,7 @@ defined by this repository and the section says so.
 - **Limits:** `repeat_interleave` materialises expanded K/V each step (`SDPA(enable_gqa=True)` can avoid it — GPU
   benchmark item). Left-padded batches are not supported by generation.
 
-## C5 Tokenizer — `llm/tokenizer.py`, `llm/bpe_trainer.py`
+## C5 Tokenizer — `src/llm/tokenizer.py`, `src/llm/bpe_trainer.py`
 - **Purpose:** byte-level BPE compatible with the C++ tokenizer's `.tok` files.
 - **Interface:** `BPETokenizer.from_file(path)`, `.encode(text, allowed_special=…)`, `.decode(ids)`, `.n_vocab`, `.eos_id`,
   `BPETokenizer.file_sha256(path)`; `bpe_trainer.train_bpe / write_tok`.
@@ -57,10 +57,12 @@ defined by this repository and the section says so.
 - **Verified by:** round-trip lossless on curated + fuzzed text (unicode, emoji, all whitespace runs, contractions);
   save/load; unknown id decodes to `<unk:N>`; special-token injection blocked for prompts and documents; trainer
   invariants (unique tokens, every merge = two earlier tokens, determinism, agreement with the encoder).
-- **Limits (important):** parity with the **C++** implementation is **unverified** — its source, `encode_cli` and
-  the trained `vocab.tok` are not part of this repository. `tests/test_cpp_parity.py` runs it as soon as
-  `TOK_CLI` and `TOK_VOCAB` are set. `bpe_trainer` output is *format*-compatible only; never present it as the
-  team's vocabulary.
+- **C++ parity: verified.** The team's C++ source (`native/tokenizer/`) was built (MSVC, after the machine's local
+  g++/MSYS2 install turned out to be broken) and run: its own 46-check test suite passes 46/46, and
+  `tests/test_cpp_parity.py` against a real vocabulary trained by the real `prepare_dataset` tool shows **identical
+  token ids** on every case and lossless round-trip. Full results: `docs/CPP_TOKENIZER_PARITY.md`.
+- **Limits:** `bpe_trainer` (the pure-Python stand-in trainer used for the biology/earth smoke tests) is *format*-
+  compatible only; never present its output as the team's real vocabulary — use `native/tokenizer/` for that.
 
 ## C6 Generation — `TransformerModel.generate`
 - **Purpose:** sampling with temperature / top-k / top-p, KV-cached or uncached, per-row EOS.
@@ -69,7 +71,7 @@ defined by this repository and the section says so.
   negative temperature raise; finished rows stay finished; warning beyond the configured context.
 - **Limits:** no repetition penalty / min-p / stop sequences / streaming; no left-padded batches.
 
-## C7 Checkpoint — `llm/checkpoint.py`, `scripts/make_scaffold_checkpoint.py`
+## C7 Checkpoint — `src/llm/checkpoint.py`, `scripts/make_scaffold_checkpoint.py`
 - **Purpose:** self-describing checkpoints (config, step, losses, vocabulary sha256, optimizer) and safe loading.
 - **Interface:** `save_checkpoint(...)`, `load_checkpoint(path, model, strict, expected_vocab_sha256)`, `read_checkpoint`,
   `looks_untrained`.
@@ -81,7 +83,7 @@ defined by this repository and the section says so.
 - **Limits:** **no trained checkpoint exists yet** for the reference model. The included biology run trains a
   smaller model (see `docs/BIOLOGY_SMOKE_TEST.md`).
 
-## C8 Pipeline — `llm/pipeline.py`
+## C8 Pipeline — `src/llm/pipeline.py`
 - **Purpose:** text in → text out.
 - **Interface:** `LLMPipeline.from_pretrained(checkpoint, vocab, config=None, device=…).generate(prompt, …)`.
 - **Verified by:** fails loudly on missing checkpoint / vocab / key or config mismatch / vocabulary-hash mismatch /
@@ -89,11 +91,11 @@ defined by this repository and the section says so.
   `test_e2e.py` runs text → `.bin` → train → checkpoint → pipeline → reward model.
 - **Limits:** returns prompt + continuation (a documented convention); no chat template yet.
 
-## C9 Conditional reward model — `llm/reward/`
+## C9 Conditional reward model — `src/llm/reward/`
 See `docs/REWARD_MODEL.md`. Mechanism verified (FiLM identity init, padding invariance, Bradley–Terry loss, opposing-criteria
 mock task, ablation control). **Its accuracy numbers are not evidence of quality** (see that document).
 
-## C10 Token data — `llm/data.py`
+## C10 Token data — `src/llm/data.py`
 - **Purpose:** the tokenizer team's `.bin` dataset format plus training-data hygiene.
 - **Interface:** `read_header/read_tokens/write_bin`, `TokenDataset.get_batch / sequential_batches`,
   `document_split`, `encode_documents`, `NearDuplicateFilter`.
@@ -103,7 +105,7 @@ mock task, ablation control). **Its accuracy numbers are not evidence of quality
   had 25% of LibreTexts validation windows also in training after exact-hash dedupe (now 0.3% overall).
 - **Limits:** the meaning of the header `split` field is not specified in the report; this repo uses 0 = train, 1 = val.
 
-## C11 Trainer — `llm/train.py`
+## C11 Trainer — `src/llm/train.py`
 - **Purpose:** reference next-token trainer so a real checkpoint can exist.
 - **Verified by:** `test_train.py` — schedule, weight-decay groups, loss starts at ln V and falls, one-batch overfit,
   i.i.d. tokens are *not* learnable (leak guard), determinism, **bit-exact resume**, grad accumulation, non-finite

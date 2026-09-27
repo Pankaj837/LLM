@@ -22,20 +22,20 @@ text ─► (other tokenizer allowed) ─► ConditionalRewardModel             
 
 | Module | Responsibility | Depends on |
 |---|---|---|
-| `llm/model_config.py` | the single configuration dataclass (validated, serialisable) | – |
-| `llm/modules.py` | `RMSNorm`, `SwiGLUFeedForward` | – |
-| `llm/dynamic_ntk.py` | `DynamicNTK.get_theta(seq_len)` (team spec) | – |
-| `llm/rope_cache.py` | `RopeCache` cos/sin tables keyed by (length, theta, device, dtype) | – |
-| `llm/rope.py` | `RotaryEmbedding`: RoPE / Dynamic NTK / YaRN, `get_cos_sin()` | config, dynamic_ntk, rope_cache |
-| `llm/gqa.py` | `GroupedQueryAttention`, `KVCache` | – |
-| `llm/model.py` | `TransformerModel` (forward, `generate`, `load_pretrained`) | all of the above |
-| `llm/tokenizer.py` | byte-level BPE, `.tok` reader/writer, `BPETokenizer` | – |
-| `llm/bpe_trainer.py` | pure-Python BPE trainer (tooling/tests; not the C++ vocabulary) | tokenizer |
-| `llm/data.py` | `.bin` reader/writer, `TokenDataset`, document split, near-duplicate filter | – |
-| `llm/checkpoint.py` | save/load with config + provenance + safety checks | config |
-| `llm/pipeline.py` | `LLMPipeline`: text → text | model, tokenizer, checkpoint |
-| `llm/train.py` | reference trainer (`python -m llm.train`) | model, data, checkpoint |
-| `llm/reward/` | conditional reward model, preference data, reward training | tokenizer |
+| `src/llm/model_config.py` | the single configuration dataclass (validated, serialisable) | – |
+| `src/llm/modules.py` | `RMSNorm`, `SwiGLUFeedForward` | – |
+| `src/llm/dynamic_ntk.py` | `DynamicNTK.get_theta(seq_len)` (team spec) | – |
+| `src/llm/rope_cache.py` | `RopeCache` cos/sin tables keyed by (length, theta, device, dtype) | – |
+| `src/llm/rope.py` | `RotaryEmbedding`: RoPE / Dynamic NTK / YaRN, `get_cos_sin()` | config, dynamic_ntk, rope_cache |
+| `src/llm/gqa.py` | `GroupedQueryAttention`, `KVCache` | – |
+| `src/llm/model.py` | `TransformerModel` (forward, `generate`, `load_pretrained`) | all of the above |
+| `src/llm/tokenizer.py` | byte-level BPE, `.tok` reader/writer, `BPETokenizer` | – |
+| `src/llm/bpe_trainer.py` | pure-Python BPE trainer (tooling/tests; not the C++ vocabulary) | tokenizer |
+| `src/llm/data.py` | `.bin` reader/writer, `TokenDataset`, document split, near-duplicate filter | – |
+| `src/llm/checkpoint.py` | save/load with config + provenance + safety checks | config |
+| `src/llm/pipeline.py` | `LLMPipeline`: text → text | model, tokenizer, checkpoint |
+| `src/llm/train.py` | reference trainer (`python -m llm.train`) | model, data, checkpoint |
+| `src/llm/reward/` | conditional reward model, preference data, reward training | tokenizer |
 
 ## Interface contracts (the things that break at integration time)
 

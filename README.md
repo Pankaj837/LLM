@@ -13,7 +13,7 @@ is still open) and `docs/HANDOFF_GPU.md` (what to run on a GPU).
 |---|---|
 | Config, blocks, GQA + KV cache, generation | verified against independent references; the team's original tests pass unchanged |
 | RoPE / Dynamic NTK / YaRN | per the team's reports and the YaRN paper; cached ≡ uncached at logit level |
-| Tokenizer | Python port verified; **C++ parity unverified** (binary and real `vocab.tok` not available) |
+| Tokenizer | Python port verified; **C++ parity verified** — built from the real source and tested, see `docs/CPP_TOKENIZER_PARITY.md` |
 | Checkpoint / pipeline | self-describing, fails loudly; **no trained reference checkpoint exists yet** |
 | Trainer + `.bin` data | proven on 2 real datasets (biology, Earth & Environment), bit-exact resume |
 | Reward model | mechanism verified; **synthetic data, not evidence of quality** |
@@ -77,6 +77,15 @@ python scripts/eval_earth.py --run runs/earth_small/ckpt_last.pt --data data/ear
 This delivery's `.bin` files use a different (incompatible) binary header than this repo's own — `prepare_earth.py`
 verifies and adapts it (finding F-29). Results: `docs/EARTH_ENVIRONMENT_SMOKE_TEST.md`.
 
+### C++ tokenizer parity (verified)
+```bash
+cd native/tokenizer && cmake -B build && cmake --build build && cd ../..   # needs a C++17 compiler
+./native/tokenizer/build/prepare_dataset <a text corpus> vocab.tok 8000    # train a real vocabulary
+TOK_CLI=native/tokenizer/build/encode_cli TOK_VOCAB=vocab.tok python -m pytest tests/test_cpp_parity.py -v
+```
+Results: `docs/CPP_TOKENIZER_PARITY.md` (46/46 on the team's own C++ test suite; identical token ids on every
+parity case between the C++ and Python tokenizers, on a real trained vocabulary).
+
 ## Layout
 
 ```
@@ -85,12 +94,13 @@ src/llm/
   tokenizer.py  bpe_trainer.py  data.py                                                     text ↔ ids ↔ .bin
   checkpoint.py  pipeline.py  train.py                                                      persistence, inference, training
   reward/                                                                                   conditional reward model
+native/tokenizer/  the team's C++ tokenizer, as delivered (+ one added test harness) — see native/README.md
 data/      README only (datasets are external/generated, never committed — see data/README.md)
 tests/     one file per component  +  legacy/ (the team's original tests, unchanged)  +  results/ (last real run's output)
 scripts/   smoke_test.py  prepare_biology.py  eval_bio.py  prepare_earth.py  eval_earth.py
            make_scaffold_checkpoint.py  mutation_check.py  lint.py
 docs/      ARCHITECTURE  COMPONENTS  DECISIONS  REVIEW_FINDINGS  TESTING  HANDOFF_GPU  TEAM_INSIGHTS  REWARD_MODEL
-           BIOLOGY_SMOKE_TEST  EARTH_ENVIRONMENT_SMOKE_TEST
+           BIOLOGY_SMOKE_TEST  EARTH_ENVIRONMENT_SMOKE_TEST  CPP_TOKENIZER_PARITY
 archive/   deprecated/uncertain files land here if any are found later — see archive/README.md for what
            was considered and why nothing is in it yet
 ```

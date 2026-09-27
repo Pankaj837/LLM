@@ -1,6 +1,6 @@
 # Review findings and their final status
 
-Origin: independent component review of the delivered `llm/` code (owner-agnostic), then re-verification while building
+Origin: independent component review of the delivered `src/llm/` code (owner-agnostic), then re-verification while building
 this repository. Every *Resolved* item has a test that fails without the fix (checked by mutation testing, see
 `docs/TESTING.md`). Severity: **Critical** blocks meaningful GPU testing/integration · **High** wrong results or security ·
 **Medium** robustness · **Design** decision needed.
@@ -28,7 +28,8 @@ this repository. Every *Resolved* item has a test that fails without the fix (ch
 | F-19 | High | C9 | evidence weak: a 5-line rule scores 100% on validation, 48-pair validation set, seed noise (FiLM vs concat flips), swap test on a training prompt | baseline printed, held-out swap prompt, README caveats | Resolved in code/docs; **conclusions need real preference data** |
 | F-20 | Design | C5 | duplicate tokenizer implementations | consolidated | Resolved |
 | F-21 | Medium | C4 | GPU performance: `.item()` host sync in every layer at every step; `repeat_interleave`; fused-kernel masking; bf16 | `.item()` removed (test); the rest need a GPU | **Open**: `docs/HANDOFF_GPU.md` |
-| F-22 | High | all | missing: C++ tokenizer + trained vocabulary, pruning, training code/data, docs | trainer, `.bin` I/O, docs added | **Open**: C++ tokenizer / `vocab.tok`, pruning |
+| F-22 | High | all | missing: C++ tokenizer + trained vocabulary, pruning, training code/data, docs | trainer, `.bin` I/O, docs added; **C++ tokenizer source received, built, and verified — see F-30** | **Open**: structured pruning only |
+| F-30 | High | C5/C10 | C++/Python tokenizer parity was unverified (no binary, no real vocabulary) | Received the C++ source, fixed a broken local toolchain by building with MSVC instead, ran the team's own 46-check test suite (46/46), trained a real 8001-token vocabulary with the real `prepare_dataset` tool, and ran `tests/test_cpp_parity.py` against it: **identical token ids on every case, lossless round-trip**. Also confirmed `.bin` header format (`TOK1`, 36 bytes) and the `split` field convention (0=train, 1=val) against the real tool's own output. Fixed a real hang in the parity test itself (`subprocess.run` needed `encoding="utf-8"`) | **Resolved** — see `docs/CPP_TOKENIZER_PARITY.md` |
 | F-23 | Medium | docs | README layout / stale TODOs / inconsistent names | rewritten | Resolved |
 | F-24 | Design | C9 | reward backbone architecture ≠ LM | adapter provided | **Decision**: standalone or shared backbone |
 | F-25 | High | C10 | LibreTexts republishes chapters: after exact-hash dedupe **25.5%** of its validation windows also occurred in training (4.9% overall) — would silently inflate validation scores | `NearDuplicateFilter` (content-defined 12-word shingles); overall leakage now 0.3% | Resolved |
@@ -38,10 +39,9 @@ this repository. Every *Resolved* item has a test that fails without the fix (ch
 | F-29 | High | C10 | the Earth & Environment delivery's `.bin` files use a **different, incompatible header** (24 bytes, magic `GNRP`) than this repo's tokenizer-report spec (36 bytes, magic `TOK1`) — `llm.data.read_header` correctly refuses to open them | `scripts/prepare_earth.py`: reads the delivered format, independently re-verifies every claim in its `PROCESSING_SUMMARY.md` (all matched), re-emits through `llm.data.write_bin` | Resolved (adapter); **the two header formats should be unified for future deliveries** |
 
 ## Not covered by this repository (needs input from the team)
-1. **C++ tokenizer parity** (source, `encode_cli`, trained `vocab.tok`) — `tests/test_cpp_parity.py` is ready.
-2. **Structured pruning** and its interaction with the reward model.
-3. **A trained reference checkpoint** (51.5M) and the perplexity-vs-length evaluation of Dynamic NTK / YaRN on it.
-4. **Real preference data** for the reward model.
-5. **Dual Chunk Attention** (described in the RoPE report for >128K tokens; out of scope at 2048).
-6. **Licences**: the biology data carries per-record licences (`pes2o` is marked “unknown” for all 6,499 records);
+1. **Structured pruning** and its interaction with the reward model.
+2. **A trained reference checkpoint** (51.5M) and the perplexity-vs-length evaluation of Dynamic NTK / YaRN on it.
+3. **Real preference data** for the reward model.
+4. **Dual Chunk Attention** (described in the RoPE report for >128K tokens; out of scope at 2048).
+5. **Licences**: the biology data carries per-record licences (`pes2o` is marked “unknown” for all 6,499 records);
    check before sharing models or data outside the team.

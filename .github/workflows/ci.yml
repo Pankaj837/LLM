@@ -22,7 +22,18 @@ jobs:
           pip install -e ".[dev]"
       - name: Packaging sanity check (src layout, editable install)
         run: python -m llm.train --help > /dev/null
-      - name: Test suite (GPU tests skip themselves)
+      - name: Build the C++ tokenizer (native/tokenizer)
+        run: |
+          cmake -S native/tokenizer -B native/tokenizer/build
+          cmake --build native/tokenizer/build
+      - name: C++ tokenizer's own test suite
+        run: ./native/tokenizer/build/test_tokenizer
+      - name: Train a real vocabulary for the parity test
+        run: ./native/tokenizer/build/prepare_dataset README.md ci_vocab.tok 500
+      - name: Test suite (GPU tests skip themselves; C++ parity runs for real)
+        env:
+          TOK_CLI: native/tokenizer/build/encode_cli
+          TOK_VOCAB: ci_vocab.tok
         run: python -m pytest -m "not gpu"
       - name: Team smoke script
         run: python scripts/smoke_test.py

@@ -1,0 +1,67 @@
+Full pytest run, real datasets + real built C++ tokenizer, Sun Sep 27 22:04:06 IST 2026
+============================= test session starts =============================
+platform win32 -- Python 3.13.13, pytest-9.1.1, pluggy-1.6.0 -- C:\Users\panka\AppData\Local\Programs\Python\Python313\python.exe
+hypothesis profile 'default'
+LLM Squad-1 suite | root=C:\Users\panka\Desktop\New folder\LLM_Squad1_Final
+rootdir: C:\Users\panka\Desktop\New folder\LLM_Squad1_Final
+configfile: pyproject.toml
+plugins: anyio-4.14.2, hypothesis-6.168.1, cov-7.1.0
+collecting ... collected 2 items
+
+tests/test_cpp_parity.py::test_ids_match_the_cpp_encoder_exactly PASSED  [ 50%]
+tests/test_cpp_parity.py::test_roundtrip_is_lossless_on_the_real_vocabulary PASSED [100%]
+
+============================== 2 passed in 4.95s ==============================
+
+=== C++ team's own test suite (native/tokenizer, MSVC build) ===
+[ OK ] base64 roundtrip for string of length 0
+[ OK ] base64 roundtrip for string of length 1
+[ OK ] base64 roundtrip for string of length 2
+[ OK ] base64 roundtrip for string of length 3
+[ OK ] base64 roundtrip for string of length 4
+[ OK ] base64 roundtrip for string of length 4
+[ OK ] base64 roundtrip for string of length 44
+[ OK ] pretokenize produces non-empty output
+    pretokenize("Hello, world!") -> Hello|,| world|!
+[ OK ] pretokenize output concatenates back to the original text
+[ OK ] pretokenize preserves contractions when rejoined
+[ OK ] pretokenize splits off "'t" as its own chunk
+[ OK ] byte vocabulary has exactly 256 entries
+[ OK ] byte token 'A' maps to id 65
+[ OK ] id 65 maps back to byte 'A'
+[ OK ] first merge token gets id 256
+[ OK ] vocabulary recognizes the new merge token
+[ OK ] special token id starts right after merge vocab
+[ OK ] special id is flagged as special
+[ OK ] total_size accounts for specials
+[ OK ] loaded vocab has same merge-vocab size
+[ OK ] loaded vocab has same total size
+[ OK ] loaded vocab contains merge token 'the'
+[ OK ] loaded vocab contains special token
+[ OK ] loaded merge token id matches original
+[ OK ] encode/decode roundtrip with byte-only vocab reproduces original text
+[ OK ] trained vocab does not exceed target vocab_size
+[ OK ] trainer learned at least one merge
+[ OK ] trained vocab contains the requested special token
+[ OK ] roundtrip preserves text: "the quick brown fox jumps over the lazy dog"
+[ OK ] roundtrip preserves text: "the dog barks at the fox"
+[ OK ] roundtrip preserves text: "the quick fox runs away from the dog"
+[ OK ] roundtrip preserves text: "hello world, hello there"
+[ OK ] "the" encodes to at most 3 tokens after training
+    "the" -> 1 token(s)
+[ OK ] encode() emits the special token id when allowed
+[ OK ] roundtrip preserves text containing a special token
+[ OK ] Tokenizer::encode/decode roundtrip works
+[ OK ] loaded Tokenizer produces identical encoding to the original
+[ OK ] sanitize_utf8_and_normalize removes all \r line endings
+[ OK ] sanitize_utf8_and_normalize removes NUL bytes
+[ OK ] sanitize_utf8_and_normalize preserves LaTeX commands
+[ OK ] sanitize_utf8_and_normalize preserves math subscripts/superscripts
+[ OK ] compile_dataset_to_binary generates train tokens
+[ OK ] compile_dataset_to_binary generates val tokens
+[ OK ] MMapDataLoader verifies header magic 0x544F4B31
+[ OK ] MMapDataLoader matches compiled token count
+[ OK ] MMapDataLoader get_batch retrieves requested sequence batch size
+
+46/46 checks passed.
+All tests passed.

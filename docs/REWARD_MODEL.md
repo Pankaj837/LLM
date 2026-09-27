@@ -108,7 +108,7 @@ response end is what gets pooled, so it is the part that cannot be lost.
 ## Tokenizer integration
 
 The team's tokenizer is C++ with no Python bindings, but the reward model trains in PyTorch. The shared
-`llm/tokenizer.py` is a line-for-line Python port of `pretokenize` and `bpe_encode_piece` that loads the same `vocab.tok`
+`src/llm/tokenizer.py` is a line-for-line Python port of `pretokenize` and `bpe_encode_piece` that loads the same `vocab.tok`
 file (one implementation for the whole stack; an earlier second copy had diverged on unknown-id decoding).
 `tests/test_cpp_parity.py` asserts id-for-id equality with the C++ `encode_cli` on punctuation, contractions, multi-byte
 UTF-8, digit/letter boundaries and repeated whitespace. **It needs the C++ binary and the real `vocab.tok`, which are not part
@@ -170,7 +170,7 @@ llm/reward/
 ├── train_reward.py     training, evaluation, swap test (held-out prompt)
 └── train_bpe.py        stand-in vocabulary for the reward corpus (wrapper over llm.bpe_trainer)
 ```
-Tokenizer: the shared `llm/tokenizer.py`. C++ parity: `tests/test_cpp_parity.py`.
+Tokenizer: the shared `src/llm/tokenizer.py`. C++ parity: `tests/test_cpp_parity.py`.
 
 ## Running it
 

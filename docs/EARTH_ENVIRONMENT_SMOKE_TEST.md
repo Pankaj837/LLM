@@ -17,11 +17,11 @@ different numbers below — see §4.
 
 **This is exactly the kind of interface mismatch this whole review exercise exists to catch, and it was real.**
 
-The tokenizer team's `.bin` spec (`docs/COMPONENTS.md` C10, reproduced in `llm/data.py`) is a **36-byte** header,
+The tokenizer team's `.bin` spec (`docs/COMPONENTS.md` C10, reproduced in `src/llm/data.py`) is a **36-byte** header,
 magic `b"TOK1"`. This dataset's `train.bin`/`val.bin` use a **24-byte** header, magic `b"GNRP"`, with no
 `split`/`reserved` fields:
 
-| Field | This repo (`llm/data.py`) | Earth & Environment delivery |
+| Field | This repo (`src/llm/data.py`) | Earth & Environment delivery |
 |---|---|---|
 | Header size | 36 bytes | 24 bytes |
 | Magic | `TOK1` (`0x544F4B31`) | `GNRP` (`0x50524E47`) |

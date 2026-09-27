@@ -28,7 +28,7 @@ in wavelength (frequencies off by up to 25–71%) and applied the reciprocal squ
 (dampening instead of sharpening). Both are tested against an independent reference.
 
 ## D4 — One configuration object, one tokenizer
-**Decision.** `ModelConfig` is the single source of truth; `llm/tokenizer.py` is the only tokenizer; the reward model imports it.
+**Decision.** `ModelConfig` is the single source of truth; `src/llm/tokenizer.py` is the only tokenizer; the reward model imports it.
 **Why.** Two Python ports of the same C++ tokenizer had already diverged (unknown-id decoding). One implementation cannot drift.
 
 ## D5 — Checkpoints are self-describing; legacy files still load
@@ -50,7 +50,7 @@ The delivered checkpoint's statistics show the same 0.02 scale.
 
 ## D8 — Data hygiene is part of the library, not the script
 **Decision.** Document-level splits, EOS-terminated documents, forged-boundary protection and near-duplicate filtering
-live in `llm/data.py` with tests.
+live in `src/llm/data.py` with tests.
 **Why.** On the biology data, exact-hash dedupe left 25% of LibreTexts validation windows also present in training
 (republished chapters). Content-defined shingle sampling removed them (overall leakage 4.9% → 0.3%).
 

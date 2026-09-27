@@ -34,7 +34,8 @@ CASES = [
 
 def test_ids_match_the_cpp_encoder_exactly():
     tok = BPETokenizer.from_file(VOCAB)
-    out = subprocess.run([CLI, VOCAB], input="\n".join(CASES), capture_output=True, text=True, check=True)
+    out = subprocess.run([CLI, VOCAB], input="\n".join(CASES), capture_output=True, text=True,
+                         encoding="utf-8", check=True, timeout=30)
     lines = out.stdout.strip("\n").split("\n")
     assert len(lines) == len(CASES)
     for case, cpp in zip(CASES, lines):

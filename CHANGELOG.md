@@ -13,8 +13,9 @@ into one package, after an independent component review. See `docs/REVIEW_FINDIN
 - `llm/train.py`: reference trainer (bit-exact resume, `stop_step`, bf16 autocast on CUDA).
 - `llm/bpe_trainer.py`: fast pure-Python BPE trainer writing the `.tok` format (tooling/tests only).
 - `TransformerModel.forward(return_hidden=…, rope_context_len=…)`, `LMBackboneAdapter` for the reward model.
-- Scripts: `prepare_biology.py`, `eval_bio.py`, `make_scaffold_checkpoint.py`, `mutation_check.py`.
+- Scripts: `prepare_biology.py`, `eval_bio.py`, `prepare_earth.py`, `eval_earth.py`, `make_scaffold_checkpoint.py`, `mutation_check.py`.
 - Tests (component by component), the team's original tests kept in `tests/legacy`, GPU handoff tests, C++ parity test (skipped until provided).
+- Real-data smoke tests on two independent datasets (biology, Earth & Environment) — see `docs/BIOLOGY_SMOKE_TEST.md` and `docs/EARTH_ENVIRONMENT_SMOKE_TEST.md`.
 
 ### Fixed
 - YaRN frequency ramp and attention-logit multiplier (now per the paper).
@@ -27,6 +28,8 @@ into one package, after an independent component review. See `docs/REVIEW_FINDIN
 - Host-device synchronisation in every attention layer at every decode step.
 - Reward model could not attach to the LM ((B,T) mask crash, no hidden-state API).
 - Two diverging tokenizer copies → one.
+- Earth & Environment delivery used an incompatible `.bin` header (24-byte `GNRP` vs this repo's 36-byte `TOK1`); adapted in `prepare_earth.py` after independently re-verifying the delivery's own claims (finding F-29).
+- Mutation check: a mutant that broke the BPE trainer's stale-cache-entry invariant caused an infinite loop instead of a clean test failure; fixed the mutant and added a 90s per-mutant timeout.
 - `ModelConfig` validation uses exceptions instead of `assert`.
 
 ### Removed

@@ -15,7 +15,7 @@ is still open) and `docs/HANDOFF_GPU.md` (what to run on a GPU).
 | RoPE / Dynamic NTK / YaRN | per the team's reports and the YaRN paper; cached ≡ uncached at logit level |
 | Tokenizer | Python port verified; **C++ parity unverified** (binary and real `vocab.tok` not available) |
 | Checkpoint / pipeline | self-describing, fails loudly; **no trained reference checkpoint exists yet** |
-| Trainer + `.bin` data | proven on real text (biology corpus), bit-exact resume |
+| Trainer + `.bin` data | proven on 2 real datasets (biology, Earth & Environment), bit-exact resume |
 | Reward model | mechanism verified; **synthetic data, not evidence of quality** |
 | GPU / bf16 / torch.compile | **untested** — see `docs/HANDOFF_GPU.md` |
 | Structured pruning | not part of this repository |
@@ -62,6 +62,16 @@ python scripts/eval_bio.py --run runs/bio_small/ckpt_last.pt --data data/bio --o
 ```
 Results: `docs/BIOLOGY_SMOKE_TEST.md`.
 
+### Real-data smoke test (Earth & Environment — a differently-tokenized third-party delivery)
+```bash
+python scripts/prepare_earth.py --zip "Earth and Environment Processed Dataset.zip" --out data/earth   # ~5 s
+python -m llm.train --train-bin data/earth/train.bin --val-bin data/earth/val.bin \
+    --out runs/earth_small --preset small --seq-len 256 --batch-size 16 --max-steps 900 --lr 2e-3   # ~13 min CPU
+python scripts/eval_earth.py --run runs/earth_small/ckpt_last.pt --data data/earth --out runs/earth_small/eval.json
+```
+This delivery's `.bin` files use a different (incompatible) binary header than this repo's own — `prepare_earth.py`
+verifies and adapts it (finding F-29). Results: `docs/EARTH_ENVIRONMENT_SMOKE_TEST.md`.
+
 ## Layout
 
 ```
@@ -72,7 +82,8 @@ llm/
   reward/                                                                                   conditional reward model
 scripts/   smoke_test.py  prepare_biology.py  eval_bio.py  make_scaffold_checkpoint.py  mutation_check.py  lint.py
 tests/     one file per component  +  legacy/ (the team's original tests, unchanged)  +  test_gpu_handoff.py
-docs/      ARCHITECTURE  COMPONENTS  DECISIONS  REVIEW_FINDINGS  TESTING  HANDOFF_GPU  TEAM_INSIGHTS  REWARD_MODEL  BIOLOGY_SMOKE_TEST
+docs/      ARCHITECTURE  COMPONENTS  DECISIONS  REVIEW_FINDINGS  TESTING  HANDOFF_GPU  TEAM_INSIGHTS  REWARD_MODEL
+           BIOLOGY_SMOKE_TEST  EARTH_ENVIRONMENT_SMOKE_TEST
 ```
 
 ## Ground rules (enforced by tests)

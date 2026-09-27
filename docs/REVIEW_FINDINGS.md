@@ -35,6 +35,7 @@ this repository. Every *Resolved* item has a test that fails without the fix (ch
 | F-26 | High | C7 | `torch.__version__` (a `TorchVersion` object) stored in checkpoint metadata made `weights_only=True` loading fail — found by the new tests | stored as `str` | Resolved |
 | F-27 | Medium | C3 | delivered `RopeCache` keyed on sequence length only → stale tables for a different θ | key includes θ, head_dim, device, dtype | Resolved |
 | F-28 | Medium | C11 | a run “stopped early” by lowering `max_steps` follows a different LR schedule and cannot resume bit-exactly | `stop_step` | Resolved |
+| F-29 | High | C10 | the Earth & Environment delivery's `.bin` files use a **different, incompatible header** (24 bytes, magic `GNRP`) than this repo's tokenizer-report spec (36 bytes, magic `TOK1`) — `llm.data.read_header` correctly refuses to open them | `scripts/prepare_earth.py`: reads the delivered format, independently re-verifies every claim in its `PROCESSING_SUMMARY.md` (all matched), re-emits through `llm.data.write_bin` | Resolved (adapter); **the two header formats should be unified for future deliveries** |
 
 ## Not covered by this repository (needs input from the team)
 1. **C++ tokenizer parity** (source, `encode_cli`, trained `vocab.tok`) — `tests/test_cpp_parity.py` is ready.

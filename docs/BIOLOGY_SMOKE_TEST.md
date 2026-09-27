@@ -108,10 +108,16 @@ a cleaning decision for a real run.
 - Single seed; differences between sources of a few percent are within what another seed could change.
 
 ## 9. Comparing with other domains (chemistry, earth science)
-No results for other domains were available to this run, so nothing is merged or compared. To compare fairly, run the **same protocol**
-on each domain and fill one row per domain: tokenizer (vocab size, trained on that domain's train docs only), tokens, model preset,
-steps, **val bits-per-byte**, **unigram baseline in the same units**, control-set gap, validation-window leakage %, round-trip
-failures. Compare **bits per byte and the gap to the unigram baseline**, not raw loss or perplexity (they depend on the tokenizer).
+An Earth & Environment dataset was run through the same protocol afterwards — see `docs/EARTH_ENVIRONMENT_SMOKE_TEST.md`.
+Its numbers (val loss 1.18 vs biology's 4.93) are **not comparable directly**: that corpus is machine-generated from a
+small set of sentence templates (CSV rows verbalised into text), so it has far lower entropy than free-form biology
+prose — see that document's §4 for why raw loss cannot be compared across domains this differently structured, and
+why bits-per-byte or a matched control set is required for a fair comparison. No chemistry data was available to this
+run. To compare fairly, run the **same protocol** on each domain and fill one row per domain: tokenizer (vocab size,
+trained on that domain's train docs only), tokens, model preset, steps, **val bits-per-byte**, **unigram baseline in
+the same units**, control-set gap, validation-window leakage %, round-trip failures. Compare **bits per byte and the
+gap to the unigram baseline**, not raw loss or perplexity (they depend on the tokenizer and on the domain's inherent
+entropy, as the earth/environment result shows concretely).
 
 ## 10. Reproduce
 ```bash

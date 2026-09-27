@@ -11,8 +11,11 @@
    corrected YaRN sign) and run in CI as its own step.
 4. **Integration** (`test_c11_integration.py`, `test_e2e.py`) — text → tokenizer → `.bin` → train → checkpoint →
    pipeline → reward model, and the LM/reward hand-off contracts.
-5. **Real-data** (`test_bio_smoke.py`, opt-in via `BIO_ZIP`) — the full biology pipeline at small scale (~1 min);
-   the full-scale run and its results are `docs/BIOLOGY_SMOKE_TEST.md`.
+5. **Real-data** (`test_bio_smoke.py` opt-in via `BIO_ZIP`; `test_prepare_earth.py` opt-in via `EARTH_ZIP`) —
+   the biology and Earth & Environment pipelines at small scale (~1 min each); the full-scale runs and their
+   results are `docs/BIOLOGY_SMOKE_TEST.md` and `docs/EARTH_ENVIRONMENT_SMOKE_TEST.md`. `test_prepare_earth.py`'s
+   synthetic-data tests (no zip needed) also pin the exact incompatible binary-header format found in that
+   delivery (finding F-29), so a regression there is caught without the 24 MB dataset.
 6. **GPU handoff** (`test_gpu_handoff.py`, opt-in, needs CUDA) — see `docs/HANDOFF_GPU.md`.
 7. **C++ parity** (`test_cpp_parity.py`, opt-in via `TOK_CLI`/`TOK_VOCAB`) — skips until the team's binary and
    vocabulary are available; ready to run the moment they are.
@@ -24,8 +27,9 @@
 ## Running
 
 ```bash
-python -m pytest                                             # layers 1-4 (fast, ~40 s)
+python -m pytest                                             # layers 1-4 (fast, ~45 s)
 BIO_ZIP="Biology Dataset.zip" python -m pytest tests/test_bio_smoke.py -s
+EARTH_ZIP="Earth and Environment Processed Dataset.zip" python -m pytest tests/test_prepare_earth.py -s
 python -m pytest tests/test_gpu_handoff.py -s                 # on a CUDA machine
 TOK_CLI=... TOK_VOCAB=... python -m pytest tests/test_cpp_parity.py
 LLM_CKPT=runs/bio_small/ckpt_last.pt python -m pytest tests/test_checkpoint.py -k trained
@@ -35,9 +39,10 @@ python scripts/smoke_test.py
 ```
 
 ## Current totals (CPU, this repository)
-- Without `BIO_ZIP`: 257 passed, 14 skipped (GPU 7, C++ parity 2, real-data 3, release gate 1, legacy checkpoint 1).
-- With `BIO_ZIP`: 260 passed, 11 skipped.
+- Without `BIO_ZIP`/`EARTH_ZIP`: 265 passed, 15 skipped (GPU 7, C++ parity 2, real-data 4, release gate 1, legacy checkpoint 1).
+- With both: 269 passed, 11 skipped.
 - Lint: 0 problems. Team smoke script: 29/29.
+- Mutation check: **25/25 mutants killed, 0 survived**.
 - Release gate: **passes** on `runs/bio_small/ckpt_last.pt` (trained here), **fails** on the delivered `pretrain_model.pt`
   (as it should — that file is random weights).
 

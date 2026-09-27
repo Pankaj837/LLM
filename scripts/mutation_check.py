@@ -76,7 +76,23 @@ MUTANTS = [
     ("Prompt EOS injection allowed", "llm/pipeline.py",
      "self.tokenizer.encode(prompt, allowed_special=set())", "self.tokenizer.encode(prompt)", ["tests/test_c7_c8_checkpoint_pipeline.py"]),
     ("BPE trainer picks the least frequent pair", "llm/bpe_trainer.py",
-     "return (-c, vocab[pair[0]], vocab[pair[1]], pair)", "return (c, vocab[pair[0]], vocab[pair[1]], pair)", ["tests/test_bpe_trainer.py"]),
+     "    def key(pair: Tuple[int, int], c: int):\n"
+     "        return (-c, vocab[pair[0]], vocab[pair[1]], pair)\n\n"
+     "    heap = [key(p, c) for p, c in pair_count.items() if c >= min_count]\n"
+     "    heapq.heapify(heap)\n\n"
+     "    while len(vocab) < target and heap:\n"
+     "        negc, _, _, pair = heapq.heappop(heap)\n"
+     "        c = pair_count.get(pair, 0)\n"
+     "        if c != -negc:                                          # stale entry",
+     "    def key(pair: Tuple[int, int], c: int):\n"
+     "        return (c, vocab[pair[0]], vocab[pair[1]], pair)   # ascending: least frequent first\n\n"
+     "    heap = [key(p, c) for p, c in pair_count.items() if c >= min_count]\n"
+     "    heapq.heapify(heap)\n\n"
+     "    while len(vocab) < target and heap:\n"
+     "        poppedc, _, _, pair = heapq.heappop(heap)\n"
+     "        c = pair_count.get(pair, 0)\n"
+     "        if c != poppedc:                                        # stale entry",
+     ["tests/test_bpe_trainer.py"]),
 ]
 
 # Source changes that do not change behaviour (kept for the record; expected to survive):
@@ -100,8 +116,15 @@ def main() -> int:
             shutil.rmtree(tmp, ignore_errors=True)
             continue
         open(path, "w", encoding="utf-8", newline="").write(src.replace(old, new, 1))
-        r = subprocess.run([sys.executable, "-m", "pytest", *tests, "-x", "-q", "-o", "addopts=", "-p", "no:cacheprovider"],
-                           cwd=dst, capture_output=True, text=True, env={**os.environ, "PYTHONIOENCODING": "utf-8"})
+        try:
+            r = subprocess.run([sys.executable, "-m", "pytest", *tests, "-x", "-q", "-o", "addopts=", "-p", "no:cacheprovider"],
+                               cwd=dst, capture_output=True, text=True, env={**os.environ, "PYTHONIOENCODING": "utf-8"},
+                               timeout=90)  # a mutant that hangs (e.g. breaks a heap/loop invariant) must not stall the whole check
+        except subprocess.TimeoutExpired:
+            print(f"[TIMEOUT ] {name:52s} mutant did not finish in 90s -- fix the mutant or the code", flush=True)
+            survivors.append(name + " (timed out; not a clean kill)")
+            shutil.rmtree(tmp, ignore_errors=True)
+            continue
         killed = r.returncode != 0
         first = next((ln for ln in r.stdout.splitlines() if ln.startswith(("FAILED", "ERROR"))), "")
         print(f"[{'KILLED  ' if killed else 'SURVIVED'}] {name:52s} {first[:80]}", flush=True)

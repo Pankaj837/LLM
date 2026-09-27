@@ -46,11 +46,18 @@ python scripts/smoke_test.py
 repository) into a temporary copy of the tree and re-runs the tests that should catch it. A **surviving** mutant is a
 behaviour nothing tests; the script exits non-zero if any survive.
 
-Result on this repository: **every mutant is killed** (two source-level equivalent mutants are documented in the
-script and excluded — see its `EQUIVALENT` list). Two mutants that looked killed on a first pass but were not
-actually sensitive to the change were caught and rewritten (`test_planned_context_changes_logits_and_cached_uncached_logits_agree`
-needed a sharper attention pattern before it could tell the mutant from the original) — this is why the check exists:
-a passing assertion is not evidence unless it can also fail.
+Result on this repository: **25/25 mutants killed, 0 survived** (two further source-level equivalent mutants are
+documented in the script's `EQUIVALENT` list and never added as cases, since they cannot be killed by design).
+Two mutants that looked killed on a first pass were not actually sensitive to the change and were caught and
+rewritten (`test_planned_context_changes_logits_and_cached_uncached_logits_agree` needed a sharper attention
+pattern before it could tell the mutant from the original) — this is why the check exists: a passing assertion is
+not evidence unless it can also fail.
+
+One mutant (`llm/bpe_trainer.py`, flipping the merge-priority sign) originally broke the trainer's internal
+stale-cache-entry invariant instead of just its priority order, which sent it into an infinite loop that ran
+for hours undetected before being found and killed manually. Fixed by mutating the sign and its paired
+consistency check together, and by adding a 90-second per-mutant `subprocess` timeout (a `TIMEOUT` result now
+counts as a survivor needing attention rather than hanging the whole check).
 
 ## Design notes
 - `tests/conftest.py` provides `ckpt_path` (skips without `LLM_CKPT`) and `vocab_path` (a session-scoped stand-in

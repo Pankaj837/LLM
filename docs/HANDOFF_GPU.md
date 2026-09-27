@@ -1,0 +1,80 @@
+# Handoff for GPU testing
+
+Audience: whoever runs this on a CUDA machine. Everything below was developed and verified **on CPU only**
+(Python 3.13, torch 2.12, 8 threads). GPU behaviour is therefore the main unknown; this page lists exactly what to run,
+what "good" looks like, and what we need back.
+
+## 0. What has been tested already (CPU)
+See `docs/TESTING.md` for the current counts. In short: every component against an independent reference, the team's
+original tests, cached ≡ uncached decoding at logit level, bit-exact training resume, mutation checks, and a real-data run
+on the biology corpus (`docs/BIOLOGY_SMOKE_TEST.md`). **Not tested anywhere:** any CUDA path, bf16/fp16 numerics on a
+trained model, torch.compile, multi-GPU, the C++ tokenizer, pruning.
+
+## 1. Setup
+```bash
+pip install "torch>=2.4" numpy pytest          # torch >= 2.5 needed for the enable_gqa experiment in §3
+python -m pytest -q                            # CPU suite must be green first
+python -c "import torch;print(torch.__version__, torch.version.cuda, torch.cuda.get_device_name())"
+```
+Record: GPU model, driver, CUDA, torch version.
+
+## 2. Automated GPU checks (`tests/test_gpu_handoff.py`, currently skipped)
+```bash
+python -m pytest tests/test_gpu_handoff.py -q -s      # -s prints the throughput / memory report
+```
+| Test | Pass criterion |
+|---|---|
+| CPU↔GPU fp32 logit parity | atol 2e-3 |
+| KV-cache decode ≡ full forward on GPU | identical greedy tokens |
+| bf16 / fp16 logits vs fp32 | ≤ 5% of the largest logit (**tolerance is a starting point; tune on a trained checkpoint**) |
+| left-padded batch with fused SDPA kernels | no NaN (report which kernel was used) |
+| YaRN beyond the trained length | finite output |
+| decode throughput + KV memory report | prints tok/s and peak MB |
+
+## 3. Questions only a GPU can answer
+| # | Ask | Why | Report |
+|---|---|---|---|
+| 1 | Profile one decode step with `torch.profiler` | the `.item()` host syncs were removed on CPU-reasoning; confirm no `cudaStreamSynchronize` remains from the model path (an `eos_token_id` check still syncs once per step by design) | sync count, ms/step |
+| 2 | `SDPA(..., enable_gqa=True)` instead of `repeat_interleave` in `gqa.py` | avoids materialising expanded K/V | speed ×, max abs diff vs current |
+| 3 | `torch.compile(model)` on prefill and decode | is the code graph-friendly now that host syncs are gone? | works? speed-up? recompiles per step? |
+| 4 | RoPE in bf16 at positions > 1k | tables are fp32 by design and cast to activation dtype; is the cast enough? | logit diff bf16 vs fp32 |
+| 5 | bf16 autocast training vs fp32 on the biology data | loss curves should overlay | curve, throughput |
+| 6 | Train the **base** (51.5M) preset on the prepared biology data | CPU speed is 743 tok/s, so this was never run beyond 6 steps | val loss vs step; time to reach the CPU `small` run's val loss |
+| 7 | Determinism: same seed twice | training is deterministic on CPU by construction | bit-identical? which flags needed |
+| 8 | Throughput at seq 256 / 512 / 2048 and batch sizes | sizing | tokens/s, peak memory |
+| 9 | Dynamic NTK / YaRN quality beyond 2048 **after** a short training run | only meaningful with trained weights | perplexity vs length curve (512, 1k, 2k, 4k) for `rope`, `dynamic_ntk`, `yarn` |
+| 10 | Reward model with `LMBackboneAdapter` on the trained LM | backbone d=640 | step time, memory, condition-sensitivity gap over ≥ 5 seeds |
+
+## 4. Commands
+```bash
+# data (once; takes ~1.5 min)
+python scripts/prepare_biology.py --zip "Biology Dataset.zip" --out data/bio --vocab-size 8000
+
+# real 51.5M model on GPU (bf16 autocast is automatic on CUDA)
+python -m llm.train --train-bin data/bio/train.bin --val-bin data/bio/val.bin --vocab data/bio/vocab.tok \
+    --out runs/bio_base --preset base --seq-len 512 --batch-size 32 --max-steps 5000 --warmup-steps 200 --lr 6e-4 \
+    --eval-interval 250 --save-interval 1000
+
+# evaluation (per source, control, bits-per-byte, unigram baseline, samples)
+python scripts/eval_bio.py --run runs/bio_base/ckpt_last.pt --data data/bio --device cuda --out runs/bio_base/eval.json
+
+# resume after a pre-emption (bit-exact)
+python -m llm.train ... --resume runs/bio_base/ckpt_last.pt
+```
+
+## 5. Reference numbers from the CPU run (for sanity comparison)
+Throughput on CPU (8 threads, fp32, batch 16 × seq 256): `tiny` 13.0k tok/s, `small` 4.5k tok/s, `base` 0.74k tok/s.
+The biology CPU results (loss/perplexity/bits-per-byte per source) are in `docs/BIOLOGY_SMOKE_TEST.md`; a GPU run of the
+same `small` preset with the same seed should land close to them (not identical: different kernels).
+
+## 6. Known limitations to carry into GPU testing
+1. **No trained reference checkpoint.** The delivered `pretrain_model.pt` is random init (the loader warns). Any quality metric
+   needs a trained model — item 6 above produces one from the biology data.
+2. C++ tokenizer parity unverified; the biology vocabulary comes from the pure-Python stand-in trainer.
+3. Left-padded batches unsupported in generation and in reward pooling.
+4. Dual Chunk Attention not implemented (not needed at 2048).
+5. Biology data licences vary per source (`pes2o`: “unknown”). Do not redistribute models or data before checking.
+
+## 7. What to send back
+A table: GPU / torch / CUDA; results of §2; answers to §3 (numbers, not adjectives); the `eval.json` and
+`metrics.jsonl` of the training run; anything that failed, with the traceback.

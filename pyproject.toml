@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "llm-squad1"
+version = "0.1.0"
+description = "Squad-1 LLM stack: GQA transformer, RoPE / Dynamic NTK / YaRN, BPE tokenizer, pipeline, conditional reward model"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = ["torch>=2.4", "numpy>=1.24"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[tool.setuptools.packages.find]
+include = ["llm*"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+addopts = "-q -p no:cacheprovider"
+markers = [
+    "finding(id): test that guards a defect found in the component review (see docs/REVIEW_FINDINGS.md)",
+    "gpu: needs a CUDA device (handoff tests for GPU testing)",
+    "slow: takes more than a few seconds",
+    "data: needs an external dataset (skipped when absent)",
+]
+filterwarnings = [
+    "ignore:.*legacy checkpoint.*:UserWarning",
+    "ignore:.*UNTRAINED.*:UserWarning",
+]

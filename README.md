@@ -24,12 +24,17 @@ Test totals and the mutation-check result are in `docs/TESTING.md`.
 
 ## Quickstart
 
+Source lives under `src/llm/` (standard Python "src layout"). Install it in editable mode once — after that,
+`import llm` and `python -m llm.<module>` work from anywhere, no `PYTHONPATH` needed:
+
 ```bash
-pip install "torch>=2.4" numpy pytest
+pip install -e ".[dev]"                # installs torch, numpy, pytest and this package (editable)
 python -m pytest                       # CPU suite (GPU / real-data tests skip themselves)
 python scripts/smoke_test.py           # the team's 29-check smoke script
 python scripts/lint.py                 # dependency-free lint
 ```
+(pytest itself does not need the install — its `pythonpath = ["src"]` setting in `pyproject.toml` already finds
+the package; the install is what makes `python -m llm.train` etc. work as plain shell commands.)
 
 ```python
 import torch
@@ -75,15 +80,19 @@ verifies and adapts it (finding F-29). Results: `docs/EARTH_ENVIRONMENT_SMOKE_TE
 ## Layout
 
 ```
-llm/
+src/llm/
   model_config.py  modules.py  dynamic_ntk.py  rope_cache.py  rope.py  gqa.py  model.py     the model
   tokenizer.py  bpe_trainer.py  data.py                                                     text ↔ ids ↔ .bin
   checkpoint.py  pipeline.py  train.py                                                      persistence, inference, training
   reward/                                                                                   conditional reward model
-scripts/   smoke_test.py  prepare_biology.py  eval_bio.py  make_scaffold_checkpoint.py  mutation_check.py  lint.py
-tests/     one file per component  +  legacy/ (the team's original tests, unchanged)  +  test_gpu_handoff.py
+data/      README only (datasets are external/generated, never committed — see data/README.md)
+tests/     one file per component  +  legacy/ (the team's original tests, unchanged)  +  results/ (last real run's output)
+scripts/   smoke_test.py  prepare_biology.py  eval_bio.py  prepare_earth.py  eval_earth.py
+           make_scaffold_checkpoint.py  mutation_check.py  lint.py
 docs/      ARCHITECTURE  COMPONENTS  DECISIONS  REVIEW_FINDINGS  TESTING  HANDOFF_GPU  TEAM_INSIGHTS  REWARD_MODEL
            BIOLOGY_SMOKE_TEST  EARTH_ENVIRONMENT_SMOKE_TEST
+archive/   deprecated/uncertain files land here if any are found later — see archive/README.md for what
+           was considered and why nothing is in it yet
 ```
 
 ## Ground rules (enforced by tests)

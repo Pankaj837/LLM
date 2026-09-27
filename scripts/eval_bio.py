@@ -21,7 +21,7 @@ import sys
 import numpy as np
 import torch
 
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src"))
 from llm import data  # noqa: E402
 from llm.checkpoint import read_checkpoint  # noqa: E402
 from llm.pipeline import LLMPipeline  # noqa: E402

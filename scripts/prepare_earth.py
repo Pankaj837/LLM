@@ -27,7 +27,7 @@ from typing import Tuple
 
 import numpy as np
 
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src"))
 from llm import data  # noqa: E402
 
 SRC_HEADER_FMT = "<IIIIQ"          # magic, version, vocab_size, eos_id, total_tokens

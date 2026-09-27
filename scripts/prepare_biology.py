@@ -36,7 +36,7 @@ from typing import Dict, Iterator, List, Tuple
 
 import numpy as np
 
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src"))
 from llm import data  # noqa: E402
 from llm.bpe_trainer import train_bpe, write_tok  # noqa: E402
 from llm.tokenizer import BPETokenizer  # noqa: E402

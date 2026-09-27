@@ -1,0 +1,30 @@
+[KILLED  ] YaRN logit multiplier inverted                       FAILED tests/test_c3_rope_yarn.py::test_yarn_attention_multiplier_direction_and_
+[KILLED  ] YaRN ramp linear in wavelength again                 FAILED tests/test_c3_rope_yarn.py::test_yarn_inv_freq_matches_reference[2.0]
+[KILLED  ] YaRN scale factor ignored                            FAILED tests/test_c3_rope_yarn.py::test_yarn_extremes_are_correct[2.0] - asse...
+[KILLED  ] Dynamic NTK wrong exponent                           FAILED tests/test_dynamic_ntk.py::test_report_reference_values - assert 20000...
+[KILLED  ] RopeCache key ignores theta                          FAILED tests/test_dynamic_ntk.py::test_cache_is_keyed_on_theta_not_only_length
+[KILLED  ] Dynamic NTK never activates in RotaryEmbedding       FAILED tests/test_dynamic_ntk.py::test_dynamic_ntk_changes_rotation_beyond_the_t
+[KILLED  ] Model passes no shared cos/sin                       FAILED tests/test_dynamic_ntk.py::test_dynamic_ntk_model_equals_plain_rope_model
+[KILLED  ] Planned context ignores KV-cache capacity            FAILED tests/test_dynamic_ntk.py::test_chunked_prefill_equals_single_pass_with_d
+[KILLED  ] Uncached decode lets the context grow each step      FAILED tests/test_dynamic_ntk.py::test_generate_uses_one_planned_context_for_eve
+[KILLED  ] GQA groups tiled instead of interleaved              FAILED tests/test_c4_gqa_kvcache.py::test_matches_naive_reference - assert False
+[KILLED  ] GQA causal mask leaks the future                     FAILED tests/test_c4_gqa_kvcache.py::test_kv_cache_chunked_prefill_equals_full_f
+[KILLED  ] Finished rows keep generating                        FAILED tests/test_c6_generation.py::test_finished_rows_stay_finished - assert...
+[KILLED  ] (B,T) attention mask not normalised                  FAILED tests/test_c11_integration.py::test_lm_accepts_2d_padding_mask - Runti...
+[KILLED  ] Weights initialised at N(0,1)                        FAILED tests/test_c1_config_blocks.py::test_fresh_model_starts_near_uniform_loss
+[KILLED  ] Reward pooling reads the wrong token                 FAILED tests/test_c9_reward_model.py::test_pooling_reads_last_real_token_only
+[KILLED  ] Checkpoint config check removed                      FAILED tests/test_checkpoint.py::test_config_mismatch_is_rejected_with_a_readabl
+[KILLED  ] Checkpoint metadata not weights_only-safe            FAILED tests/test_checkpoint.py::test_roundtrip_restores_weights_config_and_meta
+[KILLED  ] Bin header 32 bytes                                  ERROR tests/test_data_bin.py - AssertionError
+[KILLED  ] Special-token injection via documents                FAILED tests/test_e2e.py::test_encode_documents_appends_eos_and_blocks_forged_bo
+[KILLED  ] Near-duplicate filter sampling by position           FAILED tests/test_e2e.py::test_near_duplicate_filter_catches_exact_and_lightly_e
+[KILLED  ] Weight decay on norm weights                         FAILED tests/test_train.py::test_weight_decay_only_on_matrices - assert (29 +...
+[KILLED  ] Resume ignores optimizer state                       FAILED tests/test_train.py::test_resume_reproduces_the_uninterrupted_run_exactly
+[KILLED  ] Pipeline skips vocabulary-hash check                 FAILED tests/test_e2e.py::test_pipeline_rejects_a_checkpoint_trained_with_a_diff
+[KILLED  ] Prompt EOS injection allowed                         FAILED tests/test_c7_c8_checkpoint_pipeline.py::test_user_text_cannot_inject_eos
+[KILLED  ] BPE trainer picks the least frequent pair            FAILED tests/test_bpe_trainer.py::test_frequency_ordering_first_merge_is_the_mos
+
+mutants: 25  killed: 25  survived: 0
+documented equivalent mutants (expected to survive):
+  - DynamicNTK threshold '<=' -> '<': at L == L_orig the scale is exactly 1, so theta = base either way
+  - Cached decode step drops rope_context_len: the default is the KV-cache capacity, which equals the value passed

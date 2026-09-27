@@ -1,0 +1,40 @@
+============================================================
+  GQA Transformer + CRM — Smoke Test Suite
+============================================================
+
+-- GQA Transformer Pipeline --
+  [PASS] ModelConfig defaults
+  [PASS] ModelConfig YaRN auto-enable
+  [PASS] RMSNorm shape + numerics
+  [PASS] SwiGLUFeedForward shape + numerics
+  [PASS] RotaryEmbedding base
+  [PASS] RotaryEmbedding YaRN — temp=1.1434
+  [PASS] RotaryEmbedding Dynamic NTK
+  [PASS] GQA forward shape + numerics
+  [PASS] KVCache 4x memory reduction — ratio=0.25
+  [PASS] KVCache incremental parity — max_diff=5.66e-07
+  [PASS] TransformerModel forward — shape=torch.Size([1, 32, 8000])
+  [PASS] Generate cached vs uncached parity
+  [PASS] BPETokenizer roundtrip
+  [PASS] LLMPipeline end-to-end (no ckpt) — output_len=55
+  [PASS] Causal masking (future grads=0) — g3=0.0, g4=0.0
+
+-- Conditional Reward Model --
+  [PASS] Reward TransformerBackbone forward — shape=torch.Size([2, 16, 64])
+  [PASS] FiLM conditioner shape
+  [PASS] FiLM init ≈ identity
+  [PASS] CRM FiLM forward → scalar scores — shape=torch.Size([4])
+  [PASS] CRM concat forward → scalar scores — shape=torch.Size([4])
+  [PASS] score_all_conditions shape — shape=torch.Size([2, 3])
+  [PASS] preference_loss non-negative — loss=0.3140
+  [PASS] preference_loss gradients flow
+  [PASS] preference_loss correct direction — bt=0.3133
+  [PASS] Dataset generation — 240 pairs
+  [PASS] Dataset train/val split — train=192, val=48
+  [PASS] Dataset has conflicting pairs — n_conflict=200
+  [PASS] Condition-blind ceiling — ceiling=0.667
+  [PASS] CRM condition sensitivity — scores=['2.114', '2.003', '1.163']
+
+============================================================
+  29/29 passed, 0 failed  (6.44s)
+============================================================

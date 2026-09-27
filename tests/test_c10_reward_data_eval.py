@@ -1,4 +1,5 @@
 """C10 Preference data + evaluation protocol (synthetic pairs, split, ceiling, training entry-point)."""
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -95,9 +96,12 @@ def test_validation_set_is_too_small_to_rank_conditioning_methods(data):
 @pytest.fixture(scope="module")
 def train_run(vocab_path, tmp_path_factory):
     out = tmp_path_factory.mktemp("run") / "crm.pt"
+    # the package lives under src/ (not importable from ROOT without PYTHONPATH); pytest's own
+    # pythonpath=["src"] setting does not extend to this subprocess, so set it explicitly here.
+    env = {**os.environ, "PYTHONPATH": str(ROOT / "src")}
     return subprocess.run(
         [sys.executable, "-m", "llm.reward.train_reward", "--epochs", "1", "--vocab", vocab_path, "--out", str(out)],
-        cwd=str(ROOT), capture_output=True, text=True, timeout=300)
+        cwd=str(ROOT), capture_output=True, text=True, timeout=300, env=env)
 
 
 @pytest.mark.slow

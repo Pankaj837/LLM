@@ -12,7 +12,7 @@ import sys
 
 import torch
 
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src"))
 from llm.checkpoint import save_checkpoint  # noqa: E402
 from llm.model import TransformerModel  # noqa: E402
 from llm.model_config import ModelConfig  # noqa: E402

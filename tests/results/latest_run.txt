@@ -1,0 +1,7 @@
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+265 passed, 15 skipped, 2 warnings in 135.16s (0:02:15)
+Sun Sep 27 19:21:02 IST 2026

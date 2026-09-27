@@ -2,9 +2,12 @@ __pycache__/
 *.pyc
 .pytest_cache/
 runs/
-data/
+data/*
+!data/README.md
 *.pt
 *.bin
 *.tok
 .venv/
 *.egg-info/
+src/*.egg-info/
+build/

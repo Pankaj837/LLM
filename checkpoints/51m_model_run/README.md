@@ -38,8 +38,11 @@ this repo's `base` preset exactly (11 layers, d=640, 8 query/2 KV heads, SwiGLU 
 
 1. **The actual `.pt` file** (`ckpt_last.pt` or `ckpt_best.pt`) — not submitted yet.
 2. **`final_vocab_51m.tok`** — the checkpoint is only usable with the exact vocabulary it was trained on.
-3. Confirmation on the 127.45-perplexity discrepancy above.
-4. Ideally: which dataset(s) this was trained on, and whether it's the combined corpus across the team
-   (`docs/HANDOFF_GPU.md` §4 roster) or one person's alone.
 
-Once all four arrive, this replaces `checkpoints/toy_bio_small_6.3M.pt` and `checkpoints/toy_earth_small_6.3M.pt`.
+Dataset: **Biology + Earth & Science** (confirmed by Prabanjan — matches his current roster assignment in
+`docs/HANDOFF_GPU.md` §4). Not yet the full team-combined corpus, so this is still a 2-domain checkpoint, not
+the final cross-domain one described in that section.
+
+Once the `.pt` and vocab arrive, this replaces `checkpoints/toy_bio_small_6.3M.pt` and
+`checkpoints/toy_earth_small_6.3M.pt` as the best available checkpoint for those two domains — but note it still
+won't be the combined-corpus model the final handoff needs.

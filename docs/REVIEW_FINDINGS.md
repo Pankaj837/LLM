@@ -40,7 +40,10 @@ this repository. Every *Resolved* item has a test that fails without the fix (ch
 
 ## Not covered by this repository (needs input from the team)
 1. **Structured pruning** and its interaction with the reward model.
-2. **A trained reference checkpoint** (51.5M) and the perplexity-vs-length evaluation of Dynamic NTK / YaRN on it.
+2. **A trained reference checkpoint** (51.5M, combining every team member's dataset — see `docs/HANDOFF_GPU.md` §4
+   for the current roster) and the perplexity-vs-length evaluation of Dynamic NTK / YaRN on it. Two **toy**
+   placeholders (6.3M, single-domain) are pushed at `checkpoints/` so integration isn't blocked in the meantime —
+   see `checkpoints/README.md`; they are not evidence of model quality and must be replaced.
 3. **Real preference data** for the reward model.
 4. **Dual Chunk Attention** (described in the RoPE report for >128K tokens; out of scope at 2048).
 5. **Licences**: the biology data carries per-record licences (`pes2o` is marked “unknown” for all 6,499 records);

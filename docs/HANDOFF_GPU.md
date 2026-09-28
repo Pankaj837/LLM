@@ -80,18 +80,41 @@ python scripts/eval_earth.py --run runs/earth_base/ckpt_last.pt --data data/eart
 `native/README.md` for a no-CMake build) and run `./build/prepare_dataset <corpus.txt> vocab.tok 8000` on the
 biology corpus text, then point `--vocab` at that file instead.
 
+**The rest of the team's datasets — the real target for the final `base` checkpoint.** Biology and Earth &
+Environment (above) are only the two datasets that happened to be ready for CPU smoke-testing. The full team is
+training in parallel on more domains:
+
+| Person | Dataset(s) |
+|---|---|
+| Ravi | Astronomy and Space, Biology |
+| Prabanjan | Chemistry, Earth & Science |
+| Afnan | Engineering and Mathematics |
+| OM | Quant |
+| Aarav | Scientific Programming |
+
+The reference `base` model should ultimately train on the **combined** corpus across all of these, not any one
+domain in isolation — a model trained on biology alone will not generalise to astronomy or engineering prompts.
+Once each person's data is prepared into a `.bin` file (following `scripts/prepare_biology.py` /
+`scripts/prepare_earth.py` as the pattern — one `prepare_*.py` per source, one shared tokenizer/vocabulary across
+all of them so ids line up, see `docs/DECISIONS.md` D4), concatenate the resulting train/val token streams (or
+interleave batches across sources) before the final GPU run. **Do not tokenize each domain with a different
+vocabulary** — that was exactly the mistake in finding F-29; agree on one `vocab.tok` for everyone first.
+
 ## 5. Reference numbers from the CPU run (for sanity comparison)
 Throughput on CPU (8 threads, fp32, batch 16 × seq 256): `tiny` 13.0k tok/s, `small` 4.5k tok/s, `base` 0.74k tok/s.
 The biology CPU results (loss/perplexity/bits-per-byte per source) are in `docs/BIOLOGY_SMOKE_TEST.md`; a GPU run of the
 same `small` preset with the same seed should land close to them (not identical: different kernels).
 
 ## 6. Known limitations to carry into GPU testing
-1. **No trained reference checkpoint.** The delivered `pretrain_model.pt` is random init (the loader warns). Any quality metric
-   needs a trained model — §4 produces one from real data.
+1. **No trained reference checkpoint.** The delivered `pretrain_model.pt` is random init (the loader warns). Two
+   **toy** placeholders (`checkpoints/toy_bio_small_6.3M.pt`, `checkpoints/toy_earth_small_6.3M.pt` — 6.3M params,
+   single-domain, CPU-trained) are pushed so integration work isn't blocked, but they are explicitly not the real
+   model — see `checkpoints/README.md`. **Replace both with the real combined-dataset checkpoint once trained.**
 2. Left-padded batches unsupported in generation and in reward pooling.
 3. Dual Chunk Attention not implemented (not needed at 2048).
 4. Biology data licences vary per source (`pes2o`: “unknown”). Do not redistribute models or data before checking.
-5. Real preference data for the reward model is still pending from the data team — out of scope for this GPU run.
+5. Real preference data for the reward model is still pending from the data team — out of scope for this GPU run
+   (see `docs/HANDOFF_DATA_TEAM.md`).
 
 ## 7. What to send back
 A table: GPU / torch / CUDA; results of §2; answers to §3 (numbers, not adjectives); the `eval.json` and

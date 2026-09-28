@@ -14,7 +14,7 @@ is still open) and `docs/HANDOFF_GPU.md` (what to run on a GPU).
 | Config, blocks, GQA + KV cache, generation | verified against independent references; the team's original tests pass unchanged |
 | RoPE / Dynamic NTK / YaRN | per the team's reports and the YaRN paper; cached ≡ uncached at logit level |
 | Tokenizer | Python port verified; **C++ parity verified** — built from the real source and tested, see `docs/CPP_TOKENIZER_PARITY.md` |
-| Checkpoint / pipeline | self-describing, fails loudly; **no trained reference checkpoint exists yet** |
+| Checkpoint / pipeline | self-describing, fails loudly; **no full trained reference checkpoint yet** — 2 toy 6.3M placeholders in `checkpoints/` |
 | Trainer + `.bin` data | proven on 2 real datasets (biology, Earth & Environment), bit-exact resume |
 | Reward model | mechanism verified; **synthetic data, not evidence of quality** |
 | GPU / bf16 / torch.compile | **untested** — see `docs/HANDOFF_GPU.md` |
@@ -95,6 +95,7 @@ src/llm/
   checkpoint.py  pipeline.py  train.py                                                      persistence, inference, training
   reward/                                                                                   conditional reward model
 native/tokenizer/  the team's C++ tokenizer, as delivered (+ one added test harness) — see native/README.md
+checkpoints/  two TOY 6.3M placeholders for integration work only — see checkpoints/README.md (replace once trained)
 data/      README only (datasets are external/generated, never committed — see data/README.md)
 tests/     one file per component  +  legacy/ (the team's original tests, unchanged)  +  results/ (last real run's output)
 scripts/   smoke_test.py  prepare_biology.py  eval_bio.py  prepare_earth.py  eval_earth.py

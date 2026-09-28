@@ -5,6 +5,8 @@ runs/
 data/*
 !data/README.md
 *.pt
+!checkpoints/*.pt
+!checkpoints/README.md
 *.bin
 *.tok
 .venv/

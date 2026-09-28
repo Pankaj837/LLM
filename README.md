@@ -100,7 +100,7 @@ tests/     one file per component  +  legacy/ (the team's original tests, unchan
 scripts/   smoke_test.py  prepare_biology.py  eval_bio.py  prepare_earth.py  eval_earth.py
            make_scaffold_checkpoint.py  mutation_check.py  lint.py
 docs/      ARCHITECTURE  COMPONENTS  DECISIONS  REVIEW_FINDINGS  TESTING  HANDOFF_GPU  TEAM_INSIGHTS  REWARD_MODEL
-           BIOLOGY_SMOKE_TEST  EARTH_ENVIRONMENT_SMOKE_TEST  CPP_TOKENIZER_PARITY
+           BIOLOGY_SMOKE_TEST  EARTH_ENVIRONMENT_SMOKE_TEST  CPP_TOKENIZER_PARITY  HANDOFF_DATA_TEAM
 archive/   deprecated/uncertain files land here if any are found later — see archive/README.md for what
            was considered and why nothing is in it yet
 ```

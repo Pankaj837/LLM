@@ -17,6 +17,13 @@ Pushed so anyone integrating against the pipeline now (e.g. wiring up a parser) 
 while the actual model is still being trained. **Use these only to test that your integration loads a checkpoint
 and produces output of the right shape — not to judge output quality.**
 
+## In progress: a real 51M run
+
+`51m_model_run/` tracks a real, non-toy training run (config + metrics, submitted by Prabanjan) — the run itself
+completed 5,000/5,000 steps cleanly with healthy loss/perplexity convergence, but the `.pt` checkpoint file and
+the vocabulary it was trained with haven't been submitted yet, so it can't replace the toy checkpoints below
+until those arrive. Full verification and what's still needed: `checkpoints/51m_model_run/README.md`.
+
 ## What replaces these, and when
 
 The team is training the **full 51.5M-parameter reference model** (`--preset base`) on a GPU, combining datasets
@@ -24,11 +31,13 @@ from everyone currently training in parallel:
 
 | Person | Dataset(s) |
 |---|---|
-| Ravi | Astronomy and Space, Biology |
-| Prabanjan | Chemistry, Earth & Science |
+| Ravikant Kumar | Astronomy and Space, Chemistry |
+| Prabanjan Jadav | Biology, Earth & Science |
+| Om Ahire | Quant |
 | Afnan | Engineering and Mathematics |
-| OM | Quant |
-| Aarav | Scientific Programming |
+| Aarav Jayalwal | Scientific Programming |
+
+Current as of 2026-09-29 — see `docs/HANDOFF_GPU.md` §4 if this has changed again.
 
 Once every dataset above is ready and the combined GPU run finishes, **replace both files in this directory** with
 the real checkpoint (or the relevant per-domain ones, if the team ships more than one). See `docs/HANDOFF_GPU.md`

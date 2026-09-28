@@ -6,7 +6,11 @@ data/*
 !data/README.md
 *.pt
 !checkpoints/*.pt
+!checkpoints/**/*.pt
 !checkpoints/README.md
+!checkpoints/**/README.md
+!checkpoints/**/*.json
+!checkpoints/**/*.jsonl
 *.bin
 *.tok
 .venv/

@@ -86,11 +86,14 @@ training in parallel on more domains:
 
 | Person | Dataset(s) |
 |---|---|
-| Ravi | Astronomy and Space, Biology |
-| Prabanjan | Chemistry, Earth & Science |
-| Afnan | Engineering and Mathematics |
-| OM | Quant |
-| Aarav | Scientific Programming |
+| Ravikant Kumar | Astronomy and Space, Chemistry |
+| Prabanjan Jadav | Biology, Earth & Science |
+| Om Ahire | Quant |
+| Afnan (+91 90323 97656 on the group — confirm this is Afnan) | Engineering and Mathematics |
+| Aarav Jayalwal | Scientific Programming |
+
+*(Updated 2026-09-29 — reassigned from the original roster: Ravi/Prabanjan's domains swapped, Afnan and OM's
+names spelled out. If the phone-number entry above is someone other than Afnan, correct it here.)*
 
 The reference `base` model should ultimately train on the **combined** corpus across all of these, not any one
 domain in isolation — a model trained on biology alone will not generalise to astronomy or engineering prompts.

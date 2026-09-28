@@ -6,17 +6,19 @@ what "good" looks like, and what we need back.
 
 ## 0. What has been tested already (CPU)
 See `docs/TESTING.md` for the current counts. In short: every component against an independent reference, the team's
-original tests, cached ≡ uncached decoding at logit level, bit-exact training resume, mutation checks, and a real-data run
-on the biology corpus (`docs/BIOLOGY_SMOKE_TEST.md`). **Not tested anywhere:** any CUDA path, bf16/fp16 numerics on a
-trained model, torch.compile, multi-GPU, the C++ tokenizer, pruning.
+original tests, cached ≡ uncached decoding at logit level, bit-exact training resume, mutation checks, two real-data
+runs (biology and Earth & Environment — `docs/BIOLOGY_SMOKE_TEST.md`, `docs/EARTH_ENVIRONMENT_SMOKE_TEST.md`), and
+the C++ tokenizer built and verified against the Python port (`docs/CPP_TOKENIZER_PARITY.md`). **Not tested
+anywhere:** any CUDA path, bf16/fp16 numerics on a trained model, torch.compile, multi-GPU, structured pruning.
 
 ## 1. Setup
 ```bash
-pip install "torch>=2.4" numpy pytest          # torch >= 2.5 needed for the enable_gqa experiment in §3
+git clone https://github.com/Pankaj837/LLM && cd LLM
+pip install -e ".[dev]"                        # installs torch/numpy/pytest and this package (editable, src/ layout)
 python -m pytest -q                            # CPU suite must be green first
 python -c "import torch;print(torch.__version__, torch.version.cuda, torch.cuda.get_device_name())"
 ```
-Record: GPU model, driver, CUDA, torch version.
+Record: GPU model, driver, CUDA, torch version. (`torch >= 2.5` needed for the `enable_gqa` experiment in §3.)
 
 ## 2. Automated GPU checks (`tests/test_gpu_handoff.py`, currently skipped)
 ```bash
@@ -46,8 +48,10 @@ python -m pytest tests/test_gpu_handoff.py -q -s      # -s prints the throughput
 | 10 | Reward model with `LMBackboneAdapter` on the trained LM | backbone d=640 | step time, memory, condition-sensitivity gap over ≥ 5 seeds |
 
 ## 4. Commands
+
+**Dataset 1 — biology** (main target; largest corpus, 5.39M train tokens):
 ```bash
-# data (once; takes ~1.5 min)
+# data (once; ~1.5 min). --vocab-size 8000 uses the pure-Python stand-in trainer (fine for this run).
 python scripts/prepare_biology.py --zip "Biology Dataset.zip" --out data/bio --vocab-size 8000
 
 # real 51.5M model on GPU (bf16 autocast is automatic on CUDA)
@@ -62,6 +66,20 @@ python scripts/eval_bio.py --run runs/bio_base/ckpt_last.pt --data data/bio --de
 python -m llm.train ... --resume runs/bio_base/ckpt_last.pt
 ```
 
+**Dataset 2 — Earth & Environment** (smaller, templated data; already run at `small` size on CPU —
+`docs/EARTH_ENVIRONMENT_SMOKE_TEST.md`; repeating at `base` size on GPU is optional, lower priority than biology):
+```bash
+python scripts/prepare_earth.py --zip "Earth and Environment Processed Dataset.zip" --out data/earth
+python -m llm.train --train-bin data/earth/train.bin --val-bin data/earth/val.bin \
+    --out runs/earth_base --preset base --seq-len 512 --batch-size 32 --max-steps 3000 --warmup-steps 150 --lr 6e-4
+python scripts/eval_earth.py --run runs/earth_base/ckpt_last.pt --data data/earth --device cuda --out runs/earth_base/eval.json
+```
+
+**Optional — the real C++-trained vocabulary** instead of the Python stand-in, now that it's verified
+(`docs/CPP_TOKENIZER_PARITY.md`): build `native/tokenizer/` (`cmake -B build && cmake --build build`, or see
+`native/README.md` for a no-CMake build) and run `./build/prepare_dataset <corpus.txt> vocab.tok 8000` on the
+biology corpus text, then point `--vocab` at that file instead.
+
 ## 5. Reference numbers from the CPU run (for sanity comparison)
 Throughput on CPU (8 threads, fp32, batch 16 × seq 256): `tiny` 13.0k tok/s, `small` 4.5k tok/s, `base` 0.74k tok/s.
 The biology CPU results (loss/perplexity/bits-per-byte per source) are in `docs/BIOLOGY_SMOKE_TEST.md`; a GPU run of the
@@ -69,11 +87,11 @@ same `small` preset with the same seed should land close to them (not identical:
 
 ## 6. Known limitations to carry into GPU testing
 1. **No trained reference checkpoint.** The delivered `pretrain_model.pt` is random init (the loader warns). Any quality metric
-   needs a trained model — item 6 above produces one from the biology data.
-2. C++ tokenizer parity unverified; the biology vocabulary comes from the pure-Python stand-in trainer.
-3. Left-padded batches unsupported in generation and in reward pooling.
-4. Dual Chunk Attention not implemented (not needed at 2048).
-5. Biology data licences vary per source (`pes2o`: “unknown”). Do not redistribute models or data before checking.
+   needs a trained model — §4 produces one from real data.
+2. Left-padded batches unsupported in generation and in reward pooling.
+3. Dual Chunk Attention not implemented (not needed at 2048).
+4. Biology data licences vary per source (`pes2o`: “unknown”). Do not redistribute models or data before checking.
+5. Real preference data for the reward model is still pending from the data team — out of scope for this GPU run.
 
 ## 7. What to send back
 A table: GPU / torch / CUDA; results of §2; answers to §3 (numbers, not adjectives); the `eval.json` and

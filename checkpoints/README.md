@@ -31,6 +31,13 @@ submitted `eval.json` doesn't reconcile with the checkpoint's own training log, 
 benchmark this model/codebase has no way to have produced. Full findings and the questions sent back to the
 submitter: `checkpoints/chem_base_51m/README.md` (see also `docs/REVIEW_FINDINGS.md` F-31).
 
+`physics_51m/` tracks a third real training run (Physics, shared by Prabanjan) — **the best submission so far**:
+bundled code confirmed byte-identical to this repo (bar an added `torch.compile` option), vocabulary and `.bin`
+files both valid in this repo's exact formats, checkpoint strict-loads cleanly, spectral test confirms genuine
+training, and the checkpoint's own internal loss log matches `metrics.jsonl` exactly. The only open item is that
+"Physics" isn't currently on anyone's assigned-domain list in `docs/HANDOFF_GPU.md` — needs confirming, not a
+technical concern. Full verification: `checkpoints/physics_51m/README.md`.
+
 ## What replaces these, and when
 
 The team is training the **full 51.5M-parameter reference model** (`--preset base`) on a GPU, combining datasets

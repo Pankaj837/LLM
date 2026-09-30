@@ -17,12 +17,19 @@ Pushed so anyone integrating against the pipeline now (e.g. wiring up a parser) 
 while the actual model is still being trained. **Use these only to test that your integration loads a checkpoint
 and produces output of the right shape — not to judge output quality.**
 
-## In progress: a real 51M run
+## In progress: real 51M runs
 
 `51m_model_run/` tracks a real, non-toy training run (config + metrics, submitted by Prabanjan) — the run itself
 completed 5,000/5,000 steps cleanly with healthy loss/perplexity convergence, but the `.pt` checkpoint file and
 the vocabulary it was trained with haven't been submitted yet, so it can't replace the toy checkpoints below
 until those arrive. Full verification and what's still needed: `checkpoints/51m_model_run/README.md`.
+
+`chem_base_51m/` tracks a second real training run (Chemistry, submitted by Ravikant) — the checkpoint weights
+verified as genuinely trained (spectral/strict-load checks), but the submission is **not usable as-is**: the
+delivered `vocab.tok` is a WordPiece/BERT vocabulary this repo's tokenizer cannot encode with at all, the
+submitted `eval.json` doesn't reconcile with the checkpoint's own training log, and `report.pdf` describes a
+benchmark this model/codebase has no way to have produced. Full findings and the questions sent back to the
+submitter: `checkpoints/chem_base_51m/README.md` (see also `docs/REVIEW_FINDINGS.md` F-31).
 
 ## What replaces these, and when
 

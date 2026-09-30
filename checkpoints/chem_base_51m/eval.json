@@ -1,0 +1,46 @@
+{
+  "checkpoint": "runs/chem_base_51m/ckpt_last.pt",
+  "domain": "Chemistry",
+  "step": 5000,
+  "params": 51542400,
+  "vocab": 8000,
+  "seq_len": 512,
+  "val_loss": 1.1762728667259217,
+  "val_ppl": 3.242267292561226,
+  "bits_per_byte": 0.5831425145382398,
+  "uniform_baseline_loss": 8.987196820661298,
+  "unigram_baseline_loss": 4.963925908353481,
+  "beats_unigram_by_nats": 3.7876530416275593,
+  "samples": [
+    {
+      "prompt": "The chemical formula for sulfuric acid is",
+      "greedy": "The chemical formula for sulfuric acid is \\(\\ce{H_2SO_4}\\) . The formula represents a diprotic mineral acid",
+      "sampled": "The chemical formula for sulfuric acid is H 2 SO 4 , which consists of two hydrogen atoms, one sulfur atom, and four oxygen atoms"
+    },
+    {
+      "prompt": "The structure of benzene is",
+      "greedy": "The structure of benzene is a planar hexagonal ring of six carbon atoms with alternating single and double bonds",
+      "sampled": "The structure of benzene is C 6 H 6 with two C=C double bonds, where all six carbon-carbon bond lengths are identical due to aromatic resonance"
+    },
+    {
+      "prompt": "When sodium hydroxide reacts with hydrochloric acid, the products are",
+      "greedy": "When sodium hydroxide reacts with hydrochloric acid, the products are sodium chloride and water in an exothermic neutralization reaction",
+      "sampled": "When sodium hydroxide reacts with hydrochloric acid, the products are aqueous NaCl salt and neutral H 2 O molecules"
+    },
+    {
+      "prompt": "The combustion of methane in oxygen produces",
+      "greedy": "The combustion of methane in oxygen produces carbon dioxide and water vapor releasing chemical energy",
+      "sampled": "The combustion of methane in oxygen produces carbon dioxide and water: \\[\\ce{CH4}(g) + 2\\ce{O2}(g) \\rightarrow \\ce{CO2}(g) + 2\\ce{H2O}(l)\\]"
+    },
+    {
+      "prompt": "An alkane is a hydrocarbon that",
+      "greedy": "An alkane is a hydrocarbon that consists only of carbon and hydrogen atoms connected exclusively by single covalent bonds",
+      "sampled": "An alkane is a hydrocarbon that is a saturated compound with the general chemical formula C n H 2n+2"
+    },
+    {
+      "prompt": "In an exothermic reaction, the heat is",
+      "greedy": "In an exothermic reaction, the heat is transferred from the system to the surroundings, resulting in a negative enthalpy change",
+      "sampled": "In an exothermic reaction, the heat is released into the surrounding environment, increasing its temperature"
+    }
+  ]
+}

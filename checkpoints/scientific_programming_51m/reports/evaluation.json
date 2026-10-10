@@ -1,0 +1,32 @@
+{
+  "checkpoint": "models/scientific_programming/ckpt_best.pt",
+  "step": 7020,
+  "parameters": 51665920,
+  "vocab_sha256": "7a56c090cfbfc8913c21cdf412ed0aae1c806ab6fd6fa09c6376ab29566fd362",
+  "device": "cuda",
+  "seq_len": 512,
+  "validation_tokens": 1146491,
+  "validation_loss_nats": 2.053699633328709,
+  "validation_perplexity": 7.796692718497891,
+  "unigram_baseline_loss_nats": 6.1638622078196,
+  "unigram_minus_model_loss_nats": 4.110162574490891,
+  "uniform_baseline_loss_nats": 9.011035410141815,
+  "samples": [
+    {
+      "prompt": "import numpy as np\n\ndef integrate(f, a, b, n):\n",
+      "continuation": "import numpy as np\n\ndef integrate(f, a, b, n):\n    a = np.arange(4, 7, 3)\n    a, b = np.arange(3, 4)\n    a, b = np.arange(2, 7, 5),\n    a, b = np.arange(4, 5"
+    },
+    {
+      "prompt": "SELECT sample_id, AVG(value)\nFROM measurements\nGROUP BY sample_id;\n",
+      "continuation": "SELECT sample_id, AVG(value)\nFROM measurements\nGROUP BY sample_id;\n\nPROP_POSSIBILITY, INFO, LAPACK_TRANSPOSE_MEMORY_ERROR;\n\nApplynull\n*  ==============================="
+    },
+    {
+      "prompt": "library(ggplot2)\n\nplot <- ggplot(data, aes(x, y)) +\n",
+      "continuation": "library(ggplot2)\n\nplot <- ggplot(data, aes(x, y)) +\n    geom_point() +\n    geom_point() +\n    geom_point() +\n    geom_point() +\n    geom_point() +\n    geom_point() +\n    geom_point() +\n   "
+    },
+    {
+      "prompt": "program scientific_example\n  implicit none\n",
+      "continuation": "program scientific_example\n  implicit none\n  expect_equal(result, expected)\n\n\ndef test_multi_multi_multi_multi_multi_multi_multi_multi_multi_multi_multi_multi"
+    }
+  ]
+}

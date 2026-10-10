@@ -1,0 +1,279 @@
+{
+  "args": {
+    "src": "../LLMs-Datasets-main/Domains/Quant Finance/domain_dataset",
+    "out": "data/quant_shared",
+    "vocab_size": 8000,
+    "vocab": "final_vocab_51m.tok",
+    "max_doc_chars": 10000,
+    "min_doc_chars": 200,
+    "val_frac": 0.1,
+    "seed": 0
+  },
+  "excluded_sources": {
+    "stackoverflow": "held pending legal review per dataset registry README (Stack Exchange 2024 terms)"
+  },
+  "sampling": {
+    "arxiv": {
+      "files": 927,
+      "chars": 1048741,
+      "kept_files": 927
+    },
+    "wikipedia": {
+      "files": 139,
+      "chars": 1052097,
+      "kept_files": 139
+    },
+    "books": {
+      "files": 25,
+      "chars": 1069675,
+      "kept_files": 25
+    },
+    "github": {
+      "files": 113,
+      "chars": 904928,
+      "dropped_duplicate": 21,
+      "kept_files": 92
+    }
+  },
+  "split": {
+    "arxiv": {
+      "train_files": 834,
+      "val_files": 93,
+      "train_chunks": 834,
+      "val_chunks": 93,
+      "val_file_names": [
+        "arxiv_doc_00008.txt",
+        "arxiv_doc_00014.txt",
+        "arxiv_doc_00031.txt",
+        "arxiv_doc_00034.txt",
+        "arxiv_doc_00055.txt",
+        "arxiv_doc_00060.txt",
+        "arxiv_doc_00065.txt",
+        "arxiv_doc_00077.txt",
+        "arxiv_doc_00097.txt",
+        "arxiv_doc_00103.txt",
+        "arxiv_doc_00142.txt",
+        "arxiv_doc_00145.txt",
+        "arxiv_doc_00150.txt",
+        "arxiv_doc_00158.txt",
+        "arxiv_doc_00175.txt",
+        "arxiv_doc_00196.txt",
+        "arxiv_doc_00200.txt",
+        "arxiv_doc_00202.txt",
+        "arxiv_doc_00214.txt",
+        "arxiv_doc_00230.txt",
+        "arxiv_doc_00231.txt",
+        "arxiv_doc_00251.txt",
+        "arxiv_doc_00252.txt",
+        "arxiv_doc_00253.txt",
+        "arxiv_doc_00266.txt",
+        "arxiv_doc_00270.txt",
+        "arxiv_doc_00272.txt",
+        "arxiv_doc_00283.txt",
+        "arxiv_doc_00285.txt",
+        "arxiv_doc_00304.txt",
+        "arxiv_doc_00308.txt",
+        "arxiv_doc_00317.txt",
+        "arxiv_doc_00331.txt",
+        "arxiv_doc_00332.txt",
+        "arxiv_doc_00337.txt",
+        "arxiv_doc_00338.txt",
+        "arxiv_doc_00342.txt",
+        "arxiv_doc_00352.txt",
+        "arxiv_doc_00358.txt",
+        "arxiv_doc_00366.txt",
+        "arxiv_doc_00367.txt",
+        "arxiv_doc_00372.txt",
+        "arxiv_doc_00382.txt",
+        "arxiv_doc_00395.txt",
+        "arxiv_doc_00403.txt",
+        "arxiv_doc_00415.txt",
+        "arxiv_doc_00416.txt",
+        "arxiv_doc_00422.txt",
+        "arxiv_doc_00432.txt",
+        "arxiv_doc_00434.txt",
+        "arxiv_doc_00441.txt",
+        "arxiv_doc_00453.txt",
+        "arxiv_doc_00479.txt",
+        "arxiv_doc_00484.txt",
+        "arxiv_doc_00499.txt",
+        "arxiv_doc_00506.txt",
+        "arxiv_doc_00527.txt",
+        "arxiv_doc_00564.txt",
+        "arxiv_doc_00569.txt",
+        "arxiv_doc_00582.txt",
+        "arxiv_doc_00605.txt",
+        "arxiv_doc_00643.txt",
+        "arxiv_doc_00644.txt",
+        "arxiv_doc_00655.txt",
+        "arxiv_doc_00661.txt",
+        "arxiv_doc_00664.txt",
+        "arxiv_doc_00666.txt",
+        "arxiv_doc_00683.txt",
+        "arxiv_doc_00685.txt",
+        "arxiv_doc_00687.txt",
+        "arxiv_doc_00700.txt",
+        "arxiv_doc_00702.txt",
+        "arxiv_doc_00718.txt",
+        "arxiv_doc_00724.txt",
+        "arxiv_doc_00728.txt",
+        "arxiv_doc_00732.txt",
+        "arxiv_doc_00735.txt",
+        "arxiv_doc_00740.txt",
+        "arxiv_doc_00758.txt",
+        "arxiv_doc_00767.txt",
+        "arxiv_doc_00784.txt",
+        "arxiv_doc_00814.txt",
+        "arxiv_doc_00816.txt",
+        "arxiv_doc_00821.txt",
+        "arxiv_doc_00839.txt",
+        "arxiv_doc_00842.txt",
+        "arxiv_doc_00853.txt",
+        "arxiv_doc_00859.txt",
+        "arxiv_doc_00867.txt",
+        "arxiv_doc_00869.txt",
+        "arxiv_doc_00874.txt",
+        "arxiv_doc_00900.txt",
+        "arxiv_doc_00911.txt"
+      ]
+    },
+    "wikipedia": {
+      "train_files": 125,
+      "val_files": 14,
+      "train_chunks": 178,
+      "val_chunks": 19,
+      "val_file_names": [
+        "wiki_doc_00008.txt",
+        "wiki_doc_00024.txt",
+        "wiki_doc_00026.txt",
+        "wiki_doc_00027.txt",
+        "wiki_doc_00060.txt",
+        "wiki_doc_00089.txt",
+        "wiki_doc_00090.txt",
+        "wiki_doc_00096.txt",
+        "wiki_doc_00101.txt",
+        "wiki_doc_00109.txt",
+        "wiki_doc_00110.txt",
+        "wiki_doc_00113.txt",
+        "wiki_doc_00120.txt",
+        "wiki_doc_00121.txt"
+      ]
+    },
+    "books": {
+      "train_files": 23,
+      "val_files": 2,
+      "train_chunks": 114,
+      "val_chunks": 6,
+      "val_file_names": [
+        "book_doc_00002.txt",
+        "book_doc_00005.txt"
+      ]
+    },
+    "github": {
+      "train_files": 83,
+      "val_files": 9,
+      "train_chunks": 140,
+      "val_chunks": 13,
+      "val_file_names": [
+        "github_code_00002.py",
+        "github_code_00014.py",
+        "github_code_00018.py",
+        "github_code_00024.py",
+        "github_code_00026.py",
+        "github_code_00037.py",
+        "github_code_00074.py",
+        "github_code_00091.py",
+        "github_code_00097.py"
+      ]
+    }
+  },
+  "tokenizer_source": "shared vocabulary final_vocab_51m.tok (not trained here)",
+  "tokenization": {
+    "train": {
+      "docs": 1266,
+      "tokens": 1133567,
+      "bytes": 3774038,
+      "bytes_per_token": 3.333,
+      "single_byte_token_pct": 28.99
+    },
+    "val_arxiv": {
+      "docs": 93,
+      "tokens": 25181,
+      "bytes": 101297,
+      "bytes_per_token": 4.038,
+      "single_byte_token_pct": 15.5
+    },
+    "val_wikipedia": {
+      "docs": 19,
+      "tokens": 27659,
+      "bytes": 97983,
+      "bytes_per_token": 3.545,
+      "single_byte_token_pct": 18.15
+    },
+    "val_books": {
+      "docs": 6,
+      "tokens": 13265,
+      "bytes": 50777,
+      "bytes_per_token": 3.83,
+      "single_byte_token_pct": 20.95
+    },
+    "val_github": {
+      "docs": 13,
+      "tokens": 31249,
+      "bytes": 78784,
+      "bytes_per_token": 2.522,
+      "single_byte_token_pct": 40.64
+    },
+    "control": {
+      "docs": 12,
+      "tokens": 19860,
+      "bytes": 55400,
+      "bytes_per_token": 2.791,
+      "single_byte_token_pct": 36.38
+    }
+  },
+  "checks": {
+    "roundtrip_failures": 0,
+    "max_id": 8192,
+    "min_id": 9,
+    "ids_below_vocab": true,
+    "ids_below_65536": true,
+    "eos_count_matches_docs": true,
+    "val_windows_seen_in_train_pct": 0.953,
+    "vocab_tokens_used_in_train_pct": 88.3
+  },
+  "vocab_sha256": "7a56c090cfbfc8913c21cdf412ed0aae1c806ab6fd6fa09c6376ab29566fd362",
+  "files": {
+    "train": {
+      "path": "train.bin",
+      "sha256": "05565f4148696da3a598c008a54a528f26fd3dbf4fec2bd160bff29076c9e1bc"
+    },
+    "val": {
+      "path": "val.bin",
+      "sha256": "bd76b1d81c759a9d024aaf07e221c6b6561b5dba498a3b78d791a6f1f4f9b998"
+    },
+    "val_arxiv": {
+      "path": "val_arxiv.bin",
+      "sha256": "88ba1a92f3af51b1efaf53198556886252316dfd04c05198b1ee4df5131a51c7"
+    },
+    "val_wikipedia": {
+      "path": "val_wikipedia.bin",
+      "sha256": "e9de3f1e7e15a97fd578aa6a51b016b14a9278d9d38ed60dd249fee615c7c42b"
+    },
+    "val_books": {
+      "path": "val_books.bin",
+      "sha256": "413c78215fa8f49b5be02cdf73ca50089748a65bc9573fd4fdf080e507377844"
+    },
+    "val_github": {
+      "path": "val_github.bin",
+      "sha256": "c830821686b569c325871193ae7c14627464e91cc722a8a9f6725e86d2ed94d5"
+    },
+    "control": {
+      "path": "control.bin",
+      "sha256": "185b14b8d89f5c17c2b46e88e7abc8c17fe9a20fa0a1864ffe1f6aa5e53b20a1"
+    }
+  },
+  "n_vocab": 8193,
+  "eos_id": 8192,
+  "seconds": 11.2
+}

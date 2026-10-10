@@ -1,0 +1,71 @@
+{
+  "checkpoint": "runs/quant_small/ckpt_best.pt",
+  "step": 900,
+  "params": 6278400,
+  "vocab": 8000,
+  "seq_len": 256,
+  "uniform_loss": 8.987196820661973,
+  "val": {
+    "loss": 4.95546962647211,
+    "ppl": 141.9492538493278,
+    "bits_per_byte": 1.753995685932497,
+    "tokens_evaluated": 80809
+  },
+  "val_by_source": {
+    "arxiv": {
+      "loss": 4.9859122138425525,
+      "ppl": 146.33700480011748,
+      "bits_per_byte": 1.5060617377815364,
+      "tokens_evaluated": 21302
+    },
+    "books": {
+      "loss": 4.3047585699293345,
+      "ppl": 74.0513350754449,
+      "bits_per_byte": 1.4383468336231184,
+      "tokens_evaluated": 11766
+    },
+    "github": {
+      "loss": 4.865296789940367,
+      "ppl": 129.70942935349692,
+      "bits_per_byte": 2.150716246552359,
+      "tokens_evaluated": 24153
+    },
+    "wikipedia": {
+      "loss": 5.358333815699038,
+      "ppl": 212.37080259974127,
+      "bits_per_byte": 1.8594937756592598,
+      "tokens_evaluated": 23588
+    }
+  },
+  "control_non_finance": {
+    "loss": 6.301058814950185,
+    "ppl": 545.1488163704024,
+    "bits_per_byte": 3.0762681158034977,
+    "tokens_evaluated": 18719
+  },
+  "unigram_baseline_loss": 7.294224140475437,
+  "beats_unigram_by_nats": 2.3387545140033277,
+  "control_minus_val_loss": 1.3455891884780753,
+  "samples": [
+    {
+      "prompt": "The price of a European call option",
+      "greedy": "The price of a European call option, the market is the market. The price is the same, the price is the same, the price is the same, the price is the price of the stock price. The price is the price of the stock price is the stock price, the",
+      "sampled": "The price of a European call option (GVA) that the asset.\n\n== See also ==\n\n== History ==\nAblar and the term of market is the most of the financial market system. By the other system of the financial markets is typically called the case of a"
+    },
+    {
+      "prompt": "In this paper, we propose a model for volatility",
+      "greedy": "In this paper, we propose a model for volatility and the optimal strategy for the optimal portfolio.<|endoftext|>",
+      "sampled": "In this paper, we propose a model for volatility-dependent volatility. The model is shown to solve the first, i.e.<|endoftext|>"
+    },
+    {
+      "prompt": "The rate of interest on money",
+      "greedy": "The rate of interest on money, which is the same, the\n\n price of the country, which is the same, the price of the\n\n country, the price of the labour of the country, the\n\n price of the country, the price of the country, the price of",
+      "sampled": "The rate of interest on money, is the same as he would\n\n have no greater number of their own produce, and their value is\n\n likely to have been augmented by the same proportion to the stock of the\n\n country, the rate of those of the rude produce of the country"
+    },
+    {
+      "prompt": "Portfolio optimization aims to",
+      "greedy": "Portfolio optimization aims to the optimal strategy. The model is a novel approach to the optimal strategy for the optimal portfolio and the optimal strategy for the optimal portfolio.<|endoftext|>",
+      "sampled": "Portfolio optimization aims to the underlying optimal algorithm to market market with the risk management. We also demonstrate the optimal method of the expected data for the portfolio with the optimal portfolio and volatility of the optimal risk management, using the same, we consider the optimal performance of the stochastic volatility"
+    }
+  ]
+}

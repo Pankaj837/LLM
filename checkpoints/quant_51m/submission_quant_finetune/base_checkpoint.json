@@ -1,0 +1,8 @@
+{
+  "source": "https://media.githubusercontent.com/media/aarav911/scientific_testing/main/models/base/ckpt_best.pt",
+  "sha256": "60b3cb85d52e37dfa9f3f5776888a1b5f1aed7f3644c55f911d5acef5de1e06a",
+  "step": 5000,
+  "params": 51665920,
+  "vocab_sha256": "7a56c090cfbfc8913c21cdf412ed0aae1c806ab6fd6fa09c6376ab29566fd362",
+  "note": "team 51M base checkpoint (Biology + Earth run), as used for the Scientific Programming fine-tune"
+}

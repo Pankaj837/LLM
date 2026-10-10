@@ -1,0 +1,71 @@
+{
+  "checkpoint": "/kaggle/tmp/runs/quant_finetune/ckpt_best.pt",
+  "step": 5700,
+  "params": 51665920,
+  "vocab": 8193,
+  "seq_len": 512,
+  "uniform_loss": 9.011035410141815,
+  "val": {
+    "loss": 3.43087319574858,
+    "ppl": 30.903615877552927,
+    "bits_per_byte": 1.4633973477805033,
+    "tokens_evaluated": 97354
+  },
+  "val_by_source": {
+    "arxiv": {
+      "loss": 3.7040959718276043,
+      "ppl": 40.61331513486045,
+      "bits_per_byte": 1.3235069523933642,
+      "tokens_evaluated": 25181
+    },
+    "books": {
+      "loss": 2.9344681167602538,
+      "ppl": 18.811494954947815,
+      "bits_per_byte": 1.1054717948949286,
+      "tokens_evaluated": 13265
+    },
+    "github": {
+      "loss": 3.087118121444202,
+      "ppl": 21.913833880698004,
+      "bits_per_byte": 1.7658148844800385,
+      "tokens_evaluated": 31249
+    },
+    "wikipedia": {
+      "loss": 3.808317458188092,
+      "ppl": 45.07453523852046,
+      "bits_per_byte": 1.549868990066296,
+      "tokens_evaluated": 27659
+    }
+  },
+  "control_non_finance": {
+    "loss": 5.422727409162019,
+    "ppl": 226.49602818494222,
+    "bits_per_byte": 2.8028464052479753,
+    "tokens_evaluated": 19860
+  },
+  "unigram_baseline_loss": 6.9749538242551825,
+  "beats_unigram_by_nats": 3.5440806285066024,
+  "control_minus_val_loss": 1.991854213413439,
+  "samples": [
+    {
+      "prompt": "The price of a European call option",
+      "greedy": "The price of a European call option, is a market for a financial market.\n\n=== Marketing ===\n\n=== Marketing and marketing ===\n\n=== Marketing and marketing ===\n\n=== Market",
+      "sampled": "The price of a European call option, we analyze a single pound of $100 billion in price. The price is evaluated by a $100 billion at the end of a $150 billion. The price is lower, then the average price price is\n\n"
+    },
+    {
+      "prompt": "In this paper, we propose a model for volatility",
+      "greedy": "In this paper, we propose a model for volatility and a model for the model. We show that the model is a model of the model and the model is a generalized model of the model. We show that the model is a model of the model and the model is a model of the model",
+      "sampled": "In this paper, we propose a model for volatility variables. We show that the method can be applied to the model parameters, where the model is applied by a model function, and can be used to solve it. The method is given by the analysis of a model of the model and the general"
+    },
+    {
+      "prompt": "The rate of interest on money",
+      "greedy": "The rate of interest on money, it is not for the use of money,\n\n but for the same reason that money is not always to be employed in\n\n maintaining it.\n\n The whole of the goods which are paid in money, in order to be",
+      "sampled": "The rate of interest on money in the U.S. bank in the U.S. banking crash.\n\n=== Marketing ===\n\nBook on the U.S. banking\nSecurities trade.\n\n==="
+    },
+    {
+      "prompt": "Portfolio optimization aims to",
+      "greedy": "Portfolio optimization aims to use the market data. The model is a financial market, which is a financial market, where the market is a financial market, which is a financial market, and a market is a financial market.",
+      "sampled": "Portfolio optimization aims to study the impact of market growth and growth. The resulting stochastic network of the SEC's Cross-Window (2012) and the SEC's Operational Times (2001–2004), also known as SEC's"
+    }
+  ]
+}

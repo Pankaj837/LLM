@@ -1,0 +1,40 @@
+{
+  "base_checkpoint": "models/base/ckpt_best.pt",
+  "base_step": 5000,
+  "final_checkpoint": "models/scientific_programming/ckpt_best.pt",
+  "final_step": 7020,
+  "domain_finetune_updates": 2020,
+  "stages": [
+    {
+      "start_step": 5000,
+      "end_step": 5020,
+      "source_repositories": 18,
+      "train_tokens": 20035796,
+      "validation_tokens": 1078915
+    },
+    {
+      "start_step": 5020,
+      "end_step": 6020,
+      "source_repositories": 18,
+      "train_tokens": 20035796,
+      "validation_tokens": 1078915
+    },
+    {
+      "start_step": 6020,
+      "end_step": 7020,
+      "source_repositories": 22,
+      "train_tokens": 21485660,
+      "validation_tokens": 1146491
+    }
+  ],
+  "settings": {
+    "device": "NVIDIA GeForce RTX 5060 Laptop GPU",
+    "torch": "2.11.0+cu128",
+    "dtype": "bfloat16",
+    "sequence_length": 512,
+    "batch_size": 4,
+    "gradient_accumulation": 1,
+    "learning_rate": 0.0001
+  },
+  "note": "The first 1,020 updates used the initial 18-repository corpus. The final 1,000 used the expanded 22-repository corpus."
+}

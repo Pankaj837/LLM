@@ -1,0 +1,71 @@
+{
+  "checkpoint": "/kaggle/tmp/runs/quant_finetune/pre/base.pt",
+  "step": 5000,
+  "params": 51665920,
+  "vocab": 8193,
+  "seq_len": 512,
+  "uniform_loss": 9.011035410141815,
+  "val": {
+    "loss": 6.2277037018223815,
+    "ppl": 506.59086317388005,
+    "bits_per_byte": 2.6563514767327927,
+    "tokens_evaluated": 97354
+  },
+  "val_by_source": {
+    "arxiv": {
+      "loss": 5.968961131816008,
+      "ppl": 391.09915915723434,
+      "bits_per_byte": 2.1327637341497936,
+      "tokens_evaluated": 25181
+    },
+    "books": {
+      "loss": 5.43011962890625,
+      "ppl": 228.17654030129145,
+      "bits_per_byte": 2.0456327531302354,
+      "tokens_evaluated": 13265
+    },
+    "github": {
+      "loss": 7.252262717387715,
+      "ppl": 1411.2945989197265,
+      "bits_per_byte": 4.148255087347277,
+      "tokens_evaluated": 31249
+    },
+    "wikipedia": {
+      "loss": 5.696248725608543,
+      "ppl": 297.7483675523255,
+      "bits_per_byte": 2.3181994033989226,
+      "tokens_evaluated": 27659
+    }
+  },
+  "control_non_finance": {
+    "loss": 7.075543855365954,
+    "ppl": 1182.68653634861,
+    "bits_per_byte": 3.6571380347609024,
+    "tokens_evaluated": 19860
+  },
+  "unigram_baseline_loss": 6.9749538242551825,
+  "beats_unigram_by_nats": 0.747250122432801,
+  "control_minus_val_loss": 0.8478401535435722,
+  "samples": [
+    {
+      "prompt": "The price of a European call option",
+      "greedy": "The price of a European call option.  The first of the first year of the year, the first of the first year of the year, was the first of the first year of the year, and the second year of the year, the second year of the year, the second",
+      "sampled": "The price of a European call option, and the more a thing.  The first of these things, as it was, is the first place of the world.  The most careful of the facts is the question:  In the first place, there is a good one; but"
+    },
+    {
+      "prompt": "In this paper, we propose a model for volatility",
+      "greedy": "In this paper, we propose a model for volatility, and a copy of the paper, which is a very different thing.  The following extracts from the _Spectator_:  \"The following extracts are of the same kind, and the following are the following:  \"The",
+      "sampled": "In this paper, we propose a model for volatility, or the use of the key.  The subject is made to a certain article, which, in a sense, has been shown, and has a particular name. The reader is, that the word _adjugation_ is the first"
+    },
+    {
+      "prompt": "The rate of interest on money",
+      "greedy": "The rate of interest on money, and the use of the money, and the money, and the money, and the money, and the money, and the money, and the money, and the money, and the money, and the money, and the money, and the",
+      "sampled": "The rate of interest on money in that country, in which it is not proper to make it more good and better. And that it is not so far as we shall have it.  The question of the case is the case, that I have to do with the rest of"
+    },
+    {
+      "prompt": "Portfolio optimization aims to",
+      "greedy": "Portfolio optimization aims to make the best of the world.  The first is the first of the first, the second, the second, the third, the third, the third, the third, the third, the third, the third, the third, the third,",
+      "sampled": "Portfolio optimization aims to bring him to the best of the most important, and to be the more intensely-to-doing of his party.  In the middle of the fifth, the former of them is very far-off, though he is so"
+    }
+  ]
+}

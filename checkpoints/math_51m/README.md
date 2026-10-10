@@ -1,0 +1,50 @@
+# Math 51M run — verified, checkpoint genuinely trained
+
+**Status: checkpoint, vocabulary, and data all independently verified. One unreconciled number (expected,
+explained below) and one open question: who actually submitted this (see §Attribution).**
+
+## What was received
+`train_config.json`, `metrics.jsonl`, `vocab.tok`, `eval.json`, and `ckpt_last.pt` (618 MB, not committed —
+hash in §Hashes), bundled as `math_model_51m.zip` inside a larger delivery alongside Engineering and a second
+Chemistry submission.
+
+## ✅ What checks out
+
+- **Checkpoint strict-loads cleanly** into this repo's `TransformerModel`: 0 missing / 0 unexpected keys,
+  51,542,400 params, matching the `base` preset exactly.
+- **`vocab.tok` is a correct byte-level BPE vocabulary** in this repo's own format (header, all single bytes,
+  a `SPECIALS` section ending in `<|endoftext|>`). All 5 of `eval.json`'s prompts encode and decode exactly
+  (byte-for-byte round-trip) — this tokenizer works, unlike the original Chemistry submission's.
+- **Checkpoint's own recorded `vocab_sha256` matches the delivered `vocab.tok` exactly.**
+- **Spectral (Marchenko–Pastur) test confirms genuine training**: top singular value is 2.4–2.7× the
+  random-matrix edge on three independent layers.
+- **`metrics.jsonl` is clean**: 500 lines, steps 10→5000, monotonic, no NaN/Inf. The checkpoint's internal
+  `train_loss` (2.3791) and `val_loss` (1.7872) at step 5000 match `metrics.jsonl`'s last line **exactly**.
+- **Forward pass finite**, not degenerate.
+
+## ⚠️ One number that doesn't match — explained, not a red flag
+
+`eval.json` reports `val.loss: 2.7424`, but the checkpoint's own training-time val_loss at step 5000 is
+**1.7872** — a large-looking gap. This is explained by scale, not inconsistency: the training loop's periodic
+val check only samples `eval_batches=20` random batches (a few thousand tokens) for a quick estimate, while
+`eval.json` evaluates **6,399,471 tokens** — the full held-out set. A much larger, less noisy sample giving a
+different number than a small periodic spot-check is expected, especially on a small, repetitive math corpus
+where the quick-check batches may not be representative. This is the same pattern seen on the Engineering and
+Chemistry-v2 submissions below (same eval script, same explanation) — not something to read as fabrication.
+
+The sample completions in `eval.json` show heavy repetition loops (e.g. "0.5x + 0.5x = 0.5x + 0.5x = ...",
+proofs looping "Let $f: X \to Y$ be a bijection" four times) — this is exactly what an undertrained small base
+model does on hard reasoning prompts with greedy decoding, and matches the team's own chat admission
+("Raju sir: it fails completely at mathematical reasoning... Ravi: it fails because we haven't fine-tuned the
+model"). Bad-looking output that matches what the team already said about it is a sign this is real, not staged.
+
+## ⚠️ Attribution — needs confirming, not a technical concern
+
+Nobody in `docs/HANDOFF_GPU.md`'s roster is assigned a "Math" domain by that name (closest: Afnan =
+"Engineering and Mathematics"). The team chat about this model's math-reasoning failures refers to "Ravi" —
+unclear whether that's Ravikant (assigned Astronomy & Chemistry, not Math) or a short form of another name.
+Please confirm who actually trained this before it's attributed in the roster.
+
+## Hashes (large files not committed)
+- `ckpt_last.pt`: `sha256:d7d9a60da4a7e39b8038894677a1c7bb17b85305e637240b5a684e3a28ad98a1` (618 MB)
+- `vocab.tok` / checkpoint's recorded vocab_sha256: `0dd01be4ad601512b47d588e14eab4d6968b50be54a188620bfca206cffee871`

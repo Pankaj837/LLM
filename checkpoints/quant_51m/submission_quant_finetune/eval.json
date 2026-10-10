@@ -1,0 +1,71 @@
+{
+  "checkpoint": "/kaggle/tmp/runs/quant_finetune/ckpt_last.pt",
+  "step": 6500,
+  "params": 51665920,
+  "vocab": 8193,
+  "seq_len": 512,
+  "uniform_loss": 9.011035410141815,
+  "val": {
+    "loss": 3.749249902524446,
+    "ppl": 42.489199002969436,
+    "bits_per_byte": 1.5991970703899647,
+    "tokens_evaluated": 97354
+  },
+  "val_by_source": {
+    "arxiv": {
+      "loss": 4.081309834305121,
+      "ppl": 59.22299137437681,
+      "bits_per_byte": 1.4582888730901489,
+      "tokens_evaluated": 25181
+    },
+    "books": {
+      "loss": 3.274360694885254,
+      "ppl": 26.426325593930265,
+      "bits_per_byte": 1.2335160071544709,
+      "tokens_evaluated": 13265
+    },
+    "github": {
+      "loss": 3.2945255959620243,
+      "ppl": 26.964618911008408,
+      "bits_per_byte": 1.8844508391951922,
+      "tokens_evaluated": 31249
+    },
+    "wikipedia": {
+      "loss": 4.191294776068793,
+      "ppl": 66.10833105582437,
+      "bits_per_byte": 1.7057290714273874,
+      "tokens_evaluated": 27659
+    }
+  },
+  "control_non_finance": {
+    "loss": 6.174961090087891,
+    "ppl": 480.56432484127913,
+    "bits_per_byte": 3.1916536067545964,
+    "tokens_evaluated": 19860
+  },
+  "unigram_baseline_loss": 6.9749538242551825,
+  "beats_unigram_by_nats": 3.2257039217307364,
+  "control_minus_val_loss": 2.4257111875634445,
+  "samples": [
+    {
+      "prompt": "The price of a European call option",
+      "greedy": "The price of a European call option, the\n\n price of a commodity is equal to what is equal to what is\n\n sufficient to pay the expense of a certain quantity of labour and commodities.\n\n The value of a commodity, or",
+      "sampled": "The price of a European call option, which is a reasonable security for asset management.\nFor example, a market is a martingale that exchanges that are sophisticated with option and pricing options. The market is usually thought"
+    },
+    {
+      "prompt": "In this paper, we propose a model for volatility",
+      "greedy": "In this paper, we propose a model for volatility and volatility. Our model is based on a set of nonparametric estimators and stochastic volatility. We provide a numerical analysis of the optimal volatility and the optimal volatility of the volatility surface.",
+      "sampled": "In this paper, we propose a model for volatility and Gaussian macro-Markovian dynamics to analyze the volatility of the volatility. In order to reduce the volatility and volatility of volatility, the volatility was developed as a vol"
+    },
+    {
+      "prompt": "The rate of interest on money",
+      "greedy": "The rate of interest on money, the money is always more than the money price.\nThe same thing may be made in a particular country.\n\n=== Investor ===\nThe difference between the money price of a good or money price of a good or",
+      "sampled": "The rate of interest on money in gold or silver is nearly equal to that of money\n\n for goods. The difference in the value of goods for money and goods\n\n would be in goods which the purchase of goods for home consumption\n\n"
+    },
+    {
+      "prompt": "Portfolio optimization aims to",
+      "greedy": "Portfolio optimization aims to use a dynamic framework for derivatives, i.e. market value of a stochastic volatility model. The framework allows for the accuracy of optimal portfolio selection and the use of hedging strategies for portfolio alloc",
+      "sampled": "Portfolio optimization aims to study the impact of market returns on the economy.<|endoftext|>"
+    }
+  ]
+}

@@ -17,26 +17,27 @@ Pushed so anyone integrating against the pipeline now (e.g. wiring up a parser) 
 while the actual model is still being trained. **Use these only to test that your integration loads a checkpoint
 and produces output of the right shape — not to judge output quality.**
 
-## In progress: real 51M runs
+## Real 51M runs received so far (8, as of 2026-10-10)
 
-`51m_model_run/` tracks a real, non-toy training run (config + metrics, submitted by Prabanjan) — the run itself
-completed 5,000/5,000 steps cleanly with healthy loss/perplexity convergence, but the `.pt` checkpoint file and
-the vocabulary it was trained with haven't been submitted yet, so it can't replace the toy checkpoints below
-until those arrive. Full verification and what's still needed: `checkpoints/51m_model_run/README.md`.
+| Directory | Domain | Submitter | Status |
+|---|---|---|---|
+| `51m_model_run/` | Biology + Earth & Science | Prabanjan | **Complete & verified.** Checkpoint arrived 2026-10-10; strict load, spectral test, tokenizer all pass. Now the best checkpoint for these domains. |
+| `chem_base_51m/` | Chemistry (original) | Ravikant | **Not usable.** Vocabulary is WordPiece, not BPE — unreadable by this repo's tokenizer. See F-31. Superseded by `chem_base_51m_v2/`. |
+| `chem_base_51m_v2/` | Chemistry (resubmission) | Ravikant | **Verified, fixes the above.** Correct BPE vocabulary this time; checkpoint and data check out. |
+| `physics_51m/` | Physics | Prabanjan | **Verified.** First fully-clean submission; see its own README. |
+| `math_51m/` | Math | unconfirmed ("Ravi" in chat) | **Verified** (checkpoint, vocab, data). Attribution unclear — see its README. |
+| `engineering_51m/` | Engineering | unconfirmed | **Verified.** Same attribution question as Math — possibly the same person's two sub-domains. |
+| `quant_51m/` | Quant Finance (51.5M, base + fine-tuned) | Om | **Verified**, extremely well self-documented. Use `submission_quant_finetune/ckpt_best.pt`. |
+| `quant_finance_small_6.3M/` | Quant Finance (6.3M toy) | Om | **Verified.** Superseded by `quant_51m/`. |
+| `scientific_programming_51m/` | Scientific Programming | Aarav | **Data/reports verified; checkpoint weights not independently checked** — delivered as Git LFS pointers, not the actual binaries. Also flags an owner discrepancy (Pankaj vs. Aarav) in the collection-plan doc — needs a decision. |
 
-`chem_base_51m/` tracks a second real training run (Chemistry, submitted by Ravikant) — the checkpoint weights
-verified as genuinely trained (spectral/strict-load checks), but the submission is **not usable as-is**: the
-delivered `vocab.tok` is a WordPiece/BERT vocabulary this repo's tokenizer cannot encode with at all, the
-submitted `eval.json` doesn't reconcile with the checkpoint's own training log, and `report.pdf` describes a
-benchmark this model/codebase has no way to have produced. Full findings and the questions sent back to the
-submitter: `checkpoints/chem_base_51m/README.md` (see also `docs/REVIEW_FINDINGS.md` F-31).
+Every checkpoint above over 100 MB is **not committed to this repo** (GitHub's push limit) — each directory's
+README/VERIFICATION file records SHA-256 hashes for traceability. Full findings: `docs/REVIEW_FINDINGS.md`.
 
-`physics_51m/` tracks a third real training run (Physics, shared by Prabanjan) — **the best submission so far**:
-bundled code confirmed byte-identical to this repo (bar an added `torch.compile` option), vocabulary and `.bin`
-files both valid in this repo's exact formats, checkpoint strict-loads cleanly, spectral test confirms genuine
-training, and the checkpoint's own internal loss log matches `metrics.jsonl` exactly. The only open item is that
-"Physics" isn't currently on anyone's assigned-domain list in `docs/HANDOFF_GPU.md` — needs confirming, not a
-technical concern. Full verification: `checkpoints/physics_51m/README.md`.
+A cross-cutting finding worth flagging on its own: Prabanjan's Biology+Earth checkpoint, Om's Quant fine-tune,
+and Aarav's Scientific Programming fine-tune all independently reference the **exact same shared base-checkpoint
+SHA-256** (`60b3cb85…e06a`) as their starting point — strong corroboration across three unrelated submissions
+that this shared model is real.
 
 ## What replaces these, and when
 

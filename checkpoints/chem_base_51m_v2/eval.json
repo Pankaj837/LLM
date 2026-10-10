@@ -1,0 +1,36 @@
+{
+  "checkpoint": "runs/chem_base_51m/ckpt_last.pt",
+  "step": 5000,
+  "params": 51542400,
+  "vocab": 8000,
+  "seq_len": 512,
+  "uniform_loss": 8.987196820661973,
+  "val_loss": 3.396352921446709,
+  "val_perplexity": 29.855017657677895,
+  "bits_per_byte": 1.225,
+  "tokens_evaluated": 449002,
+  "unigram_baseline_loss": 7.06228752143624,
+  "beats_unigram_by_nats": 3.6659345999895314,
+  "samples": [
+    {
+      "prompt": "The reaction between an acid and a base",
+      "greedy": "The reaction between an acid and a base is called a conjugate acid-base pair. The conjugate acid of a base is a base, and the conjugate acid of a base is a base. The reaction between an acid and a base is called",
+      "sampled": "The reaction between an acid and a base is called hydrolysis. Because esters are weak bases, they are very strong bases. In fact, many ester groups are usually the weak base of the strong acid. However, there is no reaction in basic"
+    },
+    {
+      "prompt": "In organic chemistry, the Lewis structure",
+      "greedy": "In organic chemistry, the Lewis structure shows that all the bonds are identical, except that one hydrogen atom has been replaced by another atom (Figure \\(\\PageIndex{1}\\)). If a molecule contains more than one bond, then the bond is considered",
+      "sampled": "In organic chemistry, the Lewis structure is determined primarily by the presence of one or more electrons in the s or p orbital of an atom. The more electronegative elements, the more electronegative element, the more effectively the atom will be its neighb"
+    },
+    {
+      "prompt": "The first law of thermodynamics states that",
+      "greedy": "The first law of thermodynamics states that the change in enthalpy of a system is equal to the sum of the heat transferred in a process at constant pressure. The heat transfer is a proportionality constant that depends on the path taken for a process",
+      "sampled": "The first law of thermodynamics states that a spontaneous process will go forward and backward. If a spontaneous process occurs at constant entropy of the universe (the entropy of the universe) then no heat will be absorbed or released. The entropy of"
+    },
+    {
+      "prompt": "The rate of a chemical reaction depends on",
+      "greedy": "The rate of a chemical reaction depends on the concentration of the reactants. The rate of a reaction depends on the frequency of collisions between reactants. The activation energy is the energy barrier that must be overcome for a reaction to occur. A reaction rate",
+      "sampled": "The rate of a chemical reaction depends on the extent of reaction, as well as on the strength of the reactants. For example, consider the reaction between ethanol and carbon dioxide in the presence of a metal catalyst: \\[\\ce{CH_3"
+    }
+  ]
+}

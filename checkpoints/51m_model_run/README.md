@@ -1,8 +1,24 @@
 # 51M model run — training config and metrics (submitted by Prabanjan)
 
-**Status: training run itself looks genuinely complete and healthy. The `.pt` checkpoint file has not been
-submitted yet — only `train_config.json` and `metrics.jsonl` are here.** Everything below is independently
-verified against the raw `metrics.jsonl`, not taken on the submitter's word.
+**Status: COMPLETE. The missing `ckpt_best.pt` and `final_vocab_51m.tok` arrived on 2026-10-10 and are
+independently verified below — strict load, spectral test, and tokenizer round-trip all pass.** Everything
+below is independently verified, not taken on the submitter's word.
+
+## Checkpoint verification (added 2026-10-10)
+
+- **Strict load**: 0 missing / 0 unexpected keys against this repo's `base` preset, 51,665,920 params.
+- **Tokenizer works**: `final_vocab_51m.tok` is valid byte-level BPE; "The mitochondria are", "DNA replication
+  begins when", "Natural selection acts on", "The greenhouse effect occurs when" all encode/decode exactly.
+- **Spectral (Marchenko–Pastur) test confirms genuine training**: ratios 2.1–3.7× the random-matrix edge.
+- **Forward pass finite**, not degenerate.
+- This checkpoint (SHA-256 `60b3cb85d52e37dfa9f3f5776888a1b5f1aed7f3644c55f911d5acef5de1e06a`, not committed —
+  618 MB, exceeds GitHub's 100 MB push limit) turns out to also be the team's shared base model: Om's Quant
+  fine-tune (`../quant_51m/`) and Aarav's Scientific Programming fine-tune (`../scientific_programming_51m/`)
+  both independently reference this exact hash as their starting checkpoint — strong cross-corroboration this
+  is real. `final_vocab_51m.tok`'s SHA-256 (`7a56c090cfbfc8913c21cdf412ed0aae1c806ab6fd6fa09c6376ab29566fd362`)
+  is the one shared vocabulary used across all of those submissions.
+- `metrics.jsonl` sent alongside is byte-identical to the copy already in this folder — confirmed via diff,
+  so this really is the completion of the same run, not a different one reusing the same folder name.
 
 ## Is it done?
 
@@ -34,15 +50,10 @@ verified against the raw `metrics.jsonl`, not taken on the submitter's word.
 provenance/hash isn't recorded here; ask for it alongside the checkpoint). Model architecture otherwise matches
 this repo's `base` preset exactly (11 layers, d=640, 8 query/2 KV heads, SwiGLU 1664, `max_position_embeddings=2048`).
 
-## What's still needed before this can replace the toy checkpoints in `checkpoints/`
-
-1. **The actual `.pt` file** (`ckpt_last.pt` or `ckpt_best.pt`) — not submitted yet.
-2. **`final_vocab_51m.tok`** — the checkpoint is only usable with the exact vocabulary it was trained on.
-
 Dataset: **Biology + Earth & Science** (confirmed by Prabanjan — matches his current roster assignment in
 `docs/HANDOFF_GPU.md` §4). Not yet the full team-combined corpus, so this is still a 2-domain checkpoint, not
 the final cross-domain one described in that section.
 
-Once the `.pt` and vocab arrive, this replaces `checkpoints/toy_bio_small_6.3M.pt` and
-`checkpoints/toy_earth_small_6.3M.pt` as the best available checkpoint for those two domains — but note it still
-won't be the combined-corpus model the final handoff needs.
+This now replaces `checkpoints/toy_bio_small_6.3M.pt` and `checkpoints/toy_earth_small_6.3M.pt` as the best
+available checkpoint for those two domains — but it still isn't the combined-corpus model the final handoff
+needs (that requires every domain's data, see `checkpoints/README.md`).

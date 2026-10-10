@@ -1,0 +1,32 @@
+{
+  "checkpoint": "models/base/ckpt_best.pt",
+  "step": 5000,
+  "parameters": 51665920,
+  "vocab_sha256": "7a56c090cfbfc8913c21cdf412ed0aae1c806ab6fd6fa09c6376ab29566fd362",
+  "device": "cuda",
+  "seq_len": 512,
+  "validation_tokens": 1146491,
+  "validation_loss_nats": 6.835215899921944,
+  "validation_perplexity": 930.029122266379,
+  "unigram_baseline_loss_nats": 6.1638622078196,
+  "unigram_minus_model_loss_nats": -0.6713536921023442,
+  "uniform_baseline_loss_nats": 9.011035410141815,
+  "samples": [
+    {
+      "prompt": "import numpy as np\n\ndef integrate(f, a, b, n):\n",
+      "continuation": "import numpy as np\n\ndef integrate(f, a, b, n):\n, a, a, c, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a"
+    },
+    {
+      "prompt": "SELECT sample_id, AVG(value)\nFROM measurements\nGROUP BY sample_id;\n",
+      "continuation": "SELECT sample_id, AVG(value)\nFROM measurements\nGROUP BY sample_id;\n\u03c3\u03b9\u03bf\u03bf\u03b4\u03bf\u03bb\u03c3\u03bf\u03b7\u03b5\u03c2; \u03c4\u03bd\u03bd\u03bd\u03b4\u03b9\u03b7\u03c3\u03bc\u03bb\u03c3\u03bf\u03c3\u03bf\u03b5\u03bc\u03bf\u03bd\u03bb\ufffd"
+    },
+    {
+      "prompt": "library(ggplot2)\n\nplot <- ggplot(data, aes(x, y)) +\n",
+      "continuation": "library(ggplot2)\n\nplot <- ggplot(data, aes(x, y)) +\n)  St. Louisiana.  St. Louisiana.  St. Louisiana.  St. Louisiana.  St. Louisiana.  St. Louisiana.  St. Louisiana.  St. Louisiana.  St. Louisiana.  St. Louisiana.  St."
+    },
+    {
+      "prompt": "program scientific_example\n  implicit none\n",
+      "continuation": "program scientific_example\n  implicit none\n \u03c3\u03c1\u03bc\u03bf\u03c0\u03ba\u03bf\u03bf\u03bf\u03bf\u03bf\u03bf\u03bb\u03bf\u03b4\u03bf\u03bf\u03bf\u03bd\u03bf\u03bb\u03bd\u03ba\u03bf\u03bf\u03bf\u03bb\u03c3\u03bb\u03bc\u03bf\ufffd"
+    }
+  ]
+}

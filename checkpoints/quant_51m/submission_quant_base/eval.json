@@ -1,0 +1,71 @@
+{
+  "checkpoint": "/kaggle/tmp/runs/quant_base/ckpt_last.pt",
+  "step": 5000,
+  "params": 51665920,
+  "vocab": 8193,
+  "seq_len": 512,
+  "uniform_loss": 9.011035410141815,
+  "val": {
+    "loss": 6.075273589084023,
+    "ppl": 434.9684888693508,
+    "bits_per_byte": 2.591334261004851,
+    "tokens_evaluated": 97354
+  },
+  "val_by_source": {
+    "arxiv": {
+      "loss": 6.585506779806955,
+      "ppl": 724.5181258012198,
+      "bits_per_byte": 2.3530610638599834,
+      "tokens_evaluated": 25181
+    },
+    "books": {
+      "loss": 6.023649940490722,
+      "ppl": 413.0835779853761,
+      "bits_per_byte": 2.269227282961496,
+      "tokens_evaluated": 13265
+    },
+    "github": {
+      "loss": 4.914363962705018,
+      "ppl": 136.23263320518024,
+      "bits_per_byte": 2.810989632310275,
+      "tokens_evaluated": 31249
+    },
+    "wikipedia": {
+      "loss": 6.926440221292001,
+      "ppl": 1018.8605981787261,
+      "bits_per_byte": 2.8188498013597583,
+      "tokens_evaluated": 27659
+    }
+  },
+  "control_non_finance": {
+    "loss": 9.474668854161314,
+    "ppl": 13025.559924739997,
+    "bits_per_byte": 4.897174343289502,
+    "tokens_evaluated": 19860
+  },
+  "unigram_baseline_loss": 6.9749538242551825,
+  "beats_unigram_by_nats": 0.8996802351711599,
+  "control_minus_val_loss": 3.399395265077291,
+  "samples": [
+    {
+      "prompt": "The price of a European call option",
+      "greedy": "The price of a European call option in the Black-Scholes model and the model-free rate.<|endoftext|>",
+      "sampled": "The price of a European call option in the Black-Scholes model and the Black-Scholes model as well as the constant elasticity of variance (CEV) model as special cases. Based on a general dynamic programming principle, we are able to link"
+    },
+    {
+      "prompt": "In this paper, we propose a model for volatility",
+      "greedy": "In this paper, we propose a model for volatility and jump-intensity stochastic volatility models.<|endoftext|>",
+      "sampled": "In this paper, we propose a model for volatility on the commodity-Functional Model-free Heston model. We analyze the approximation error and use the model to compute WWR sensitivities of the model and demonstrate that this additional source of r"
+    },
+    {
+      "prompt": "The rate of interest on money",
+      "greedy": "The rate of interest on money and swaps (borrower) to gain the lender net interest rates (or yields), the bond market and (c.g. default) will be), and are sold in a security. The caller will \"",
+      "sampled": "The rate of interest on money in the form of deposits in the U.S. financial services industry at that time to merge.\nCost savings - One of the keys for banks to cut costs is automated applications that repl"
+    },
+    {
+      "prompt": "Portfolio optimization aims to",
+      "greedy": "Portfolio optimization aims to maximize both a diversification measure and the portfolio expected return. Within this general framework, we focus on maximizing a diversification measure recently proposed by Choueifaty and Coignard for the case of volat",
+      "sampled": "Portfolio optimization aims to maximize both a diversification measure and the portfolio expected return. Within this general framework, we focus on maximizing a diversification measure recently proposed by Choueifaty and Coignard for the case of volat"
+    }
+  ]
+}

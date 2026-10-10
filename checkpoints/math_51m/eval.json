@@ -1,0 +1,44 @@
+{
+  "checkpoint": "out/math_model/ckpt_last.pt",
+  "step": 5000,
+  "params": 51542400,
+  "vocab": 8000,
+  "seq_len": 512,
+  "uniform_loss": 8.9872,
+  "val": {
+    "loss": 2.7424,
+    "ppl": 15.52,
+    "bits_per_byte": 1.1163,
+    "tokens_evaluated": 6399471
+  },
+  "val_by_source": {},
+  "unigram_baseline_loss": 7.2668,
+  "beats_unigram_by_nats": 4.5244,
+  "samples": [
+    {
+      "prompt": "Problem: Solve for x: 3x^2 + 5x - 2 = 0.",
+      "greedy": "Problem: Solve for x: 3x^2 + 5x - 2 = 0.5x + 0.5x = 0.5x + 0.5x = 0.5x + 0.5x = 0.5x + 0.5x = 0.5x + 0.5x = 0.5x + 0.5x = 0.",
+      "sampled": "Problem: Solve for x: 3x^2 + 5x - 2 = 0.01.\nShow that the system is initially at x = 0 and is in the plane of the x plane.\n#### Exercise 2\nA system is initially at x = 0 and is in the plane of the x plane. If the equation is known, the system is initially at x ="
+    },
+    {
+      "prompt": "Theorem: Let f be a continuous function",
+      "greedy": "Theorem: Let f be a continuous function on a compact set and let f(x) = x^2 + 1. Then f(x) = x^2 + 1. Since f(x) = x^2 + 1. Since f(x) = x^2 + 1. Since f(x) = x",
+      "sampled": "Theorem: Let f be a continuous function on the real numbers. Then f(x) = x + f(x) = f(x) = f(x) = f(x) = x + f(x) = x + f(x) = f(x) = f(x) = x + f"
+    },
+    {
+      "prompt": "The Fourier transform of",
+      "greedy": "The Fourier transform of the Fourier transform of the Fourier transform of the Fourier transform of the Fourier transform of the Fourier transform of the Fourier transform of the Fourier transform of the Fourier transform of the Fourier transform of the Fourier transform of the Fourier transform of the Fourier transform of the Fourier transform of the Fourier transform of the Fourier transform of",
+      "sampled": "The Fourier transform of the signal is:\n:$\\map \\sigma {\\map \\sigma {\\map \\sigma {\\map \\sigma {\\map \\sigma {\\map \\sigma {\\map \\sigma {\\map \\sigma {\\map \\sigma {\\map \\sigma {\\map \\sigma {\\map \\sigma {\\map \\sigma {\\map \\sigma"
+    },
+    {
+      "prompt": "Proof: By induction on n,",
+      "greedy": "Proof: By induction on n, we have that $f$ is a bijection.\nLet $f: X \\to Y$ be a bijection.\nLet $f: X \\to Y$ be a bijection.\nLet $f: X \\to Y$ be a bijection.\nLet $f: X \\to",
+      "sampled": "Proof: By induction on n, it is easy to verify that (n) = n. This is not a proof of the theorem.\n• I am trying to prove that (n) = n. (Note: I am trying to prove that (n) = n. I am trying to prove that (n) ="
+    },
+    {
+      "prompt": "Definition: A group G is called abelian if",
+      "greedy": "Definition: A group G is called abelian if it is a subgroup of the group G. The group G is called the '''group of G'''.\n\\end{definition}\n\\begin{definition}[Definition:Addition of Group Homomorphism]\nLet $G$ be a group.\nLet $G$ be a group.\nLet $G",
+      "sampled": "Definition: A group G is called abelian if every element of the abelian group is abelian.\nIn the context of group theory, a group is a group, a group, and an abelian group. For example, the group is abelian, and the group is abelian, and the group is abelian.\nFor example, the group is abelian. In the"
+    }
+  ]
+}

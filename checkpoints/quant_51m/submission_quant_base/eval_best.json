@@ -1,0 +1,71 @@
+{
+  "checkpoint": "/kaggle/tmp/runs/quant_base/ckpt_best.pt",
+  "step": 500,
+  "params": 51665920,
+  "vocab": 8193,
+  "seq_len": 512,
+  "uniform_loss": 9.011035410141815,
+  "val": {
+    "loss": 3.739576274470279,
+    "ppl": 42.080155950486876,
+    "bits_per_byte": 1.595070901677164,
+    "tokens_evaluated": 97354
+  },
+  "val_by_source": {
+    "arxiv": {
+      "loss": 3.8850815101545684,
+      "ppl": 48.67090947116633,
+      "bits_per_byte": 1.388174720205062,
+      "tokens_evaluated": 25181
+    },
+    "books": {
+      "loss": 3.461184501647949,
+      "ppl": 31.85468610490895,
+      "bits_per_byte": 1.3038962058049417,
+      "tokens_evaluated": 13265
+    },
+    "github": {
+      "loss": 3.2845303386938376,
+      "ppl": 26.696443083723214,
+      "bits_per_byte": 1.878733606046331,
+      "tokens_evaluated": 31249
+    },
+    "wikipedia": {
+      "loss": 4.235887085949933,
+      "ppl": 69.12296955949752,
+      "bits_per_byte": 1.7238767807607072,
+      "tokens_evaluated": 27659
+    }
+  },
+  "control_non_finance": {
+    "loss": 5.801214745170192,
+    "ppl": 330.7010334994495,
+    "bits_per_byte": 2.9984752445973473,
+    "tokens_evaluated": 19860
+  },
+  "unigram_baseline_loss": 6.9749538242551825,
+  "beats_unigram_by_nats": 3.2353775497849036,
+  "control_minus_val_loss": 2.061638470699913,
+  "samples": [
+    {
+      "prompt": "The price of a European call option",
+      "greedy": "The price of a European call option (orually a CFD) is a financial market. The main result is that the CFD is a financial instrument that allows to be a derivative and a financial instrument. In the",
+      "sampled": "The price of a European call option (i.e., for) is the asset's (i.e. to) is a Credit (i.e., the spot price).\n\n=== Market efficiency ===\nThe commodity market is a"
+    },
+    {
+      "prompt": "In this paper, we propose a model for volatility",
+      "greedy": "In this paper, we propose a model for volatility-based model. We show that the model is able to solve the optimal portfolios.<|endoftext|>",
+      "sampled": "In this paper, we propose a model for volatility of the hedging strategies in the portfolio.<|endoftext|>"
+    },
+    {
+      "prompt": "The rate of interest on money",
+      "greedy": "The rate of interest on money.\n\n=== Market risk ===\n\n=== Market-based and bond ===\nIn financial markets, the company began to be in the form of assets. In the United States, the company has",
+      "sampled": "The rate of interest on money to supply money. In the 1970s, we find a result of this effectual fund in the market model. In contrast, in a study on the market, we find a market model where an agent's value function is a given rate for"
+    },
+    {
+      "prompt": "Portfolio optimization aims to",
+      "greedy": "Portfolio optimization aims to evaluate the performance of the optimal portfolios.<|endoftext|>",
+      "sampled": "Portfolio optimization aims to discussviate the trading signals, including the trading strategy, we focus on a unique trading strategy, which has an algorithm that applies the traditional investment strategy. The paper employs a traditional model to identify the"
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "checkpoint": "out/engineering_model/ckpt_last.pt",
+  "step": 5000,
+  "params": 51542400,
+  "vocab": 8000,
+  "seq_len": 512,
+  "uniform_loss": 8.9872,
+  "val": {
+    "loss": 2.9451,
+    "ppl": 19.01,
+    "bits_per_byte": 1.2025,
+    "tokens_evaluated": 17150433
+  },
+  "val_by_source": {},
+  "unigram_baseline_loss": 7.0798,
+  "beats_unigram_by_nats": 4.1347,
+  "samples": [
+    {
+      "prompt": "In software engineering, the design pattern",
+      "greedy": "In software engineering, the design pattern of the system is analyzed. The results show that the system is capable of reducing the number of parameters in the system, and the system is capable of reducing the number of parameters in the system.<|endoftext|>",
+      "sampled": "In software engineering, the design pattern of the system and the design of the system. It is also shown that the system is more effective than the system. It also provides a more accurate and robust system of system systems that can be implemented in the system.<|endoftext|>"
+    },
+    {
+      "prompt": "The computational efficiency of the algorithm can be analyzed as",
+      "greedy": "The computational efficiency of the algorithm can be analyzed as a function of the number of parameters. The results show that the proposed algorithm can be used to improve the performance of the algorithm.<|endoftext|>",
+      "sampled": "The computational efficiency of the algorithm can be analyzed as a function of the number of users in a system. The results of the simulation show that the algorithm can effectively improve the accuracy of the algorithm.<|endoftext|>"
+    },
+    {
+      "prompt": "Theorem: The neural network architecture satisfies",
+      "greedy": "Theorem: The neural network architecture satisfies the following properties:\n\n1. The neural network architecture is a class of neural networks that can be used to learn the model parameters.\n2. The neural network architecture is a class of neural networks that can be used to learn the model parameters.\n3. The neural network architecture is a",
+      "sampled": "Theorem: The neural network architecture satisfies the following, and a new network architecture which is the same as a network architecture for the human-like network.\n\n\\subsection{Data-based approach}\n\\label{sec:data-based}\n\n\\begin{figure*}["
+    },
+    {
+      "prompt": "Let G = (V, E) be a directed graph where",
+      "greedy": "Let G = (V, E) be a directed graph where G is a directed graph. Then, we have\n\n$$\\mathcal{L}(G) = \\mathcal{L}(G) + \\mathcal{L}(G) + \\mathcal{L}(G) + \\math",
+      "sampled": "Let G = (V, E) be a directed graph where G = V and V = V. Then, the vertices of G are said to be a graph with vertices and vertices, respectively, and the vertices of G are not said to be a graph. In the proof of the proof, we prove that the ver"
+    },
+    {
+      "prompt": "The control system design relies on feedback loops to",
+      "greedy": "The control system design relies on feedback loops to the control system. The control system is designed to control the control system and control system. The control system is designed to control the control system and control system. The control system is designed to control the control system and control system. The control system is designed to control the control system and control system.",
+      "sampled": "The control system design relies on feedback loops to reduce the input signal. The control system design relies on a control system, where the control system can be used to ensure the control system outputs. The control system design relies on the control system design relies on the control system design relies on the control system, which can be considered"
+    }
+  ]
+}

@@ -86,13 +86,13 @@ training in parallel on more domains:
 
 | Person | Dataset(s) |
 |---|---|
-| Ravikant Kumar | Astronomy and Space, Chemistry |
-| Prabanjan Jadav | Biology, Earth & Science |
+| Ravikant Kumar | Astronomy and Space, Chemistry, Math, Engineering |
+| Prabanjan Jadav | Biology, Earth & Science, Physics |
 | Om Ahire | Quant |
-| Afnan | Engineering and Mathematics |
+| Afnan | *(listed for Engineering and Mathematics in the previous roster — Ravikant trained both; reconcile with Afnan directly)* |
 | Aarav Jayalwal | Scientific Programming |
 
-*(Updated 2026-09-29 — reassigned from the original roster: Ravi/Prabanjan's domains swapped, all names confirmed.)*
+*(Updated 2026-10-10 — confirmed by Pankaj: Ravikant trained the Math and Engineering 51M models (previously listed under Afnan); Prabanjan's Physics submission added. Earlier note: reassigned from the original roster on 2026-09-29, Ravi/Prabanjan's domains swapped, all names confirmed then.)*
 
 The reference `base` model should ultimately train on the **combined** corpus across all of these, not any one
 domain in isolation — a model trained on biology alone will not generalise to astronomy or engineering prompts.

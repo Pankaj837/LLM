@@ -1,7 +1,6 @@
 # Math 51M run — verified, checkpoint genuinely trained
 
-**Status: checkpoint, vocabulary, and data all independently verified. One unreconciled number (expected,
-explained below) and one open question: who actually submitted this (see §Attribution).**
+**Status: checkpoint, vocabulary, and data all independently verified. Trained by Ravikant (confirmed 2026-10-10).**
 
 ## What was received
 `train_config.json`, `metrics.jsonl`, `vocab.tok`, `eval.json`, and `ckpt_last.pt` (618 MB, not committed —
@@ -37,13 +36,6 @@ proofs looping "Let $f: X \to Y$ be a bijection" four times) — this is exactly
 model does on hard reasoning prompts with greedy decoding, and matches the team's own chat admission
 ("Raju sir: it fails completely at mathematical reasoning... Ravi: it fails because we haven't fine-tuned the
 model"). Bad-looking output that matches what the team already said about it is a sign this is real, not staged.
-
-## ⚠️ Attribution — needs confirming, not a technical concern
-
-Nobody in `docs/HANDOFF_GPU.md`'s roster is assigned a "Math" domain by that name (closest: Afnan =
-"Engineering and Mathematics"). The team chat about this model's math-reasoning failures refers to "Ravi" —
-unclear whether that's Ravikant (assigned Astronomy & Chemistry, not Math) or a short form of another name.
-Please confirm who actually trained this before it's attributed in the roster.
 
 ## Hashes (large files not committed)
 - `ckpt_last.pt`: `sha256:d7d9a60da4a7e39b8038894677a1c7bb17b85305e637240b5a684e3a28ad98a1` (618 MB)

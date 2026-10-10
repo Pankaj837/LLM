@@ -1,7 +1,7 @@
 # Engineering 51M run — verified, checkpoint genuinely trained
 
-**Status: checkpoint, vocabulary, and data all independently verified. Same explained eval-vs-training-log gap
-as Math (see below); attribution needs confirming the same way.**
+**Status: checkpoint, vocabulary, and data all independently verified. Trained by Ravikant (confirmed
+2026-10-10). Same explained eval-vs-training-log gap as Math (see below).**
 
 ## What was received
 `train_config.json`, `metrics.jsonl`, `vocab.tok`, `eval.json`, and `ckpt_last.pt` (618 MB, not committed —
@@ -24,12 +24,6 @@ hash in §Hashes), bundled as `engineering_model_51m.zip` alongside Math and a s
 `eval.json` reports `val.loss: 2.9451` (over 17,150,433 tokens — the full held-out set) vs. the checkpoint's
 own training-time spot-check val_loss of 3.3616 (20 random batches). Same cause as the Math submission: a
 full-val-set evaluation is expected to differ from a small periodic sample. Not a red flag on its own.
-
-## ⚠️ Attribution — needs confirming
-
-Same open question as Math: no "Engineering" domain by that exact name is on the roster (closest: Afnan's
-"Engineering and Mathematics"). If Afnan trained both this and the Math model as his two sub-domains, that
-would resolve both attribution questions at once — please confirm.
 
 ## Hashes (large files not committed)
 - `ckpt_last.pt`: `sha256:5f39cddcc6bd5dd0b46a844468c47bc0dbcf81874daad3f4c11f630afda3082e` (618 MB)

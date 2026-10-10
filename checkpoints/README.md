@@ -25,8 +25,8 @@ and produces output of the right shape — not to judge output quality.**
 | `chem_base_51m/` | Chemistry (original) | Ravikant | **Not usable.** Vocabulary is WordPiece, not BPE — unreadable by this repo's tokenizer. See F-31. Superseded by `chem_base_51m_v2/`. |
 | `chem_base_51m_v2/` | Chemistry (resubmission) | Ravikant | **Verified, fixes the above.** Correct BPE vocabulary this time; checkpoint and data check out. |
 | `physics_51m/` | Physics | Prabanjan | **Verified.** First fully-clean submission; see its own README. |
-| `math_51m/` | Math | unconfirmed ("Ravi" in chat) | **Verified** (checkpoint, vocab, data). Attribution unclear — see its README. |
-| `engineering_51m/` | Engineering | unconfirmed | **Verified.** Same attribution question as Math — possibly the same person's two sub-domains. |
+| `math_51m/` | Math | Ravikant | **Verified** (checkpoint, vocab, data). |
+| `engineering_51m/` | Engineering | Ravikant | **Verified** (checkpoint, vocab, data). |
 | `quant_51m/` | Quant Finance (51.5M, base + fine-tuned) | Om | **Verified**, extremely well self-documented. Use `submission_quant_finetune/ckpt_best.pt`. |
 | `quant_finance_small_6.3M/` | Quant Finance (6.3M toy) | Om | **Verified.** Superseded by `quant_51m/`. |
 | `scientific_programming_51m/` | Scientific Programming | Aarav | **Data/reports verified; checkpoint weights not independently checked** — delivered as Git LFS pointers, not the actual binaries. Also flags an owner discrepancy (Pankaj vs. Aarav) in the collection-plan doc — needs a decision. |

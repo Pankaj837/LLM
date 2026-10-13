@@ -37,6 +37,19 @@ model does on hard reasoning prompts with greedy decoding, and matches the team'
 ("Raju sir: it fails completely at mathematical reasoning... Ravi: it fails because we haven't fine-tuned the
 model"). Bad-looking output that matches what the team already said about it is a sign this is real, not staged.
 
+## Data integrity confirmed (2026-10-14)
+
+Raw `train.bin`/`val.bin` arrived (via Ravikant), with a `manifest.json` documenting provenance: 53,605 train
+docs from MathPile + OpenWebMath (122,932,492 train tokens), 0 tokenizer round-trip failures, `vocab_sha256`
+in the manifest matching the checkpoint's recorded one exactly. The delivered files hash identically
+(SHA-256) to what the manifest declares — no corruption or substitution. `val.bin`'s token count
+(6,399,471) matches `eval.json`'s `tokens_evaluated` exactly, confirming that full-set number really was
+computed on this exact data. (Not independently re-run from scratch here — Chemistry's full re-run, done
+separately, matched its submitted number to 5 decimal places, which is the basis for trusting this one by
+the same methodology without re-spending the ~45 CPU-minutes it would take.)
+
 ## Hashes (large files not committed)
 - `ckpt_last.pt`: `sha256:d7d9a60da4a7e39b8038894677a1c7bb17b85305e637240b5a684e3a28ad98a1` (618 MB)
 - `vocab.tok` / checkpoint's recorded vocab_sha256: `0dd01be4ad601512b47d588e14eab4d6968b50be54a188620bfca206cffee871`
+- `train.bin` sha256: `ee764cdee9e50d5ea40897d5e29432fb575ac80bffcdafad66c037de7df6c137` (122.9M tokens)
+- `val.bin` sha256: `ab8da15f0b265b0ccc6ff6609cd979a50b98e36ac2c7e2eaad181568302dc749` (6.4M tokens)

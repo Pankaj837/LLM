@@ -26,6 +26,20 @@ verifies cleanly. See `../chem_base_51m/README.md` for the original findings thi
 - `eval.json`'s own val_loss (3.3964, over 449,002 held-out tokens) is in the same range — consistent with a
   harder-to-predict domain than the training loop's spot checks suggested, same pattern as Math/Engineering.
 
+## Full held-out eval independently reproduced (2026-10-14)
+
+Raw `train.bin`/`val.bin` arrived (via Ravikant). Independently re-ran the full evaluation from scratch —
+not trusting the submitted `eval.json` — using this repo's own `evaluate()` over all 448,490 held-out windows:
+
+| | Submitted `eval.json` | Independently recomputed here |
+|---|---|---|
+| Val loss | 3.396353 | **3.396351** |
+| Perplexity | 29.86 | **29.85** |
+
+Matches to 5 decimal places. The delivered `val.bin` also hashes identically to what the data pipeline's own
+manifest declared (`sha256` cross-checked, no corruption/substitution). This is now verified at the same level
+of rigor as the Physics checkpoint — not just plausible, independently reproduced.
+
 ## Not yet resolved from the original submission
 The original `report.pdf`'s 1200-question QA benchmark claim was never explained, and the original `eval.json`
 discrepancy (F-31 in `docs/REVIEW_FINDINGS.md`) stands as a separate open question about that first delivery.

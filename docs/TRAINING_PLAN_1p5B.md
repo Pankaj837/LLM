@@ -27,8 +27,23 @@ PyTorch code: ≈ 3×10⁴ tokens/s per GPU ≈ **2.8B tokens per GPU-day**.
 | 4 | ~33B | 22 |
 | 8 | ~65B | 43 |
 
-30B tokens (≈ 20 tokens/parameter) = 8 GPU-days. **The first thing to fix is how many H100s, and for how many
-hours, Gokul can really give us.** The run length (tokens) is then set by that, not the other way round.
+30B tokens (≈ 20 tokens/parameter) ≈ 11 GPU-days (≈ 257 H100-hours). *(An earlier version of this plan said 8 GPU-days; that was wrong.)*
+
+### Cost against the budget we actually have *(est.)*
+Gokul's reply (21 Oct): one H100 costs ₹330 per hour and he has about ₹1,000 of credit, i.e. **about 3 H100-hours**.
+Same assumptions as above (35% of bf16 peak, seq 2048, vocab 32K, ~20 tokens/parameter):
+
+| Model | Tokens at 20/param | H100-hours | Cost at ₹330/h | Tokens in ₹1,000 |
+|---|---|---|---|---|
+| ~100M | 2.0B | 1.3 | ₹440 | 4.6B |
+| ~300M | 6.1B | 11.8 | ₹3,900 | 1.6B |
+| ~650M | 13.1B | 51 | ₹16,700 | 0.8B |
+| **1.51B** | **30.2B** | **257** | **₹85,000** | **0.35B** |
+
+1.51B on 5B tokens (3 tokens/parameter, under-trained baseline) ≈ 43 h ≈ ₹14,000; on 10B ≈ 86 h ≈ ₹28,000.
+**With ₹1,000 we can run the smoke test of the 1.51B pipeline (~40 min ≈ ₹220) and one small (~100M) compute-optimal
+run, not the 1.51B training.** The 1.51B run needs compute from outside this budget; the model size and token budget
+are a decision for Raju.
 
 **3B:** the configurations in `llm update.pdf` stop at 2.08B (32 layers, d=2048, 8 KV heads, FFN 8192; `2b` preset = 2.012B with 4 KV heads). A true 3B needs a new configuration (for example d=2560 gives ~2.6B), and at ~20 tokens/parameter it needs ~60B tokens against the ~25–30B we can verify today. Decision for Raju: first run 1.51B, then scale.
 

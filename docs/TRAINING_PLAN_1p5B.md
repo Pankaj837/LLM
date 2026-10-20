@@ -30,9 +30,11 @@ PyTorch code: ≈ 3×10⁴ tokens/s per GPU ≈ **2.8B tokens per GPU-day**.
 30B tokens (≈ 20 tokens/parameter) = 8 GPU-days. **The first thing to fix is how many H100s, and for how many
 hours, Gokul can really give us.** The run length (tokens) is then set by that, not the other way round.
 
+**3B:** the configurations in `llm update.pdf` stop at 2.08B (32 layers, d=2048, 8 KV heads, FFN 8192; `2b` preset = 2.012B with 4 KV heads). A true 3B needs a new configuration (for example d=2560 gives ~2.6B), and at ~20 tokens/parameter it needs ~60B tokens against the ~25–30B we can verify today. Decision for Raju: first run 1.51B, then scale.
+
 ## 3. Data gate for the first run
 Usable tokens are "verified" only after: tokenizer frozen → every owner's recount → dedup. Reported pools after my
-corrections (est.): Gokul ~8.8B, Prabanjan math ~9B (after cleaning), Ravi: Code ~2.4B, Scientific Programming
+corrections (est.): Gokul ~8.8B, Prabanjan math ~9B (after cleaning), Ravi: Code 3.28B (his report), Scientific Programming
 1.2–1.9B, Scientific Q&A and CAD up to 2.5B and 2.0B but both overstated (3× storage; 41% procedural), Physics 0.6B,
 Medical (PubMed abstracts, if included) ~6–8B. That is roughly 25–30B without Medical.
 
@@ -40,7 +42,7 @@ Medical (PubMed abstracts, if included) ~6–8B. That is roughly 25–30B withou
 | Day | What | Owner |
 |---|---|---|
 | Tue 20 | Plan and owners posted; GPU count and hours confirmed | Pankaj, Gokul |
-| Wed 21 | Final 32K `vocab.tok` verified and hash frozen; every owner's recount posted; Math cleaned; dedup keys | Ravi, Pankaj, owners, Avinash, Prabanjan |
+| Wed 21 | 32K vocab approved and hash frozen (candidate ready); every owner's recount posted; Math cleaned; dedup keys | Pankaj, Raju, owners, Avinash, Prabanjan |
 | Wed 21 | Smoke test (§5) on the real GPUs | Gokul, Om |
 | Thu 22 | Tokenize everything on the training machine (~2 h per 25B tokens on 16 cores) | Ravi, Gokul |
 | Thu 22 night / Fri 23 | Launch the full run; per-domain eval at every checkpoint | Gokul, Om, Pankaj |
@@ -81,6 +83,6 @@ checks. Prabanjan: Math and his other domains, quality validation, domain evalua
 
 ## 7. Open risks
 1. GPU count/time unknown (decides run length).
-2. Ravi's final 32K tokenizer not received; training cannot start before it is verified.
+2. The 32K tokenizer (`tokenizers/vocab32k_v1/`) is a candidate until approved and frozen; it was trained without physics/engineering/general-language text (none delivered), so retrain it before tokenizing if that data arrives.
 3. Numbers in §2 and §3 are estimates until the smoke test and the recount.
 4. The DDP path has only been exercised on CPU.

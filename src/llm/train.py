@@ -12,10 +12,15 @@ Design choices (kept deliberately conventional so results are comparable across 
     the uninterrupted run exactly.
   * Checkpoints carry config, step, losses and the vocabulary hash (see ``checkpoint.py``).
 Training fails fast on a non-finite loss.
+
+Multi-GPU: launch with ``torchrun --nproc_per_node=N -m llm.train ...`` (DistributedDataParallel, one process per
+GPU). ``--batch-size`` is PER RANK; every rank draws different batches, gradients are averaged, only rank 0 logs,
+evaluates and writes checkpoints. A world-size-N run with accumulation 1 matches a single process with accumulation N.
 """
 from __future__ import annotations
 
 import argparse
+import contextlib
 import json
 import math
 import os
@@ -24,6 +29,7 @@ from dataclasses import asdict, dataclass, field
 from typing import Any, Dict, List, Optional
 
 import torch
+import torch.distributed as dist
 import torch.nn.functional as F
 
 from .checkpoint import load_checkpoint, read_checkpoint, save_checkpoint
@@ -38,6 +44,12 @@ PRESETS: Dict[str, Dict[str, Any]] = {
                   num_layers=6, max_position_embeddings=512, yarn_original_max_position=512),   # ~6M params
     "tiny": dict(hidden_dim=128, num_query_heads=4, num_kv_heads=2, head_dim=32, intermediate_dim=352,
                  num_layers=4, max_position_embeddings=512, yarn_original_max_position=512),
+    # Scale-up targets (llm update.pdf): 32 layers, d=2048, 16 query / 4 KV heads, 32K vocab, 4K context
+    # (YaRN extends it later). Parameter counts with tied embeddings and vocab 32000:
+    "1p5b": dict(hidden_dim=2048, num_query_heads=16, num_kv_heads=4, head_dim=128, intermediate_dim=5632,
+                 num_layers=32, max_position_embeddings=4096, yarn_original_max_position=4096),   # 1.509B
+    "2b": dict(hidden_dim=2048, num_query_heads=16, num_kv_heads=4, head_dim=128, intermediate_dim=8192,
+               num_layers=32, max_position_embeddings=4096, yarn_original_max_position=4096),     # 2.012B
 }
 
 
@@ -125,9 +137,31 @@ def train(cfg: TrainConfig) -> Dict[str, Any]:
     """Run training; returns ``{"history": [...], "final": {...}, "checkpoint": path}``."""
     if cfg.preset not in PRESETS:
         raise ValueError(f"unknown preset {cfg.preset!r}; choose from {sorted(PRESETS)}")
-    os.makedirs(cfg.out_dir, exist_ok=True)
-    device = resolve_device(cfg.device)
-    amp_dtype = resolve_dtype(cfg.dtype, device)
+    world = int(os.environ.get("WORLD_SIZE", "1"))
+    rank = int(os.environ.get("RANK", "0")) if world > 1 else 0
+    main_rank = rank == 0
+    if world > 1:
+        local_rank = int(os.environ.get("LOCAL_RANK", "0"))
+        use_cuda = cfg.device in ("auto", "cuda") and torch.cuda.is_available()
+        if use_cuda:
+            torch.cuda.set_device(local_rank)
+        device = torch.device(f"cuda:{local_rank}") if use_cuda else torch.device("cpu")
+        dist.init_process_group(backend="nccl" if use_cuda else "gloo")
+    else:
+        device = resolve_device(cfg.device)
+    try:
+        return _train(cfg, device, amp_dtype=resolve_dtype(cfg.dtype, device), world=world, rank=rank, main_rank=main_rank)
+    finally:
+        if world > 1 and dist.is_initialized():
+            dist.destroy_process_group()
+
+
+def _train(cfg: TrainConfig, device: torch.device, amp_dtype: Optional[torch.dtype], world: int, rank: int,
+           main_rank: bool) -> Dict[str, Any]:
+    if main_rank:
+        os.makedirs(cfg.out_dir, exist_ok=True)
+    if world > 1:
+        dist.barrier()
 
     train_ds = TokenDataset(cfg.train_bin, cfg.seq_len)
     model_cfg = ModelConfig(**{**PRESETS[cfg.preset], "vocab_size": train_ds.header.vocab_size, **cfg.model_overrides})
@@ -148,12 +182,16 @@ def train(cfg: TrainConfig) -> Dict[str, Any]:
         optimizer.load_state_dict(raw["optimizer"])
         start_step = int(info["step"])
     model.train()
+    # every rank holds the full model; DDP averages gradients (identical start: same seed / same checkpoint)
+    fwd_model = torch.nn.parallel.DistributedDataParallel(
+        model, device_ids=[device.index] if device.type == "cuda" else None) if world > 1 else model
 
     n_params = sum(p.numel() for p in model.parameters())
-    print(f"[train] device={device} amp={amp_dtype} params={n_params/1e6:.2f}M vocab={model_cfg.vocab_size} "
-          f"train_tokens={train_ds.header.total_tokens:,} steps {start_step}->{cfg.max_steps}", flush=True)
-    with open(os.path.join(cfg.out_dir, "train_config.json"), "w", encoding="utf-8") as f:
-        json.dump({"train": asdict(cfg), "model": model_cfg.to_dict()}, f, indent=2)
+    if main_rank:
+        print(f"[train] device={device} world={world} amp={amp_dtype} params={n_params/1e6:.2f}M vocab={model_cfg.vocab_size} "
+              f"train_tokens={train_ds.header.total_tokens:,} steps {start_step}->{cfg.max_steps}", flush=True)
+        with open(os.path.join(cfg.out_dir, "train_config.json"), "w", encoding="utf-8") as f:
+            json.dump({"train": asdict(cfg), "model": model_cfg.to_dict(), "world_size": world}, f, indent=2)
 
     metrics_path = os.path.join(cfg.out_dir, "metrics.jsonl")
     history: List[Dict[str, Any]] = []
@@ -164,6 +202,8 @@ def train(cfg: TrainConfig) -> Dict[str, Any]:
 
     def checkpoint(name: str, step: int, val: Optional[float]) -> str:
         path = os.path.join(cfg.out_dir, name)
+        if not main_rank:
+            return path
         save_checkpoint(path, model, model_cfg, step=step, train_loss=last_loss, val_loss=val,
                         vocab_sha256=vocab_sha, optimizer=optimizer, extra={"seed": cfg.seed, "preset": cfg.preset})
         return path
@@ -177,17 +217,23 @@ def train(cfg: TrainConfig) -> Dict[str, Any]:
         optimizer.zero_grad(set_to_none=True)
         step_loss = 0.0
         for micro in range(cfg.grad_accum):
-            gen.manual_seed(cfg.seed * 1_000_003 + step * cfg.grad_accum + micro)
+            gen.manual_seed(cfg.seed * 1_000_003 + (step * cfg.grad_accum + micro) * world + rank)
             x, y = train_ds.get_batch(cfg.batch_size, gen, device)
-            with torch.autocast(device.type, dtype=amp_dtype, enabled=amp_dtype is not None):
-                loss = loss_fn(model, x, y) / cfg.grad_accum
-            if not torch.isfinite(loss):
-                raise FloatingPointError(f"non-finite loss at step {step}: {loss.item()}")
-            loss.backward()
+            sync = world == 1 or micro == cfg.grad_accum - 1
+            with (contextlib.nullcontext() if sync else fwd_model.no_sync()):
+                with torch.autocast(device.type, dtype=amp_dtype, enabled=amp_dtype is not None):
+                    loss = loss_fn(fwd_model, x, y) / cfg.grad_accum
+                if not torch.isfinite(loss):
+                    raise FloatingPointError(f"non-finite loss at step {step}: {loss.item()}")
+                loss.backward()
             step_loss += loss.item()
-            tokens_seen += x.numel()
+            tokens_seen += x.numel() * world
         grad_norm = torch.nn.utils.clip_grad_norm_(model.parameters(), cfg.grad_clip).item()
         optimizer.step()
+        if world > 1:   # report the mean loss over ranks
+            t = torch.tensor(step_loss, device=device)
+            dist.all_reduce(t)
+            step_loss = t.item() / world
         last_loss = step_loss
 
         done = step + 1
@@ -195,12 +241,12 @@ def train(cfg: TrainConfig) -> Dict[str, Any]:
         if done % cfg.log_interval == 0 or done == end_step:
             record = {"step": done, "loss": step_loss, "lr": lr, "grad_norm": grad_norm,
                       "tokens_per_s": tokens_seen / max(time.time() - t0, 1e-9)}
-        if val_ds is not None and (done % cfg.eval_interval == 0 or done == end_step):
+        if main_rank and val_ds is not None and (done % cfg.eval_interval == 0 or done == end_step):
             record.update({"step": done, **evaluate(model, val_ds, cfg.batch_size, cfg.eval_batches, device, amp_dtype)})
             if record["val_loss"] < best_val:
                 best_val = record["val_loss"]
                 checkpoint("ckpt_best.pt", done, best_val)
-        if record:
+        if record and main_rank:
             history.append(record)
             with open(metrics_path, "a", encoding="utf-8") as f:
                 f.write(json.dumps(record) + "\n")

@@ -9,6 +9,7 @@ import torch
 from llm import data
 from llm.checkpoint import read_checkpoint
 from llm.train import PRESETS, TrainConfig, build_optimizer, loss_fn, lr_at, train
+
 from llm.model import TransformerModel
 from llm.model_config import ModelConfig
 
@@ -162,3 +163,47 @@ def test_resume_without_optimizer_state_is_rejected(tmp_path):
     save_checkpoint(p, TransformerModel(cfg), cfg, step=5)
     with pytest.raises(ValueError, match="optimizer"):
         train(_cfg(tmp_path, resume=p))
+
+def _analytic_params(c: ModelConfig) -> int:
+    """Parameter count from the config alone (tied embeddings, bias-free projections, RMSNorm)."""
+    d, q, kv = c.hidden_dim, c.num_query_heads * c.head_dim, c.num_kv_heads * c.head_dim
+    per_layer = d * q + 2 * d * kv + q * d + 3 * d * c.intermediate_dim + 2 * d
+    return c.num_layers * per_layer + d + c.vocab_size * d
+
+
+def test_scale_presets_have_the_documented_parameter_counts():
+    # the formula must reproduce a real built model exactly before it is trusted for the big presets
+    small = ModelConfig(**{**PRESETS["small"], "vocab_size": 300})
+    assert _analytic_params(small) == sum(p.numel() for p in TransformerModel(small).parameters())
+    for name, billions in (("1p5b", 1.509), ("2b", 2.012)):
+        n = _analytic_params(ModelConfig(**{**PRESETS[name], "vocab_size": 32000}))
+        assert abs(n / 1e9 - billions) < 0.001, (name, n)
+
+
+def _ddp_worker(rank, world, port, cfg_kwargs):
+    import os
+    os.environ.update(MASTER_ADDR="127.0.0.1", MASTER_PORT=str(port), RANK=str(rank), WORLD_SIZE=str(world), LOCAL_RANK=str(rank))
+    train(TrainConfig(**cfg_kwargs))
+
+
+def test_two_process_ddp_matches_single_process_with_grad_accum_2(tmp_path):
+    """World size 2 (accum 1) sees the same two batches per step as one process with accum 2 -> same weights."""
+    import socket
+
+    import torch.multiprocessing as mp
+    if not torch.distributed.is_available():
+        pytest.skip("torch.distributed not available")
+    (tmp_path / "one").mkdir()
+    (tmp_path / "two").mkdir()
+    one = _cfg(tmp_path / "one", grad_accum=2, max_steps=12, eval_interval=1000, save_interval=1000, log_interval=6)
+    two = _cfg(tmp_path / "two", grad_accum=1, max_steps=12, eval_interval=1000, save_interval=1000, log_interval=6)
+    train(one)
+    with socket.socket() as s:
+        s.bind(("127.0.0.1", 0))
+        port = s.getsockname()[1]
+    mp.spawn(_ddp_worker, args=(2, port, two.__dict__), nprocs=2, join=True)
+    sa = read_checkpoint(str(tmp_path / "one" / "run" / "ckpt_last.pt"))[0]
+    sb = read_checkpoint(str(tmp_path / "two" / "run" / "ckpt_last.pt"))[0]
+    assert sa.keys() == sb.keys()
+    for k in sa:
+        assert torch.allclose(sa[k].float(), sb[k].float(), atol=2e-5, rtol=1e-4), k

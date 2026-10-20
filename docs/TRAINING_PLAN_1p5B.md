@@ -1,4 +1,4 @@
-# Training plan — 1.51B model (20 Oct 2026)
+# Training plan — 1.51B model (21 Oct 2026)
 
 Owner of this plan: Pankaj. Numbers marked *est.* are my calculations and must be replaced by Om/Gokul's
 measured benchmark. Nothing below has been run on a GPU yet.

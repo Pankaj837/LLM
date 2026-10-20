@@ -2,7 +2,9 @@
 """Stream Parquet shards into TOK1 ``.bin`` files with a frozen tokenizer; or count tokens per domain.
 
 Low memory: each shard is read in small batches and only the needed columns (``text``; ``doc_id``,
-``domain``, ``char_count`` when present). One shard = one job, so shards run in parallel and a finished
+``domain``, ``char_count`` when present). Files in the v4.0 entity schema (no ``text``; body in the
+``properties`` JSON, plus ``description``) are handled by ``v4_text`` -- a proposed rule the data owners
+must confirm; ``--count-only`` on such files parses the JSON, so it is slower than the ``char_count`` path. One shard = one job, so shards run in parallel and a finished
 shard is skipped on re-run (resumable).
 
   # fast token estimate without tokenizing (reads only char_count/domain, seconds not hours)
@@ -43,6 +45,26 @@ def _h64(s: str) -> int:
     return int.from_bytes(hashlib.blake2b(s.encode("utf-8", "replace"), digest_size=8).digest(), "little")
 
 
+def v4_text(description, properties) -> str:
+    """Training text of one v4.0 entity row (no ``text`` column): the body lives in ``properties`` JSON.
+
+    code_content / text / content if present; else Question + Answer; else ``description``.
+    """
+    if properties:
+        try:
+            p = json.loads(properties)
+        except ValueError:
+            p = None
+        if isinstance(p, dict):
+            for k in ("code_content", "text", "content"):
+                if isinstance(p.get(k), str) and p[k].strip():
+                    return p[k]
+            q, a = p.get("question"), p.get("answer")
+            if isinstance(q, str) and isinstance(a, str) and q.strip() and a.strip():
+                return f"Question: {q}\n\nAnswer: {a}"
+    return description or ""
+
+
 def _write_header(f, vocab_size: int, eos_id: int, total: int, split: int) -> None:
     f.seek(0)
     f.write(struct.pack(HEADER_FMT, MAGIC, 1, vocab_size, eos_id, total, split, 0))
@@ -61,10 +83,13 @@ def process_file(job) -> dict:
 
     pf = pq.ParquetFile(path)
     names = set(pf.schema_arrow.names)
-    if "text" not in names and not (count_only and "char_count" in names):
+    v4 = "text" not in names and "properties" in names and "description" in names
+    if "text" not in names and not v4 and not (count_only and "char_count" in names):
         raise ValueError(f"{path}: no 'text' column (columns: {sorted(names)})")
-    use_chars_only = count_only and "char_count" in names and not dedup and not min_chars
+    use_chars_only = count_only and "char_count" in names and not dedup and not min_chars and not v4
     cols = [c for c in ("text", "doc_id", "domain", "char_count") if c in names]
+    if v4:
+        cols = [c for c in ("entity_id", "domain", "description", "properties") if c in names]
     if use_chars_only:
         cols = [c for c in ("char_count", "domain") if c in names]
 
@@ -92,7 +117,7 @@ def process_file(job) -> dict:
                     pd_["docs"] += 1
                     pd_["chars"] += int(d["char_count"][i])
                     continue
-                text = d["text"][i] or ""
+                text = v4_text(d["description"][i], d["properties"][i]) if v4 else (d["text"][i] or "")
                 if len(text) < min_chars:
                     stats["short_dropped"] += 1
                     continue
@@ -108,7 +133,8 @@ def process_file(job) -> dict:
                 pd_["chars"] += len(text)
                 if count_only:
                     continue
-                ident = d["doc_id"][i] if "doc_id" in d and d["doc_id"][i] else key
+                id_col = "doc_id" if "doc_id" in d else "entity_id"
+                ident = d[id_col][i] if id_col in d and d[id_col][i] else key
                 is_val = (_h64(str(ident)) % MOD) < thresh
                 ids = tok.encode(text, allowed_special=set())
                 ids.append(tok.eos_id)

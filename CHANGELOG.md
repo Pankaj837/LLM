@@ -6,7 +6,7 @@ into one package, after an independent component review. See `docs/REVIEW_FINDIN
 `docs/TEAM_INSIGHTS.md` for what was kept versus changed.
 
 ### Added
-- `scripts/tokenize_parquet.py` (+ tests): streams Parquet shards into TOK1 `.bin` files with a frozen tokenizer in low memory, in parallel and resumable; `--count-only` gives per-domain token estimates from `char_count` in seconds.
+- `scripts/tokenize_parquet.py` (+ tests): streams Parquet shards into TOK1 `.bin` files with a frozen tokenizer in low memory, in parallel and resumable; `--count-only` gives per-domain token estimates from `char_count` in seconds. Also reads v4.0 entity-schema files (no `text` column): body taken from the `properties` JSON (`code_content`, else question+answer, else `description`) -- a proposed rule the data owners must confirm.
 - `llm/` package with relative imports (replaces flat, generically named modules).
 - `llm/dynamic_ntk.py`, `llm/rope_cache.py`: the team's Dynamic NTK and RoPE cache, integrated into `RotaryEmbedding`.
 - `llm/checkpoint.py`: self-describing checkpoints, vocabulary / config verification, untrained-weights warning.

@@ -81,6 +81,25 @@ def test_min_chars_filter_and_missing_text_column(setup):
         tp.process_file(_job(bad, tmp / "b", vocab))
 
 
+def test_v4_schema_without_text_column(setup):
+    import json as _json
+    tmp, vocab, _ = setup
+    props = [_json.dumps({"code_content": DOCS[0][2]}), _json.dumps({"question": "What is 2+2?", "answer": "4"}),
+             _json.dumps({"other": 1}), "not json"]
+    shard = tmp / "v4.parquet"
+    pq.write_table(pa.table({"entity_id": ["e1", "e2", "e3", "e4"], "domain": ["code", "qa", "x", "y"],
+                             "description": ["d1", "d2", "fallback body", "bad props body"], "properties": props}), shard)
+    assert tp.v4_text("d", props[0]) == DOCS[0][2]
+    assert tp.v4_text("d", props[1]) == "Question: What is 2+2?\n\nAnswer: 4"
+    assert tp.v4_text("fallback", props[2]) == "fallback" and tp.v4_text("bad", props[3]) == "bad"
+    cnt = tp.process_file(_job(shard, tmp / "c4", None, dedup=False, count_only=True))
+    assert cnt["docs"] == 4 and cnt["chars"] == len(DOCS[0][2]) + len("Question: What is 2+2?\n\nAnswer: 4") + len("fallback body") + len("bad props body")
+    st = tp.process_file(_job(shard, tmp / "o4", vocab, dedup=False))
+    tok = BPETokenizer.from_file(str(vocab))
+    texts = [DOCS[0][2], "Question: What is 2+2?\n\nAnswer: 4", "fallback body", "bad props body"]
+    assert st["train_tokens"] + st["val_tokens"] == sum(len(tok.encode(t, allowed_special=set())) + 1 for t in texts)
+
+
 def test_merge_bins_writes_a_valid_file(setup):
     tmp, vocab, shard = setup
     tp.process_file(_job(shard, tmp / "a", vocab, dedup=False))

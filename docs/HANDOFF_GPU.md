@@ -90,7 +90,7 @@ training in parallel on more domains:
 | Prabanjan Jadav | Biology, Earth & Science, Physics |
 | Om Ahire | Quant |
 | Afnan | *(listed for Engineering and Mathematics in the previous roster — Ravikant trained both; reconcile with Afnan directly)* |
-| Aarav Jayalwal | Scientific Programming |
+| ~~Aarav Jayalwal~~ (left 2026-10-15) | reassigned: Chemistry + Scientific Q&A to Ravikant; Scientific Discovery, Biology, Earth & Environment to Gokul |
 
 *(Updated 2026-10-10 — confirmed by Pankaj: Ravikant trained the Math and Engineering 51M models (previously listed under Afnan); Prabanjan's Physics submission added. Earlier note: reassigned from the original roster on 2026-09-29, Ravi/Prabanjan's domains swapped, all names confirmed then.)*
 

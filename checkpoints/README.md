@@ -29,7 +29,7 @@ and produces output of the right shape — not to judge output quality.**
 | `engineering_51m/` | Engineering | Ravikant | **Verified** (checkpoint, vocab, data). |
 | `quant_51m/` | Quant Finance (51.5M, base + fine-tuned) | Om | **Verified**, extremely well self-documented. Use `submission_quant_finetune/ckpt_best.pt`. |
 | `quant_finance_small_6.3M/` | Quant Finance (6.3M toy) | Om | **Verified.** Superseded by `quant_51m/`. |
-| `scientific_programming_51m/` | Scientific Programming | Aarav | **Data/reports verified; checkpoint weights not independently checked** — delivered as Git LFS pointers, not the actual binaries. Also flags an owner discrepancy (Pankaj vs. Aarav) in the collection-plan doc — needs a decision. |
+| `scientific_programming_51m/` | Scientific Programming | Aarav (left the team 2026-10-15) | **Closed.** Data/reports were verified, but the checkpoint was only ever delivered as Git LFS pointers (never the weights) and cannot now be obtained. Domain now owned by Ravikant. |
 
 Every checkpoint above over 100 MB is **not committed to this repo** (GitHub's push limit) — each directory's
 README/VERIFICATION file records SHA-256 hashes for traceability. Full findings: `docs/REVIEW_FINDINGS.md`.
@@ -50,7 +50,7 @@ from everyone currently training in parallel:
 | Prabanjan Jadav | Biology, Earth & Science |
 | Om Ahire | Quant |
 | Afnan | Engineering and Mathematics |
-| Aarav Jayalwal | Scientific Programming |
+| ~~Aarav Jayalwal~~ (left 2026-10-15) | ~~Scientific Programming~~ — reassigned to Ravikant; his other domains went to Ravikant (Chemistry, Scientific Q&A) and Gokul (Scientific Discovery, Biology, Earth & Environment) |
 
 Current as of 2026-09-29 — see `docs/HANDOFF_GPU.md` §4 if this has changed again.
 

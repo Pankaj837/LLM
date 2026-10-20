@@ -47,6 +47,15 @@ are a decision for Raju.
 
 **3B:** the configurations in `llm update.pdf` stop at 2.08B (32 layers, d=2048, 8 KV heads, FFN 8192; `2b` preset = 2.012B with 4 KV heads). A true 3B needs a new configuration (for example d=2560 gives ~2.6B), and at ~20 tokens/parameter it needs ~60B tokens against the ~25–30B we can verify today. Decision for Raju: first run 1.51B, then scale.
 
+### Plan inside the ₹1,000 budget (about 3 H100-hours)
+Gokul's machine: 200 GB of Drive storage, 6 CPU cores (reply of 21 Oct).
+1. **Tokenize on CPU, not on the GPU clock.** `tokenize_parquet.py` runs at ~0.2M tokens/s per core: 2B tokens ≈ 30 min on 6 cores.
+   Only the sample for the small run is needed this week, not the 25–30B corpus (that would take ~6 hours on 6 cores).
+2. **Smoke test of the 1.51B pipeline** (`--preset 1p5b`): ~40 min ≈ ₹220. Gives the real tokens/s and memory, and proves save/resume.
+3. **One compute-optimal ~100M run** (`--preset 100m`, ~2B tokens, ~1.3 h ≈ ₹440) on the balanced sample, evaluated per domain with
+   `scripts/eval_domains.py`. This produces a real checkpoint and a measured loss curve this week.
+4. Reserve ~₹340 for a failed start. The 1.51B training waits for Raju's decision on compute.
+
 ## 3. Data gate for the first run
 Usable tokens are "verified" only after: tokenizer frozen → every owner's recount → dedup. Reported pools after my
 corrections (est.): Gokul ~8.8B, Prabanjan math ~9B (after cleaning), Ravi: Code 3.28B (his report), Scientific Programming

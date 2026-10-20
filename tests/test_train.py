@@ -175,7 +175,7 @@ def test_scale_presets_have_the_documented_parameter_counts():
     # the formula must reproduce a real built model exactly before it is trusted for the big presets
     small = ModelConfig(**{**PRESETS["small"], "vocab_size": 300})
     assert _analytic_params(small) == sum(p.numel() for p in TransformerModel(small).parameters())
-    for name, billions in (("1p5b", 1.509), ("2b", 2.012)):
+    for name, billions in (("100m", 0.1001), ("300m", 0.3034), ("1p5b", 1.509), ("2b", 2.012)):
         n = _analytic_params(ModelConfig(**{**PRESETS[name], "vocab_size": 32000}))
         assert abs(n / 1e9 - billions) < 0.001, (name, n)
 

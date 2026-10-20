@@ -44,6 +44,11 @@ PRESETS: Dict[str, Dict[str, Any]] = {
                   num_layers=6, max_position_embeddings=512, yarn_original_max_position=512),   # ~6M params
     "tiny": dict(hidden_dim=128, num_query_heads=4, num_kv_heads=2, head_dim=32, intermediate_dim=352,
                  num_layers=4, max_position_embeddings=512, yarn_original_max_position=512),
+    # Budget-sized models (vocab 32000, 2K context): what a few hundred rupees of H100 time can train compute-optimally
+    "100m": dict(hidden_dim=768, num_query_heads=12, num_kv_heads=4, head_dim=64, intermediate_dim=2048,
+                 num_layers=12, max_position_embeddings=2048, yarn_original_max_position=2048),    # 100.1M
+    "300m": dict(hidden_dim=1024, num_query_heads=16, num_kv_heads=4, head_dim=64, intermediate_dim=2816,
+                 num_layers=24, max_position_embeddings=2048, yarn_original_max_position=2048),    # 303.4M
     # Scale-up targets (llm update.pdf): 32 layers, d=2048, 16 query / 4 KV heads, 32K vocab, 4K context
     # (YaRN extends it later). Parameter counts with tied embeddings and vocab 32000:
     "1p5b": dict(hidden_dim=2048, num_query_heads=16, num_kv_heads=4, head_dim=128, intermediate_dim=5632,

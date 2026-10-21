@@ -77,6 +77,8 @@ def main(argv=None) -> int:
     ap.add_argument("--out", required=True)
     ap.add_argument("--key", choices=["text", "sha256"], default="text",
                     help="v4.0 files only: 'sha256' uses properties.sha256 when present (fast, exact file identity)")
+    ap.add_argument("--expect-files", type=int, help="stop with an error if the inputs match a different number of files "
+                    "(catches incomplete downloads, e.g. Google Drive web downloads that skip files)")
     a = ap.parse_args(argv)
     paths = []
     for s in a.inputs:
@@ -84,10 +86,13 @@ def main(argv=None) -> int:
     paths = list(dict.fromkeys(paths))
     if not paths:
         ap.error("no Parquet files matched")
+    print(f"found {len(paths)} Parquet files")
+    if a.expect_files is not None and len(paths) != a.expect_files:
+        ap.error(f"expected {a.expect_files} files but found {len(paths)}: the download is incomplete")
     t0 = time.time()
     r = clean_shards(paths, a.out, a.key)
     t = r["total"]
-    print(f"in={t['in']:,} kept={t['kept']:,} duplicate={t['duplicate']:,} ({time.time() - t0:.0f}s) -> {a.out}/dedup_report.json")
+    print(f"files={len(paths)} in={t['in']:,} kept={t['kept']:,} duplicate={t['duplicate']:,} ({time.time() - t0:.0f}s) -> {a.out}/dedup_report.json")
     return 0
 
 

@@ -3,7 +3,7 @@
 
     python scripts/train_vocab.py samples/*.jsonl --vocab-size 32000 --out tokenizers/vocab32k_v1/vocab32k.tok
 
-Uses the repo's pure-Python trainer (``llm.bpe_trainer``): about 4 minutes for a 32K vocabulary on a ~220 MB mixed
+Uses the repo's pure-Python trainer (``llm.bpe_trainer``): about 4-5 minutes for a 32K vocabulary on a ~220 MB mixed
 sample (measured). Its output is format-compatible with, and was checked against, the C++ encoder
 (see ``tokenizers/vocab32k_v1/README.md``). Streams the files, so memory stays low.
 """

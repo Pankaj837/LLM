@@ -28,7 +28,7 @@ token counts marked "owner" are the owners' own and unverified; "est." are my es
 4. Synthetic / non-prose: CAD 41% procedural; OpenFOAM part-00000 (250,000 rows) is synthetic parametric CFD templates; Avinash's index is largely database records.
 5. Math: Raju's folder holds ~1.6 GB (4 shards); the 39.17 GB cleaned text was on Shrot's drive (he has left; Raju's re-shared folder holds the same 4 of 114 shards). Prabanjan's .gz (~34 GB unpacked) is the math source.
 6. Three schemas (Gokul 18 cols, v4.0 21 cols, Avinash 23 cols) and no agreed training-text rule.
-7. Tokenizer: Ravikant has no vocabulary (it cannot be trained before there is data). A 32K candidate was trained on a balanced 218 MB sample and verified (C++ parity 3003/3003, lossless round-trip) — `tokenizers/vocab32k_v1/`, SHA-256 `8b00fc00…c023b45`. Nothing is tokenized before the team lead approves and freezes it.
+7. Tokenizer: Ravikant has no vocabulary (it cannot be trained before there is data). A 32K candidate was trained on a balanced 218 MB sample and verified (C++ parity 3003/3003, lossless round-trip) — `tokenizers/vocab32k_v1/`, SHA-256 `50a0910f…df32da9`. Nothing is tokenized before the team lead approves and freezes it.
 
 ## Plan to the first training run
 1. Freeze the 32K tokenizer: candidate `tokenizers/vocab32k_v1/vocab32k.tok` is built and verified; approve, then freeze. Ravikant tokenizes with it.

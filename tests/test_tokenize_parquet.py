@@ -92,6 +92,8 @@ def test_v4_schema_without_text_column(setup):
     assert tp.v4_text("d", props[0]) == DOCS[0][2]
     assert tp.v4_text("d", props[1]) == "Question: What is 2+2?\n\nAnswer: 4"
     assert tp.v4_text("fallback", props[2]) == "fallback" and tp.v4_text("bad", props[3]) == "bad"
+    cad = _json.dumps({"cadquery_code": "import cadquery as cq", "step_file_snippet": "ISO-10303-21;", "qa_pairs": "[Q]"})
+    assert tp.v4_text("A part", cad) == "A part\n\nimport cadquery as cq\n\nISO-10303-21;\n\n[Q]"
     cnt = tp.process_file(_job(shard, tmp / "c4", None, dedup=False, count_only=True))
     assert cnt["docs"] == 4 and cnt["chars"] == len(DOCS[0][2]) + len("Question: What is 2+2?\n\nAnswer: 4") + len("fallback body") + len("bad props body")
     st = tp.process_file(_job(shard, tmp / "o4", vocab, dedup=False))

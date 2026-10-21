@@ -48,7 +48,8 @@ def _h64(s: str) -> int:
 def v4_text(description, properties) -> str:
     """Training text of one v4.0 entity row (no ``text`` column): the body lives in ``properties`` JSON.
 
-    code_content / text / content if present; else Question + Answer; else ``description``.
+    code_content / text / content if present; else Question + Answer; else CAD (description + cadquery_code + STEP
+    snippet + Q&A); else ``description``.
     """
     if properties:
         try:
@@ -62,6 +63,9 @@ def v4_text(description, properties) -> str:
             q, a = p.get("question"), p.get("answer")
             if isinstance(q, str) and isinstance(a, str) and q.strip() and a.strip():
                 return f"Question: {q}\n\nAnswer: {a}"
+            if isinstance(p.get("cadquery_code"), str) and p["cadquery_code"].strip():      # CAD/STEP records
+                parts = [description or "", p["cadquery_code"], p.get("step_file_snippet") or "", p.get("qa_pairs") or ""]
+                return "\n\n".join(x for x in parts if isinstance(x, str) and x.strip())
     return description or ""
 
 

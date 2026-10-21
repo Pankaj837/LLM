@@ -54,3 +54,14 @@ def test_blank_line_records_keep_multiline_documents_whole(tmp_path):
     assert (out / "qa.txt").read_text(encoding="utf-8") == (
         "Question: What is 2 plus 2?\nAnswer: 4\n\nQuestion: What is 3 plus 3?\nAnswer: 6\n\n"
         "Question: What is 5 plus 5?\nAnswer: 10\n\n")
+
+
+def test_dedup_parquet_expect_files_catches_incomplete_downloads(tmp_path):
+    import pyarrow as pa
+    import pyarrow.parquet as pq
+    import pytest
+    import dedup_parquet as dp
+    pq.write_table(pa.table({"text": ["one document", "another document"]}), tmp_path / "a.parquet")
+    with pytest.raises(SystemExit):
+        dp.main([str(tmp_path / "*.parquet"), "--out", str(tmp_path / "o"), "--expect-files", "63"])
+    assert dp.main([str(tmp_path / "*.parquet"), "--out", str(tmp_path / "o"), "--expect-files", "1"]) == 0

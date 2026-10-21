@@ -42,3 +42,15 @@ def test_dedup_parquet_across_shards_text_and_v4(tmp_path):
     pq.write_table(pa.table({"description": ["d"] * 3, "properties": props}), tmp_path / "v4.parquet")
     r2 = dp.clean_shards([str(tmp_path / "v4.parquet")], str(tmp_path / "o4"), key_mode="sha256")
     assert r2["total"] == {"in": 3, "kept": 2, "duplicate": 1}
+
+
+def test_blank_line_records_keep_multiline_documents_whole(tmp_path):
+    f = tmp_path / "qa.txt"
+    f.write_text("Question: What is 2 plus 2?\nAnswer: 4\n\nQuestion: What is 3 plus 3?\nAnswer: 6\n\n"
+                 "Question: what is 2 plus 2?\nANSWER: 4\n\nQuestion: What is 5 plus 5?\nAnswer: 10\n", encoding="utf-8")
+    out = tmp_path / "o"
+    assert dd.main([str(f), "--records", "blank", "--min-chars", "0", "--out", str(out)]) == 0
+    assert json.loads((out / "dedup_report.json").read_text())["total"] == {"in": 4, "kept": 3, "duplicate": 1, "broken": 0, "short": 0}
+    assert (out / "qa.txt").read_text(encoding="utf-8") == (
+        "Question: What is 2 plus 2?\nAnswer: 4\n\nQuestion: What is 3 plus 3?\nAnswer: 6\n\n"
+        "Question: What is 5 plus 5?\nAnswer: 10\n\n")

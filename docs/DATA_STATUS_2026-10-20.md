@@ -13,15 +13,17 @@ token counts marked "owner" are the owners' own and unverified; "est." are my es
 | Ravikant | Code | 3.29 GB, 2,692,769 rows | 3.28B owner (report of 21 Oct; row count matches the file; counter not stated) | 83% of tokens are TypeScript; Python only 6 files; "100% permissive" and "zero leakage" are his claims, not checked |
 | Gokul | Biology / Earth & Env. / Sci. Discovery | 5.8 / 4.2 / 2.8 GB | ~8.8B owner after exact dedup | 18 columns with `text`; 150,226 exact duplicates still in files |
 | Prabanjan | Physics | 2.33 GB | ~0.6B est. | 165,528 docs |
-| Prabanjan | Mathematics | 11.38 GB .gz, ~34 GB unpacked | ~9–10B est. | mojibake (U+FFFD) and junk lines; needs cleaning |
-| Prabanjan | Multi-step / Quant / Astronomy | 717 / 485 / 90 MB | ~0.25 / 0.12 / 0.05B est. | Multi-step overlaps Sci. Q&A; Quant ~23% off-topic; Astronomy = catalog rows |
+| Prabanjan | Mathematics | 11.38 GB .gz, ~34 GB unpacked | ~9.5B est. (4,924,517 documents after his dedup, 21 Oct) | his run removed 331 duplicates, 8,444 broken-encoding and 1 short document; the cleaned file is not on Drive yet |
+| Prabanjan | Multi-step (rebuilt 21 Oct) | 1.18 GB, 18.0M Q&A | ~0.45B est. | DeepMind arithmetic only, procedurally generated; 804,443 exact duplicates (4.5%) |
+| Prabanjan | Astronomy (21 Oct) | 391 MB, 754,260 records | ~0.11B est. | 500,000 are SDSS catalog rows; the rest are 247,809 abstracts and 6,451 exoplanets |
+| Prabanjan | Quant / finance (21 Oct) | 166 MB, 1.27M lines | ~0.06B est. | numbers only: Binance candles, Ken French factors, SEC facts; no prose |
 | Avinash | Universal index | 39,705,376 rows, 13.84 GB | 21.92B owner (cl100k over name/synonyms/description/properties/tags) | those columns = 58.3 GB, 86% `properties` JSON; ~48% structured DB records |
 | Avinash | Medical | 41.6 GB zip, 929 PubMed XML.gz | unknown | raw, unprocessed |
 | Afnan, Avinash | 6 engineering capabilities | — | — | nothing delivered |
 
 ## Findings
 1. Token counts are not comparable (cl100k on serialized fields, chars/4, unstated, file sizes). The v4.0 files have no `text` column.
-2. Overlap: Multi-step = GSM8K + NuminaMath-CoT, already inside Scientific Q&A. Code vs Scientific Programming: 1 shared file name, 7,188 shared repositories (3.7%).
+2. Overlap: the rebuilt Multi-step (21 Oct) is DeepMind arithmetic only, so the earlier GSM8K/NuminaMath overlap with Scientific Q&A is gone. Code vs Scientific Programming: 1 shared file name, 7,188 shared repositories (3.7%).
 3. Duplicates: Gokul 150,226 exact; Scientific Programming repeats files (see table).
 4. Synthetic / non-prose: CAD 41% procedural; OpenFOAM part-00000 (250,000 rows) is synthetic parametric CFD templates; Avinash's index is largely database records.
 5. Math: Raju's folder holds ~1.6 GB (4 shards); the 39.17 GB cleaned text was on Shrot's drive (he has left; Raju's re-shared folder holds the same 4 of 114 shards). Prabanjan's .gz (~34 GB unpacked) is the math source.

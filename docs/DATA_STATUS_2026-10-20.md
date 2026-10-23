@@ -30,6 +30,13 @@ token counts marked "owner" are the owners' own and unverified; "est." are my es
 6. Three schemas (Gokul 18 cols, v4.0 21 cols, Avinash 23 cols) and no agreed training-text rule.
 7. Tokenizer: Ravikant has no vocabulary (it cannot be trained before there is data). A 32K candidate was trained on a balanced 218 MB sample and verified (C++ parity 3003/3003, lossless round-trip) — `tokenizers/vocab32k_v1/`, SHA-256 `50a0910f…df32da9`. Nothing is tokenized before the team lead approves and freezes it.
 
+## Training-text rule for the v4.0 files (`v4_text` in `scripts/tokenize_parquet.py`; agreed with Ravikant, 23 Oct)
+Checked against the real files (field census over 16–24 evenly spaced row groups per file; CAD sources over all rows):
+1. Code and documentation: `code_content`, `doc_content`, `text`, `content`. (`doc_content` exists in only 362 of 1,831,796 Scientific Programming rows.)
+2. Q&A: Question, Options (when present), Answer, Explanation (not the `Source origin:` boilerplate). In 3 sampled row groups a third of explanations were empty, a third boilerplate and a third `Expected Answer: N`; over 16 row groups they average 195 characters.
+3. CAD/STEP: DeepCAD pairs (`objective_prompt` + `sketch_extrude_completion`; only 5 rows exist), otherwise description + `cadquery_code` + `step_file_snippet` + `qa_pairs`. CAD sources, all 940,576 rows: zerotocad 59.5%, cad_synthetic 40.5% (procedural), deepcad_sft 0.0005%. `operations_hierarchy` (an AST dump of the CadQuery code, ~2,000 characters per zerotocad row) is deliberately left out: it is derived from the code.
+4. Anything else: `description`.
+
 ## Plan to the first training run
 1. Freeze the 32K tokenizer: candidate `tokenizers/vocab32k_v1/vocab32k.tok` is built and verified; approve, then freeze. Ravikant tokenizes with it.
 2. One honest count: each owner runs `python scripts/tokenize_parquet.py <files> --count-only --out runs/count` (reads v4.0 files too) and posts the totals.

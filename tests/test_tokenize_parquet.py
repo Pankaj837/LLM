@@ -102,6 +102,27 @@ def test_v4_schema_without_text_column(setup):
     assert st["train_tokens"] + st["val_tokens"] == sum(len(tok.encode(t, allowed_special=set())) + 1 for t in texts)
 
 
+def test_v4_text_rule_covers_every_field_family():
+    import json as J
+    v = tp.v4_text
+    # 1. code and documentation
+    assert v("one line", J.dumps({"doc_content": "  Full manual page.  "})) == "Full manual page."
+    # 2. Q&A: options and explanation kept, boilerplate explanation dropped
+    qa = J.dumps({"question": "Pick one", "answer": "B", "options": ["a1", "b2"], "explanation": "Because b2."})
+    assert v("d", qa) == "Question: Pick one\n\nOptions:\n- a1\n- b2\n\nAnswer: B\n\nExplanation: Because b2."
+    assert v("d", J.dumps({"question": "Q", "answer": "A", "options": [], "explanation": "Source origin: orca_math"})) == "Question: Q\n\nAnswer: A"
+    assert v("d", J.dumps({"question": "Q", "answer": "A", "options": J.dumps(["x", "y"])})) == "Question: Q\n\nOptions:\n- x\n- y\n\nAnswer: A"
+    # 3a. DeepCAD instruction pair
+    assert v("d", J.dumps({"objective_prompt": "Make a cube", "sketch_extrude_completion": "sketch(); extrude()"})) == \
+        "Objective: Make a cube\n\nCompletion:\nsketch(); extrude()"
+    # 3b. STEP snippet without CadQuery code is kept; structured QA pairs (list of dicts, either key style) are kept
+    assert v("A part", J.dumps({"step_file_snippet": "ISO-10303-21;"})) == "A part\n\nISO-10303-21;"
+    pairs = J.dumps({"cadquery_code": "x = 1", "qa_pairs": [{"question": "How many faces?", "answer": "6"}, {"q": "Edges?", "a": "12"}]})
+    assert v("A part", pairs) == "A part\n\nx = 1\n\nQ: How many faces?\nA: 6\n\nQ: Edges?\nA: 12"
+    # 4. nothing usable -> description; properties may already be a dict
+    assert v("only desc", J.dumps({"stars": 3})) == "only desc" and v("d", {"code_content": "x"}) == "x"
+
+
 def test_merge_bins_writes_a_valid_file(setup):
     tmp, vocab, shard = setup
     tp.process_file(_job(shard, tmp / "a", vocab, dedup=False))

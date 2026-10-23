@@ -45,27 +45,65 @@ def _h64(s: str) -> int:
     return int.from_bytes(hashlib.blake2b(s.encode("utf-8", "replace"), digest_size=8).digest(), "little")
 
 
+def _s(x) -> str:
+    return x.strip() if isinstance(x, str) else ""
+
+
 def v4_text(description, properties) -> str:
     """Training text of one v4.0 entity row (no ``text`` column): the body lives in ``properties`` JSON.
 
-    code_content / text / content if present; else Question + Answer; else CAD (description + cadquery_code + STEP
-    snippet + Q&A); else ``description``.
+    1. Code / documentation: ``code_content``, ``doc_content``, ``text``, ``content``.
+    2. Q&A: Question, Options (if any), Answer, Explanation (skipping the ``Source origin:`` boilerplate).
+    3. CAD: DeepCAD ``objective_prompt`` + ``sketch_extrude_completion``; otherwise description + ``cadquery_code`` +
+       ``step_file_snippet`` + ``qa_pairs`` (list of dicts or a string).
+    4. Fallback: ``description``.
     """
-    if properties:
-        try:
-            p = json.loads(properties)
-        except ValueError:
-            p = None
-        if isinstance(p, dict):
-            for k in ("code_content", "text", "content"):
-                if isinstance(p.get(k), str) and p[k].strip():
-                    return p[k]
-            q, a = p.get("question"), p.get("answer")
-            if isinstance(q, str) and isinstance(a, str) and q.strip() and a.strip():
-                return f"Question: {q}\n\nAnswer: {a}"
-            if isinstance(p.get("cadquery_code"), str) and p["cadquery_code"].strip():      # CAD/STEP records
-                parts = [description or "", p["cadquery_code"], p.get("step_file_snippet") or "", p.get("qa_pairs") or ""]
-                return "\n\n".join(x for x in parts if isinstance(x, str) and x.strip())
+    if not properties:
+        return description or ""
+    try:
+        p = json.loads(properties) if isinstance(properties, str) else properties
+    except ValueError:
+        return description or ""
+    if not isinstance(p, dict):
+        return description or ""
+    for k in ("code_content", "doc_content", "text", "content"):
+        if _s(p.get(k)):
+            return p[k].strip()
+    q, a = _s(p.get("question")), _s(p.get("answer"))
+    if q and a:
+        parts = [f"Question: {q}"]
+        opts = p.get("options")
+        if isinstance(opts, str):
+            try:
+                opts = json.loads(opts)
+            except ValueError:
+                opts = None
+        if isinstance(opts, list):
+            lines = [f"- {o}" for o in opts if o]
+            if lines:
+                parts.append("Options:\n" + "\n".join(lines))
+        parts.append(f"Answer: {a}")
+        exp = _s(p.get("explanation"))
+        if exp and not exp.startswith("Source origin:"):
+            parts.append(f"Explanation: {exp}")
+        return "\n\n".join(parts)
+    if _s(p.get("objective_prompt")) and _s(p.get("sketch_extrude_completion")):
+        return f"Objective: {p['objective_prompt'].strip()}\n\nCompletion:\n{p['sketch_extrude_completion'].strip()}"
+    cad = [_s(description)] if _s(description) else []
+    for k in ("cadquery_code", "step_file_snippet"):
+        if _s(p.get(k)):
+            cad.append(p[k].strip())
+    qa = p.get("qa_pairs")
+    if isinstance(qa, list):
+        for pair in qa:
+            if isinstance(pair, dict):
+                qq, aa = _s(pair.get("question") or pair.get("q")), _s(pair.get("answer") or pair.get("a"))
+                if qq and aa:
+                    cad.append(f"Q: {qq}\nA: {aa}")
+    elif _s(qa):
+        cad.append(qa.strip())
+    if len(cad) > (1 if _s(description) else 0):
+        return "\n\n".join(cad)
     return description or ""
 
 

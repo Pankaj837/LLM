@@ -18,6 +18,7 @@ benchmark. **Nothing below has been run on a GPU yet.** Decisions that are not m
 | `scripts/check_bins.py` — header/size/ids/EOS/vocabulary check of every token file | tested; PASS on the smoke data |
 | `scripts/train_vocab.py`, `scripts/verify_vocab.py`, `tokenizers/vocab32k_v2/` — the 32K vocabulary (candidate) and its verification (round-trip, C++ parity 3003/3003 lines) | tested |
 | `scripts/eval_domains.py` — validation loss per domain | tested |
+| Real layer shapes of `1p5b` / `2b` (d=2048, 16/4 heads, head_dim 128, FFN 5632/8192) | forward + backward + full 4K context verified on CPU with 1–2 layers instead of 32 (`tests/test_scale_shapes.py`); the full-depth model has not been instantiated yet |
 | `scripts/pubmed_to_parquet.py` — PubMed XML → Parquet (for Medical) | tested, also on a real 48 MB slice from the Drive zip |
 
 **Not in the repo:** FSDP/ZeRO-3, FP8 (Transformer Engine), FlashAttention-3, `torch.compile`, activation
@@ -102,7 +103,7 @@ Data: the 59M-token smoke set (9 domains, per-domain validation files) built fro
 earlier throwaway vocabulary (its own `vocab32k.tok` is in the zip), so it tests speed, memory and resume only; it is not tied to
 the vocabulary that will be frozen. Run `--preset 1p5b
 --seq-len 2048` for ~200 steps:
-1. Loss starts near ln(32000) ≈ 10.4 and falls steadily; no NaN.
+1. Loss starts between 10.4 (= ln 32000) and about 11 (measured 10.88 at init on the real layer shapes) and falls steadily; no NaN.
 2. Tokens/s per GPU and peak memory per GPU recorded (these replace the estimate in §2); micro-batch size chosen.
 3. A checkpoint is written; resuming from it continues the loss curve (same loss at the next step).
 4. On several GPUs: tokens/s scales close to N×, and only rank 0 writes files.

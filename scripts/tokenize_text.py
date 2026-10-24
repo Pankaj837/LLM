@@ -10,7 +10,7 @@ disk) and a pool of workers tokenizes batches, so all cores stay busy and memory
     # blocks of lines separated by blank lines (default: one document per line)
     python scripts/tokenize_text.py math=maths_final_corpus.clean.txt.gz multistep=multistep_corpus.txt \
         astronomy=astronomy_corpus.txt --blank-domains multistep,astronomy \
-        --vocab tokenizers/vocab32k_v1/vocab32k.tok --out runs/bins_text --workers 8 --dedup
+        --vocab tokenizers/vocab32k_v2/vocab32k.tok --out runs/bins_text --workers 8 --dedup
 
 Per input it writes ``<domain>.<file>.train.bin`` / ``.val.bin`` (valid TOK1 files; the validation set is a
 deterministic hash-based share of DOCUMENTS), merges them into ``train.bin`` / ``val.bin`` unless ``--no-merge``,

@@ -16,7 +16,7 @@ benchmark. **Nothing below has been run on a GPU yet.** Decisions that are not m
 | `scripts/dedup_text.py`, `scripts/dedup_parquet.py` — exact de-duplication across files; `--expect-files` catches incomplete downloads | tested; run by Prabanjan (math) and Gokul (3 domains) |
 | `scripts/merge_bins.py` — concatenates a domain's per-job bins into one TOK1 file (needed for `--train-mix` and per-domain evaluation; refuses mixed vocabularies) | tested |
 | `scripts/check_bins.py` — header/size/ids/EOS/vocabulary check of every token file | tested; PASS on the smoke data |
-| `scripts/train_vocab.py`, `scripts/verify_vocab.py`, `tokenizers/vocab32k_v1/` — the 32K vocabulary (candidate) and its verification (round-trip, C++ parity 3003/3003 lines) | tested |
+| `scripts/train_vocab.py`, `scripts/verify_vocab.py`, `tokenizers/vocab32k_v2/` — the 32K vocabulary (candidate) and its verification (round-trip, C++ parity 3003/3003 lines) | tested |
 | `scripts/eval_domains.py` — validation loss per domain | tested |
 | `scripts/pubmed_to_parquet.py` — PubMed XML → Parquet (for Medical) | tested, also on a real 48 MB slice from the Drive zip |
 
@@ -50,7 +50,7 @@ Gokul (21 Oct): an H100 costs ₹330 per hour; credit about ₹1,000 = **about 3
 1.51B training.**
 
 **3B:** the configurations in `llm update.pdf` stop at 2.08B (`2b` preset = 2.012B with 4 KV heads). A true 3B needs a
-new configuration (d=2560 gives ~2.6B) and ~60B tokens at 20 tokens/parameter, against ~25–30B *estimated* today.
+new configuration (d=2560 gives ~2.6B) and ~60B tokens at 20 tokens/parameter, against ~26–28B *estimated* today.
 
 ## 3. Data: what exists *(estimates until every owner's recount and the manifests are in)*
 | Source | Tokens (est.) | Notes |
@@ -58,16 +58,16 @@ new configuration (d=2560 gives ~2.6B) and ~60B tokens at 20 tokens/parameter, a
 | Math (Prabanjan, 4,924,517 docs after his dedup) | ~9.5B | `tokenize_text.py`, line documents; his cleaned file must be uploaded |
 | Biology / Earth & Env. / Sci. Discovery (Gokul, 1,642,491 docs after dedup) | ~8.5B | Parquet with `text` |
 | Code (Ravi) | 3.28B (his report) | 83% TypeScript; Python only 6 files |
-| Scientific Programming (Ravi) | 1.2–1.9B | 73% of rows repeat a file; dedup pending |
-| Scientific Q&A (Ravi) | ≤2.5B | each Q&A stored 3×; model-generated math |
-| CAD/STEP (Ravi) | ≤2.0B | 40.5% procedural, 59.5% zerotocad |
+| Scientific Programming (Ravi) | 1.2–2.1B | 73% of rows repeat a file; dedup pending |
+| Scientific Q&A (Ravi) | ~2.5B | checked against the rows; model-generated math |
+| CAD/STEP (Ravi) | ~0.75B (he reported 2.0B) | 40.5% procedural, 59.5% zerotocad; the estimate uses the agreed text rule |
 | Physics (Prabanjan) | ~0.6B | not read in full |
 | Multi-step / Astronomy / Finance (Prabanjan) | 0.43B / 0.11B / 0.06B | synthetic arithmetic / 66% catalog rows / numbers only |
 | Chemistry text | ~0.5B | ~2.1 GB, sampled |
 | Medical (PubMed abstracts, optional) | 6–8B | not one of the 15 capabilities |
 | **Engineering (6 capabilities), general language** | **none** | nobody has delivered; the model will be weak there |
 
-Total ≈ 25–30B without Medical. "Verified" tokens exist only after: tokenizer frozen → tokenization → `manifest.json`
+Total ≈ 26–28B without Medical. "Verified" tokens exist only after: tokenizer frozen → tokenization → `manifest.json`
 per-domain counts → `check_bins.py` PASS. Until then everything above is an estimate.
 
 ### Proposed first-run mix (for Raju's approval; weights are shares of training tokens, normalised automatically)
@@ -93,12 +93,14 @@ general language 8%) cannot be filled: there is no such data.
 Example (100M, single GPU, mixed domains):
 ```
 python -m llm.train --train-mix bins/math.train.bin=0.20 bins/code.train.bin=0.12 ... --val-bin bins/val.bin \
-  --vocab tokenizers/vocab32k_v1/vocab32k.tok --out runs/100m --preset 100m --seq-len 2048 \
+  --vocab tokenizers/vocab32k_v2/vocab32k.tok --out runs/100m --preset 100m --seq-len 2048 \
   --batch-size 16 --grad-accum 8 --max-steps 7629 --warmup-steps 300 --lr 6e-4 --eval-interval 250 --save-interval 500
 ```
 
 ## 5. Smoke test (before any real run) — pass criteria
-Data: the 59M-token smoke set (9 domains, per-domain validation files) built from the tokenizer sample. Run `--preset 1p5b
+Data: the 59M-token smoke set (9 domains, per-domain validation files) built from the tokenizer sample. It was tokenized with an
+earlier throwaway vocabulary (its own `vocab32k.tok` is in the zip), so it tests speed, memory and resume only; it is not tied to
+the vocabulary that will be frozen. Run `--preset 1p5b
 --seq-len 2048` for ~200 steps:
 1. Loss starts near ln(32000) ≈ 10.4 and falls steadily; no NaN.
 2. Tokens/s per GPU and peak memory per GPU recorded (these replace the estimate in §2); micro-batch size chosen.
@@ -124,7 +126,7 @@ torchrun --nproc_per_node=8 -m llm.train --train-bin data/train.bin --val-bin da
 
 ## 7. Evaluation suite
 - Per-domain held-out loss/perplexity with `scripts/eval_domains.py` (one validation file per domain: tokenize with
-  `--no-merge --val-frac 0.005`, which keeps `<job>.val.bin` per job; merge a domain's files with `scripts/merge_bins.py --split val`, or pass a wildcard to `--val`; do **not** use `--delete-shards`). Same windows
+  `--no-merge --val-frac 0.005`, which keeps `<job>.val.bin` per job; merge a domain's files with `scripts/merge_bins.py --split val`, or pass a wildcard to `--val`; do **not** use `--delete-shards`). Use **exact** file patterns when merging (`code.rg*.train.bin`, not `code*`): a pattern that also matches another domain's files would silently mix them. Same windows
   every time, so checkpoints are comparable.
 - Regression, parser and structured-output tests: Swaraj. Gaps against the project requirements, found *before*
   training: Swaraj (start from `docs/REVIEW_FINDINGS.md`, `docs/HANDOFF_GPU.md`).
@@ -139,7 +141,7 @@ requirement gaps. Avinash: dataset integration, dedup and cross-domain checks. P
 quality validation, domain evaluation.
 
 ## 9. Open decisions and risks
-Decisions for Raju: (1) choose and freeze one of the two 32K tokenizers (`vocab32k_v1`, or `vocab32k_digits_v1` with numbers encoded digit by digit at ~5–6% more tokens — recommended, see `tokenizers/README.md`); (2) compute: budget/another machine for the 1.51B run, or a
+Decisions for Raju: (1) choose and freeze one of the two 32K tokenizers (`vocab32k_v2`, or `vocab32k_digits_v2` with numbers encoded digit by digit at ~5–6% more tokens — recommended, see `tokenizers/README.md`); (2) compute: budget/another machine for the 1.51B run, or a
 smaller first model, or 1.51B on 5B tokens; (3) the data mix in §3; (4) include Medical or not; (5) who delivers
 engineering and general-language data; (6) true 3B or 2B as the ceiling.
 Risks: GPU time and count; the DDP path and the 1.51B model have never run on CUDA; all numbers in §2–§3 are estimates;

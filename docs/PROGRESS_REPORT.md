@@ -7,7 +7,7 @@ a test); anything without evidence is marked *awaiting*. Last update: 24 Oct 202
 ## Gates (in order; nothing starts before the gate above it)
 | # | Gate | Owner | Status | Evidence / next step |
 |---|---|---|---|---|
-| 0 | 32K tokenizer approved and frozen | Raju (approve), Pankaj (freeze) | **awaiting approval** | two candidates built and verified (round-trip, C++ parity 3003/3003): `tokenizers/vocab32k_v1/` and `tokenizers/vocab32k_digits_v1/` (numbers digit by digit, ~5–6% more tokens; recommended). Raju/Pankaj choose one, then it is frozen |
+| 0 | 32K tokenizer approved and frozen | Raju (approve), Pankaj (freeze) | **awaiting approval** | two candidates built and verified (round-trip, C++ parity 3003/3003): `tokenizers/vocab32k_v2/` and `tokenizers/vocab32k_digits_v2/` (numbers digit by digit, ~5–6% more tokens; recommended). Raju/Pankaj choose one, then it is frozen |
 | 1 | Compute budget decided | Raju | **awaiting** | Gokul: ₹330/H100-hour, credit ≈ ₹1,000 ≈ 3 hours; 1.51B on 30B tokens ≈ 257 H100-hours ≈ ₹85,000 (est.) |
 | 2 | All cleaned data in one shared Drive folder | Raju (create/confirm folder), all owners (upload) | **awaiting** | requested in the group; no folder link seen yet |
 | 3 | Recount per domain from the manifests | Pankaj | blocked by gates 0 and 2 | `tokenize_*.py --count-only` is ready |

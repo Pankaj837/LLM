@@ -1,24 +1,25 @@
-# vocab32k_digits_v1 — 32,000-token byte-level BPE, numbers encoded digit by digit (candidate, 24 Oct 2026)
+# vocab32k_digits_v2 — 32,000-token byte-level BPE, numbers encoded digit by digit (candidate, 24 Oct 2026)
 
-Same training sample (227 MB, 9 domains), same trainer and same format as `../vocab32k_v1/`; the only difference is that **no
-token may contain two adjacent digits** (`scripts/train_vocab.py --split-digits`). The encoder is unchanged: it only merges
-what the vocabulary contains, so every number becomes single digits, always in the same way.
+Same training sample (227 MB, 9 domains), same trainer, same format and the same 64 special tokens as `../vocab32k_v2/`;
+the only difference is that **no token may contain two adjacent digits** (`scripts/train_vocab.py --split-digits`). The
+encoder is unchanged: it only merges what the vocabulary contains, so every number becomes single digits, always in the same way.
 
 | | |
 |---|---|
-| File | `vocab32k.tok` (V1 format, `<|endoftext|>` = 31999, n_vocab 32,000, fits `uint16`) |
-| SHA-256 | `e6bd30d24b67d85b880ad3d6a282303887e5bd94d39bcc8f27b9587ea2cb383d` |
+| File | `vocab32k.tok` (V1 format; 31,936 merges + 64 special tokens, ids 31,936–31,999; n_vocab 32,000, fits `uint16`) |
+| EOS | `<|endoftext|>` = **31,936** |
+| SHA-256 | `b2e45a916f6b01868d36ca181887021fcee36e8d91f1d4835745553d3397aa87` |
 | Status | **Candidate, verified; one of two options — the team lead chooses, then it is frozen.** Recommendation: this one |
 
 ## Why
-In `vocab32k_v1` the number `134945` is encoded as ` 134`, `9`, `45`; `1234567890123` as ` 123`, `45`, `678`, `90`, `123`.
+In `vocab32k_v2` the number `134945` is encoded as ` 134`, `9`, `45`; `1234567890123` as ` 123`, `45`, `678`, `90`, `123`.
 The split depends on which chunks happened to be frequent in the sample, so the same digit has a different role in
 different numbers. For a model whose domains are mathematics, multi-step calculation, physics, quant finance and CAD
 geometry, consistent place value matters for learning arithmetic and numeric reasoning. Digit-level number tokens are the
 choice made by LLaMA, PaLM and Qwen-style models. Here, ` 134945` is ` 1`,`3`,`4`,`9`,`4`,`5`.
 
 ## What it costs (bytes per token on the same held-out documents, deterministic sampling; higher = fewer tokens = cheaper)
-| Domain | `vocab32k_v1` | **digits** | change | cl100k |
+| Domain | `vocab32k_v2` | **digits** | change | cl100k |
 |---|---|---|---|---|
 | Math | 3.76 | 3.63 | −3% | 3.88 |
 | Code | 3.73 | 3.65 | −2% | 4.18 |
@@ -39,9 +40,9 @@ the most. That is the price of regular numbers.
 
 ## Verification (`scripts/verify_vocab.py ... --cli native/tokenizer/build/encode_cli.exe`) — PASS
 Lossless round-trip on held-out documents of every domain; **C++ parity: 3003 / 3003 lines identical**;
-`<|endoftext|>` typed in user text does not produce the EOS id; no token contains two adjacent digits (0 of 31,999).
+`<|endoftext|>` typed in user text does not produce the EOS id; no token contains two adjacent digits.
 
 ## Limits
-Same as `vocab32k_v1`: no physics, engineering, astronomy-heavy or general-language text in the sample; held-out text comes
-from the same files as the training sample. If this candidate is chosen, anything tokenized with `vocab32k_v1` (for example
-the smoke-test data) must be tokenized again — the two vocabularies are not interchangeable.
+Same as `vocab32k_v2` (see its README, including the special-token layout): no physics, engineering or general-language text in
+the sample; held-out text comes from the same files as the training sample. If this candidate is chosen, anything tokenized with
+`vocab32k_v2` (for example the smoke-test data) must be tokenized again — the two vocabularies are not interchangeable.

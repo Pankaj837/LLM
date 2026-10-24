@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Integrity check for TOK1 token files before any training run.
 
-    python scripts/check_bins.py runs/bins/train.bin runs/bins/val.bin runs/bins/*.val.bin --vocab tokenizers/vocab32k_v1/vocab32k.tok
+    python scripts/check_bins.py runs/bins/train.bin runs/bins/val.bin runs/bins/*.val.bin --vocab tokenizers/vocab32k_v2/vocab32k.tok
 
 For every file: the header is valid and the file size matches ``total_tokens`` (no truncation); every id is below
 the vocabulary size; the file ends on an EOS; documents (= EOS count) and mean document length are reported. Across

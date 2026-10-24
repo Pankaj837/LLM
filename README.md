@@ -17,7 +17,7 @@ is still open) and `docs/HANDOFF_GPU.md` (what to run on a GPU).
 | Checkpoint / pipeline | self-describing, fails loudly; **no full trained reference checkpoint yet** — 2 toy 6.3M placeholders in `checkpoints/` |
 | Trainer + `.bin` data | proven on 2 real datasets (biology, Earth & Environment), bit-exact resume |
 | Scale-up (Oct 2026): presets `100m` / `300m` / `1p5b` / `2b`, multi-GPU DDP, weighted domain mix, atomic checkpoints | parameter counts and 2-process equivalence verified **on CPU only**; never run on CUDA/NCCL — `docs/TRAINING_PLAN_1p5B.md` |
-| Data pipeline (count → dedup → tokenize → check → evaluate per domain) and a 32K vocabulary candidate | tested on synthetic data and real slices; vocabulary verified (round-trip, C++ parity) but **not yet approved/frozen** — `docs/DATA_STATUS_2026-10-20.md`, `tokenizers/vocab32k_v1/` |
+| Data pipeline (count → dedup → tokenize → check → evaluate per domain) and a 32K vocabulary candidate | tested on synthetic data and real slices; vocabulary verified (round-trip, C++ parity) but **not yet approved/frozen** — `docs/DATA_STATUS_2026-10-20.md`, `tokenizers/vocab32k_v2/` |
 | Reward model | mechanism verified; **synthetic data, not evidence of quality** |
 | GPU / bf16 / torch.compile | **untested** — see `docs/HANDOFF_GPU.md` |
 | Structured pruning | not part of this repository |
@@ -85,12 +85,12 @@ pip install -e ".[dev]"                                               # includes
 python scripts/tokenize_parquet.py "data/*.parquet" --count-only --out runs/count      # seconds: rows, chars, ~tokens per domain
 python scripts/dedup_parquet.py "biology/*.parquet" --out cleaned --expect-files 63     # exact dedup across files
 python scripts/dedup_text.py corpus.txt.gz --out cleaned_text                           # text corpora (--records blank for Q&A blocks)
-python scripts/tokenize_parquet.py "cleaned/*.parquet" --vocab tokenizers/vocab32k_v1/vocab32k.tok --out runs/bins --no-merge
-python scripts/tokenize_text.py math=cleaned_text/corpus.txt.gz --vocab tokenizers/vocab32k_v1/vocab32k.tok --out runs/bins_text
+python scripts/tokenize_parquet.py "cleaned/*.parquet" --vocab tokenizers/vocab32k_v2/vocab32k.tok --out runs/bins --no-merge
+python scripts/tokenize_text.py math=cleaned_text/corpus.txt.gz --vocab tokenizers/vocab32k_v2/vocab32k.tok --out runs/bins_text
 python scripts/merge_bins.py "runs/bins/code*.train.bin" --out bins/code.train.bin      # one train and one val file per domain (big inputs are split into jobs)
-python scripts/check_bins.py bins/*.bin --vocab tokenizers/vocab32k_v1/vocab32k.tok              # integrity gate
+python scripts/check_bins.py bins/*.bin --vocab tokenizers/vocab32k_v2/vocab32k.tok              # integrity gate
 torchrun --nproc_per_node=8 -m llm.train --train-mix bins/code.train.bin=0.6 bins/math.train.bin=0.4 --val-bin val.bin \
-    --vocab tokenizers/vocab32k_v1/vocab32k.tok --out runs/1p5b --preset 1p5b --seq-len 2048 --batch-size 4 --grad-accum 8
+    --vocab tokenizers/vocab32k_v2/vocab32k.tok --out runs/1p5b --preset 1p5b --seq-len 2048 --batch-size 4 --grad-accum 8
 python scripts/eval_domains.py --ckpt runs/1p5b/ckpt_last.pt --val math="runs/bins/math*.val.bin" code=runs/bins/code.val.bin
 ```
 Recipe, budget, mix proposal, smoke test and the pre-launch checklist: `docs/TRAINING_PLAN_1p5B.md`.

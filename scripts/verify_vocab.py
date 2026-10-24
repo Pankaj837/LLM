@@ -2,7 +2,7 @@
 """Verify a ``.tok`` vocabulary before freezing it: structure, lossless round-trip on held-out documents of every
 domain, bytes/token per domain (and against cl100k if ``tiktoken`` is installed), and exact parity with the C++ encoder.
 
-    python scripts/verify_vocab.py tokenizers/vocab32k_v1/vocab32k.tok --holdout "holdout/*.jsonl" \
+    python scripts/verify_vocab.py tokenizers/vocab32k_v2/vocab32k.tok --holdout "holdout/*.jsonl" \
         --cli native/tokenizer/build/encode_cli.exe
 
 ``--holdout`` files are JSONL (``{"t": text}``) that were NOT used to train the vocabulary. Exit code 1 on any failure.

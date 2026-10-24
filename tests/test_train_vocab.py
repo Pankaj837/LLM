@@ -36,3 +36,21 @@ def test_split_digits_vocab_encodes_every_number_digit_by_digit(tmp_path):
     ids = tok.encode("2026 12345", allowed_special=set())
     assert [tok.decode([i]).strip() for i in ids if tok.decode([i]).strip()] == list("202612345")
     assert tok.decode(ids) == "2026 12345"
+
+
+def test_reserved_special_tokens_are_named_in_order_and_never_produced_from_text(tmp_path):
+    import json
+
+    from llm.tokenizer import BPETokenizer
+    docs = ["hello world, number 12345 and 2026. " * 5, "def f(x): return x + 1\n" * 5] * 30
+    (tmp_path / "s.jsonl").write_text("\n".join(json.dumps({"t": d}) for d in docs), encoding="utf-8")
+    out = tmp_path / "v.tok"
+    assert tv.main([str(tmp_path / "s.jsonl"), "--vocab-size", "400", "--reserved-specials", "64", "--out", str(out)]) == 0
+    t = BPETokenizer.from_file(str(out))
+    assert len(t.special_to_id) == 64 and t.eos_id == min(t.special_to_id.values())          # EOS is the first special
+    assert sorted(t.special_to_id.values()) == list(range(t.eos_id, t.eos_id + 64)) and t.n_vocab == t.eos_id + 64
+    assert t.id_to_special[t.eos_id] == "<|endoftext|>" and t.id_to_special[t.n_vocab - 1] == "<|reserved_63|>"
+    assert {"<|pad|>", "<|user|>", "<|assistant|>", "<|tool_call|>"} <= set(t.special_to_id)
+    ids = t.encode("a <|user|> b <|endoftext|>", allowed_special=set())
+    assert not any(i in t.id_to_special for i in ids)                                      # text cannot forge a special
+    assert t.decode(ids) == "a <|user|> b <|endoftext|>"

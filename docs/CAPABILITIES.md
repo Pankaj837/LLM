@@ -6,7 +6,7 @@ Token numbers are the estimates of `docs/DATA_STATUS_2026-10-20.md`; "none" mean
 | # | Capability | Original owner | Data now |
 |---|---|---|---|
 | 1 | Mathematics | Prabanjan | 4.92M documents (~9.3B tokens) |
-| 2 | Physics | Prabanjan | 165,528 documents (~0.6B); not read in full |
+| 2 | Physics | Prabanjan | ~160k documents (~0.64B); mixed public sources (Cosmopedia textbooks, arXiv LaTeX, OpenWebMath), 13% with little physics |
 | 3 | Chemistry | Aarav → Ravi | chemistry text ~0.5B; Avinash's "chemical" records are database rows, not prose |
 | 4 | Engineering reasoning | Afnan (left the internship, 24 Oct: **needs a new owner**) | **none** |
 | 5 | Multi-step calculations | Prabanjan | 18.0M generated arithmetic Q&A (~0.43B) |

@@ -12,7 +12,9 @@ Config (paths relative to the current directory; ``weights`` are shares of train
        {"name": "bio",  "kind": "parquet", "paths": ["gokul/biology/*.parquet"], "max_files": 3,           "weight": 0.10},
        {"name": "multistep", "kind": "text", "paths": ["prab/multistep_corpus.txt"], "blank": true, "max_tokens": 60000000, "weight": 0.03}]}
 
-``kind`` is ``text`` (``.txt``/``.gz``; ``blank`` = documents separated by blank lines; ``max_tokens`` caps the read) or
+``kind`` is ``text`` (``.txt``/``.gz``; ``blank`` = documents separated by blank lines; ``marker`` = documents between
+``<|document|>`` and ``<|endofdocument|>`` lines; ``max_tokens`` caps the read, ``spread`` = take it as that many evenly
+spaced slices of a plain-text file instead of a prefix) or
 ``parquet`` (``sample_rg`` = fraction of evenly spaced row groups; ``max_files`` = only the first N matching files). For every
 domain it writes ``<out>/<name>.train.bin`` and ``<name>.val.bin``, then runs the integrity check on all of them and prints the exact
 ``--train-mix`` / ``--val`` arguments for ``llm.train`` and ``eval_domains.py`` with the epochs each domain will see for
@@ -56,8 +58,12 @@ def build_domain(d: dict, cfg: dict, out: str) -> dict:
         args = [f"{name}={f}" for f in files] + common
         if d.get("blank"):
             args += ["--blank-domains", name]
+        if d.get("marker"):
+            args += ["--marker-domains", name]
         if d.get("max_tokens"):
             args += ["--max-tokens", str(int(d["max_tokens"]))]
+        if d.get("spread"):
+            args += ["--spread", str(int(d["spread"]))]
         if d.get("dedup"):
             args += ["--dedup"]
         rc = tt.main(args)

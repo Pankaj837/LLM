@@ -13,8 +13,8 @@ above. Sizes and row counts are *read*; every token count except Gokul's dedup r
 | Ravikant | Scientific Q&A | 7.23 GB, 5,929,942 rows | 2.50B owner; ~2.5B est. holds (5.93M rows × ~1,400 characters ÷ 3.25 characters/token) | each Q&A stored 3× (name, description, properties), which inflates the file but not the text rule's output; 49% math Q&A |
 | Ravikant | Code | 3.29 GB, 2,692,769 rows | 3.28B owner (report of 21 Oct; row count matches the file; counter not stated) | 83% of tokens are TypeScript; Python only 6 files; "100% permissive" and "zero leakage" are his claims, not checked |
 | Gokul | Biology / Earth & Env. / Sci. Discovery | 5.8 / 4.2 / 2.8 GB | ~8.5B est. (1,642,491 documents after dedup) | 18 columns with `text`. Exact dedup run 22 Oct on the full folders (Colab): Biology 5 duplicates of 800,000; Earth 57,273 of 432,855 (13.2%); Scientific Discovery 92,951 of 559,865 (16.6%); 150,229 removed, matching his own earlier count of 150,226 |
-| Prabanjan | Physics | 2.33 GB | ~0.6B est. | 165,528 docs |
-| Prabanjan | Mathematics | 11.38 GB .gz, ~34 GB unpacked | ~9.5B est. (4,924,517 documents after his dedup, 21 Oct) | his run removed 331 duplicates, 8,444 broken-encoding and 1 short document; the cleaned file is not on Drive yet |
+| Prabanjan | Physics | 2,329,388,820 bytes | ~0.64B (measured on a 20 MB spread sample: 5.49M tokens for 19.9M characters) | ~160k documents between `<|document|>` / `<|endofdocument|>` lines. Sample of 1,833 documents: Cosmopedia textbook units 65% of documents (29% of characters), arXiv LaTeX source 8% (29% of characters), OpenWebMath pages the rest; 13% of documents have almost no physics vocabulary (mostly Cosmopedia, e.g. history units); the OpenWebMath pages may also be in the math corpus |
+| Prabanjan | Mathematics | 11.38 GB .gz, ~34 GB unpacked | ~9.5B est. (4,924,517 documents after his dedup, 21 Oct) | his run removed 331 duplicates, 8,444 broken-encoding and 1 short document; the cleaned file is on Drive since 21 Oct: `Prabanjan_LLM/maths_final_corpus.clean.txt`, 34,050,804,243 bytes, plain text, one document per line, no `\r`, U+FFFD about 0.3 per MB in a sample |
 | Prabanjan | Multi-step (rebuilt 21 Oct) | 1.18 GB, 18.0M Q&A | ~0.45B est. | DeepMind arithmetic only, procedurally generated; 804,443 exact duplicates (4.5%) |
 | Prabanjan | Astronomy (21 Oct) | 391 MB, 754,260 records | ~0.11B est. | 500,000 are SDSS catalog rows; the rest are 247,809 abstracts and 6,451 exoplanets |
 | Prabanjan | Quant / finance (21 Oct) | 166 MB, 1.27M lines | ~0.06B est. | numbers only: Binance candles, Ken French factors, SEC facts; no prose |
@@ -53,4 +53,4 @@ true 3B vs 2B ceiling) is `docs/TRAINING_PLAN_1p5B.md` §9. The 20 Oct draft mix
 cannot be filled because that data does not exist; the proposed mix for the data we do have is in plan §3.
 
 ## Not yet read in full
-Gokul's shards (only sampled, for the tokenizer), the `chem_clean_*.txt` files (sampled), Prabanjan's Physics file, nine of ten OpenFOAM parts.
+Gokul's shards (only sampled, for the tokenizer), the `chem_clean_*.txt` files (sampled), the physics file beyond a 1,833-document sample, nine of ten OpenFOAM parts.

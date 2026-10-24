@@ -24,9 +24,9 @@ a test); anything without evidence is marked *awaiting*. Last update: 24 Oct 202
 | Gokul | smoke test | **ran on his laptop RTX 4050 (6 GB), `small` preset, seq 512, batch 1: loss 9.71 → 7.57, no NaN** — first proof that the CUDA/bf16 path trains; the H100 benchmark is still to do | 24 Oct |
 | Gokul | Medical extraction (`scripts/pubmed_to_parquet.py`), CPU only | awaiting Raju's decision to include Medical | 21 Oct |
 | Prabanjan | math dedup | **done**: 4,924,517 documents kept (331 duplicates, 8,444 broken-encoding, 1 short removed) | 21 Oct |
-| Prabanjan | upload `maths_final_corpus.clean.txt` (as `.gz`) to Drive | **"I have uploaded" (24 Oct)**; link/file not yet checked | 21 Oct |
+| Prabanjan | upload the cleaned math file to Drive | **done and verified (25 Oct)**: folder `Prabanjan_LLM` holds `maths_final_corpus.clean.txt` (34.05 GB, plain text, one document per line), the Multi-step / Astronomy / Finance files (byte-identical in size to the zip already checked) and `physics_1B_top_notch.txt` (2.33 GB) | 21 Oct |
 | Prabanjan | Multi-step / Astronomy / Finance corpora | **delivered** (373 MB zip), checked by Pankaj | 21 Oct |
-| Prabanjan | Physics file | delivered earlier; not read in full | — |
+| Prabanjan | Physics file | **read (25 Oct)**: mixed sources (65% Cosmopedia textbook units, 8% raw arXiv LaTeX, OpenWebMath pages), 13% of documents with little physics, document markers `<|document|>`; usable, ~0.64B tokens; supported by `tokenize_text.py --marker-domains` | — |
 | Ravi | final 32K vocabulary | **closed**: cannot exist before data; built by Pankaj instead | 21 Oct |
 | Ravi | training-text rule for the v4.0 files | **done**: his rule adopted in `v4_text` (verified against the files) | 23 Oct |
 | Ravi | Scientific Programming dedup by sha256 (491,834 distinct names in 1,831,796 rows) | **"deduped all 4 parquet, uploaded as <domain>_cleaned.parquet" (24 Oct)**; the link he posted is the Pranag AI root folder, which shows no such files, and his earlier team folder now asks for sign-in: **cannot verify** — asked for the folder link and row counts | 21 Oct |

@@ -62,7 +62,7 @@ new configuration (d=2560 gives ~2.6B) and ~60B tokens at 20 tokens/parameter, a
 | Scientific Programming (Ravi) | 1.2–2.1B | 73% of rows repeat a file; dedup pending |
 | Scientific Q&A (Ravi) | ~2.5B | checked against the rows; model-generated math |
 | CAD/STEP (Ravi) | ~0.75B (he reported 2.0B) | 40.5% procedural, 59.5% zerotocad; the estimate uses the agreed text rule |
-| Physics (Prabanjan) | ~0.6B | not read in full |
+| Physics (Prabanjan) | ~0.64B | read: mixed public sources, 13% of documents with little physics; document markers handled by `--marker-domains` |
 | Multi-step / Astronomy / Finance (Prabanjan) | 0.43B / 0.11B / 0.06B | synthetic arithmetic / 66% catalog rows / numbers only |
 | Chemistry text | ~0.5B | ~2.1 GB, sampled |
 | Medical (PubMed abstracts, optional) | 6–8B | not one of the 15 capabilities |

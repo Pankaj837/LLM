@@ -89,3 +89,37 @@ def test_validation_split_is_a_deterministic_share_of_documents(tmp_path, vocab)
     m1, m2 = (json.loads((o / "manifest.json").read_text()) for o in (out, out2))
     assert m1["val_tokens"] == m2["val_tokens"] > 0 and m1["train_tokens"] + m1["val_tokens"] == len(_expected(vocab, docs))
     assert np.array_equal(read_tokens(str(out / "val.bin"), mmap=False)[1], read_tokens(str(out2 / "val.bin"), mmap=False)[1])
+
+
+def test_marker_documents_drop_the_marker_lines_and_keep_unterminated_tails(tmp_path, vocab):
+    raw = ("junk before the first document\n<|document|>\nSource: Cosmopedia (stanford)\n\nFirst document, two lines.\nSecond line.\n"
+           "<|endofdocument|>\n<|document|>\nSecond document.\n<|endofdocument|>\n<|document|>\nCut off at the end of the file\n")
+    (tmp_path / "phys.txt").write_text(raw, encoding="utf-8")
+    assert list(tt.iter_docs(str(tmp_path / "phys.txt"), False, True)) == [
+        "Source: Cosmopedia (stanford)\n\nFirst document, two lines.\nSecond line.", "Second document.", "Cut off at the end of the file"]
+    out = _run(tmp_path, [f"physics={tmp_path / 'phys.txt'}"], vocab, "--marker-domains", "physics")
+    _, arr = read_tokens(str(out / "train.bin"), mmap=False)
+    assert arr.tolist() == _expected(vocab, ["Source: Cosmopedia (stanford)\n\nFirst document, two lines.\nSecond line.",
+                                             "Second document.", "Cut off at the end of the file"])
+    assert json.loads((out / "manifest.json").read_text())["docs"] == 3
+
+
+def test_spread_reads_evenly_spaced_whole_documents_not_a_prefix(tmp_path, vocab):
+    docs = [f"document {i:04d} about cells and ATP, number {i * 13}" for i in range(2000)]
+    path = tmp_path / "big.txt"
+    path.write_text("\n".join(docs) + "\n", encoding="utf-8")
+    got = list(tt.iter_docs(str(path), False, False, spread=4, slice_bytes=6000))
+    assert got and all(g in set(docs) for g in got)                      # only whole documents, never a cut one
+    ids = sorted(int(g.split()[1]) for g in got)
+    assert ids[0] > 100 and ids[-1] < 1900 and (ids[-1] - ids[0]) > 1000     # spread over the file, not rows 0..N
+    blocks = [f"Question: q{i}\nAnswer: a{i}" for i in range(1500)]
+    (tmp_path / "qa.txt").write_text("\n\n".join(blocks) + "\n", encoding="utf-8")
+    got_b = list(tt.iter_docs(str(tmp_path / "qa.txt"), True, False, spread=3, slice_bytes=4000))
+    assert got_b and all(g in set(blocks) for g in got_b)
+    marked = "".join(f"<|document|>\nSource: x\n\ntext {i}\n<|endofdocument|>\n" for i in range(800))
+    (tmp_path / "m.txt").write_text(marked, encoding="utf-8")
+    got_m = list(tt.iter_docs(str(tmp_path / "m.txt"), False, True, spread=3, slice_bytes=3000))
+    assert got_m and all(g.startswith("Source: x") and g.rsplit("text ", 1)[1].isdigit() for g in got_m)
+    out = _run(tmp_path, [f"bio={path}"], vocab, "--max-tokens", "3000", "--spread", "4")
+    m = json.loads((out / "manifest.json").read_text())
+    assert 0 < m["docs"] < 2000

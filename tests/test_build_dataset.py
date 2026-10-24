@@ -56,3 +56,19 @@ def test_the_shipped_example_config_is_valid_json_with_known_kinds():
     assert {d["kind"] for d in cfg["domains"]} <= {"text", "parquet"}
     assert len({d["name"] for d in cfg["domains"]}) == len(cfg["domains"]) and all(d["weight"] > 0 for d in cfg["domains"])
     assert (ROOT / cfg["vocab"]).is_file()
+
+
+def test_partial_config_uses_weights_sum_and_writes_a_build_manifest(tmp_path, capsys):
+    vocab = tmp_path / "v.tok"
+    write_tok(train_bpe(BIO * 3, 330), str(vocab))
+    (tmp_path / "bio.txt").write_text("\n".join(BIO * 5) + "\n", encoding="utf-8")
+    cfg = {"vocab": str(vocab), "out": str(tmp_path / "bins"), "workers": 1, "val_frac": 0.1, "plan_tokens": 100000, "weights_sum": 0.5,
+           "domains": [{"name": "bio", "kind": "text", "paths": [str(tmp_path / "bio.txt")], "weight": 0.25}]}
+    (tmp_path / "cfg.json").write_text(json.dumps(cfg), encoding="utf-8")
+    assert bd.main([str(tmp_path / "cfg.json")]) == 0
+    out = capsys.readouterr().out
+    total = read_header(str(tmp_path / "bins" / "bio.train.bin")).total_tokens
+    assert f"{0.25 / 0.5:>9.3f}" in out                                   # share 0.5 of the whole mix, not 1.0 of this config
+    m = json.loads((tmp_path / "bins" / "build_manifest.json").read_text())
+    assert m["tokens"]["bio"]["train"] == total and len(m["tokenizer_sha256"]) == 64 and m["config"]["weights_sum"] == 0.5
+    assert m["inputs"]["bio"][0]["bytes"] == (tmp_path / "bio.txt").stat().st_size and "git_commit" in m["run_info"]

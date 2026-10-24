@@ -118,3 +118,17 @@ def test_max_tokens_stops_reading_a_text_input_early(tmp_path, two_vocabs):
     capped = json.loads((out / "cap" / "manifest.json").read_text())["train_tokens"]
     assert 5000 <= capped < full
     assert read_header(str(out / "cap" / "train.bin")).total_tokens == capped
+
+
+def test_max_tokens_does_not_overshoot_by_the_whole_pipeline_depth(tmp_path, two_vocabs):
+    va, _ = two_vocabs
+    (tmp_path / "big.txt").write_text("\n".join(TEXTS * 3000) + "\n", encoding="utf-8")
+    old = tt.BATCH_DOCS
+    tt.BATCH_DOCS = 500                               # ~500 documents per batch -> 8 batches in flight with 2 workers
+    try:
+        assert tt.main([f"bio={tmp_path / 'big.txt'}", "--vocab", str(va), "--workers", "2", "--val-frac", "0", "--out", str(tmp_path / "o"),
+                        "--max-tokens", "30000"]) == 0
+    finally:
+        tt.BATCH_DOCS = old
+    got = json.loads((tmp_path / "o" / "manifest.json").read_text())["train_tokens"]
+    assert 30000 <= got < 30000 * 1.6                 # the estimate of what is already in flight stops submitting in time

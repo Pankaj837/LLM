@@ -1,10 +1,11 @@
 {
-  "notes": "Example for the ~2B-token run of the 100M model. Edit the paths to where the files really are (mounted Drive or local) and the caps after sizing each source with --count-only. Weights are shares of training tokens (docs/TRAINING_PLAN_1p5B.md section 3). Physics (Prabanjan) uses <|document|> markers; the 'marker' flag handles them.",
+  "notes": "Example for the ~2B-token run of the 100M model. If you keep only some domains, leave weights_sum as it is (it is the sum of ALL weights, so the epoch report stays correct). Edit the paths to where the files really are (mounted Drive or local) and the caps after sizing each source with --count-only. Weights are shares of training tokens (docs/TRAINING_PLAN_1p5B.md section 3). Physics (Prabanjan) uses <|document|> markers; the 'marker' flag handles them.",
   "vocab": "tokenizers/vocab32k_v2/vocab32k.tok",
   "out": "bins",
   "workers": 6,
   "val_frac": 0.005,
   "plan_tokens": 2400000000,
+  "weights_sum": 0.917,
   "domains": [
     {"name": "math",      "kind": "text",    "paths": ["data/math/maths_final_corpus.clean.txt"], "max_tokens": 480000000, "spread": 20, "weight": 0.20},
     {"name": "code",      "kind": "parquet", "paths": ["data/ravi/code.parquet"],                    "sample_rg": 0.09, "weight": 0.12},

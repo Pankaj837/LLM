@@ -136,8 +136,9 @@ Post `bench.json` (or the printed table) in the group: it replaces every estimat
 (~9,000 steps); if the measured speed is lower the run is simply shorter: never extend it past the reserve.
 
 **Data for the 100M run** (≈ 2B tokens, built on a CPU machine beforehand): `python scripts/build_dataset.py configs/run_100m.example.json`
-tokenizes only what the mix needs (row-group samples and token caps per domain), merges per domain, runs the integrity check and prints
-the `--train-mix` and evaluation arguments. Size candidates first with `--count-only`; edit paths and caps to the files actually on the machine.
+tokenizes only what the mix needs (row-group samples and token caps per domain), merges per domain, runs the integrity check, writes
+`build_manifest.json` (tokenizer hash, code commit, inputs) and prints the `--train-mix` and evaluation arguments. Each owner may run it on
+his own domains only (keep `weights_sum`); first real use: Prabanjan, 25 Oct (math, Multi-step, Astronomy, Finance: 612M tokens, check PASS). Size candidates first with `--count-only`; edit paths and caps to the files actually on the machine.
 
 ### What the first CUDA run showed (Gokul, 24 Oct, laptop RTX 4050 with 6 GB — not the H100)
 `--preset small` (6M parameters), seq 512, batch 1 × accumulation 4, 200 steps on a subset of his corpus, bf16 autocast chosen automatically:

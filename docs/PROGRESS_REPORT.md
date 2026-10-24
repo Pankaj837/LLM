@@ -26,6 +26,7 @@ a test); anything without evidence is marked *awaiting*. Last update: 24 Oct 202
 | Prabanjan | math dedup | **done**: 4,924,517 documents kept (331 duplicates, 8,444 broken-encoding, 1 short removed) | 21 Oct |
 | Prabanjan | upload the cleaned math file to Drive | **done and verified (25 Oct)**: folder `Prabanjan_LLM` holds `maths_final_corpus.clean.txt` (34.05 GB, plain text, one document per line), the Multi-step / Astronomy / Finance files (byte-identical in size to the zip already checked) and `physics_1B_top_notch.txt` (2.33 GB) | 21 Oct |
 | Prabanjan | Multi-step / Astronomy / Finance corpora | **delivered** (373 MB zip), checked by Pankaj | 21 Oct |
+| Prabanjan | token files for math, Multi-step, Astronomy, Finance (`bins.zip`, 607 MB) | **built with the real pipeline and verified (25 Oct)**: math 486.5M, Multi-step 88.6M, Astronomy 20.3M, Finance 17.2M tokens; integrity check PASS; decoded with the frozen vocabulary they read as the right text, with the other candidate as gibberish (so the vocabulary is the frozen one). Math was read as a prefix (first 1.83 GB): rerun with `spread` for a representative sample. Physics not yet tokenized | 25 Oct |
 | Prabanjan | Physics file | **read (25 Oct)**: mixed sources (65% Cosmopedia textbook units, 8% raw arXiv LaTeX, OpenWebMath pages), 13% of documents with little physics, document markers `<|document|>`; usable, ~0.64B tokens; supported by `tokenize_text.py --marker-domains` | — |
 | Ravi | final 32K vocabulary | **closed**: cannot exist before data; built by Pankaj instead | 21 Oct |
 | Ravi | training-text rule for the v4.0 files | **done**: his rule adopted in `v4_text` (verified against the files) | 23 Oct |
@@ -40,6 +41,7 @@ a test); anything without evidence is marked *awaiting*. Last update: 24 Oct 202
 | Afnan → ? | capabilities 4, 9, 10 and Engineering | **Afnan left the internship (24 Oct)**; Raju: give his part to someone else. Proposal to Raju: Swaraj takes 9 and 10 (PINN side), Prabanjan takes 4. No data exists | 24 Oct |
 | Avinash | six engineering-side capabilities (12, 14, 15) | no data delivered | 20 Oct |
 | Everyone | general-language data (none exists, nobody owns it) | open | 20 Oct |
+| Raju | "some domains are missing like physics and others" (25 Oct) | physics **is delivered** (2.33 GB, ~0.64B tokens) and only waits to be tokenized; the domains with no data at all are capabilities 4, 9, 10, 11, 12, 14, 15 (`docs/CAPABILITIES.md`) and general language | 25 Oct |
 | Pankaj | tools, plan, tokenizer, audit | **done**: see `CHANGELOG.md`; 24 Oct audit below | 24 Oct |
 
 ## Failures and corrections (kept on purpose)

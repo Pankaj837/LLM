@@ -16,7 +16,8 @@ disk) and a pool of workers tokenizes batches, so all cores stay busy and memory
 Per input it writes ``<domain>.<file>.train.bin`` / ``.val.bin`` (valid TOK1 files; the validation set is a
 deterministic hash-based share of DOCUMENTS), merges them into ``train.bin`` / ``val.bin`` unless ``--no-merge``,
 and writes ``manifest.json`` (tokenizer sha256, per-domain counts, inputs). EOS is appended after every document.
-A finished input is skipped on re-run, but only if the vocabulary, settings and input file are unchanged (a fingerprint
+``--count-only`` counts documents with the same delimiter flags as a real run (``--blank-domains`` / ``--marker-domains``);
+without them every line is a document. A finished input is skipped on re-run, but only if the vocabulary, settings and input file are unchanged (a fingerprint
 is stored with it). ``--dedup`` drops exact duplicates across all inputs of this run (about 80 bytes of memory per
 kept document: 5M documents ~ 400 MB); ``--count-only`` reads and counts characters without tokenizing.
 """
@@ -195,12 +196,16 @@ def process_input(domain: str, path: str, name: str, a, ex, seen) -> dict:
         ftrain, fval = open(tmp_t, "wb"), open(tmp_v, "wb")
         for f in (ftrain, fval):
             f.write(b"\0" * HEADER_SIZE)
-        pending: deque = deque()
+        pending: deque = deque()                       # (future, characters in that batch)
         t0, last = time.time(), time.time()
+        done_chars = 0
 
         def drain(block: bool) -> None:
+            nonlocal done_chars
             while pending and (block or len(pending) >= 4 * a.workers):
-                tb, vb, nt, nv = pending.popleft().result()
+                fut, nchars = pending.popleft()
+                tb, vb, nt, nv = fut.result()
+                done_chars += nchars
                 ftrain.write(tb)
                 fval.write(vb)
                 st["train_tokens"] += nt
@@ -209,10 +214,13 @@ def process_input(domain: str, path: str, name: str, a, ex, seen) -> dict:
         ok = False
         try:
             for batch in batches:
-                pending.append(ex.submit(_encode_batch, batch))
+                pending.append((ex.submit(_encode_batch, batch), sum(len(x) for x in batch)))
                 drain(False)
-                if a.max_tokens and st["train_tokens"] + st["val_tokens"] >= a.max_tokens:
-                    break                   # enough from this input (overshoots by the batches already in flight)
+                if a.max_tokens:
+                    done_tok = st["train_tokens"] + st["val_tokens"]
+                    ratio = done_tok / done_chars if done_chars else 0.3            # tokens per character so far
+                    if done_tok + ratio * sum(c for _, c in pending) >= a.max_tokens:
+                        break               # what is already submitted will reach the cap (no large overshoot)
                 if time.time() - last > 30:
                     last = time.time()
                     print(f"  {name}: docs={st['docs']:,} tokens={st['train_tokens'] + st['val_tokens']:,} "

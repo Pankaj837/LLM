@@ -93,6 +93,23 @@ def build_domain(d: dict, cfg: dict, out: str) -> dict:
     return res
 
 
+def write_build_manifest(cfg: dict, totals: dict, out: str, config_path: str) -> None:
+    """Provenance next to the bins: which tokenizer, which code, which inputs, how many tokens. The bins alone cannot tell."""
+    import hashlib
+    from datetime import datetime, timezone
+
+    from llm.tokenizer import BPETokenizer
+    from llm.train import run_info
+
+    inputs = {d["name"]: [{"path": p, "bytes": os.path.getsize(p)} for p in _expand(d["paths"])[: int(d.get("max_files") or 10**9)]]
+              for d in cfg["domains"]}
+    manifest = {"built_at": datetime.now(timezone.utc).isoformat(timespec="seconds"), "run_info": run_info(),
+                "tokenizer_sha256": BPETokenizer.file_sha256(cfg["vocab"]), "config": cfg,
+                "config_sha256": hashlib.sha256(open(config_path, "rb").read()).hexdigest(), "tokens": totals, "inputs": inputs}
+    with open(os.path.join(out, "build_manifest.json"), "w", encoding="utf-8") as f:
+        json.dump(manifest, f, indent=2)
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("config")
@@ -112,13 +129,16 @@ def main(argv=None) -> int:
     if cb.main([*bins, "--vocab", cfg["vocab"]]) != 0:
         raise SystemExit("integrity check FAILED: do not train on these files")
     plan = int(cfg.get("plan_tokens", 0))
-    wsum = sum(float(d["weight"]) for d in cfg["domains"])
+    # weights are shares of the WHOLE mix: when this config holds only one owner's domains, ``weights_sum`` (the sum of all
+    # domains' weights in the full config) keeps the epoch report honest
+    wsum = float(cfg.get("weights_sum") or sum(float(d["weight"]) for d in cfg["domains"]))
     print("\ndomain               train tokens   weight   epochs at plan_tokens")
     for d in cfg["domains"]:
         t = totals[d["name"]]["train"]
         share = float(d["weight"]) / wsum
         ep = share * plan / t if plan and t else float("nan")
         print(f"{d['name']:<20}{t:>14,}{share:>9.3f}{ep:>12.2f}" + ("   <-- repeated more than 4x" if ep > 4 else ""))
+    write_build_manifest(cfg, totals, out, a.config)
     mix = " ".join(f"{os.path.join(out, d['name'] + '.train.bin')}={d['weight']}" for d in cfg["domains"])
     vals = " ".join(f"{d['name']}={os.path.join(out, d['name'] + '.val.bin')}" for d in cfg["domains"]
                     if totals[d["name"]]["val"] > 0)

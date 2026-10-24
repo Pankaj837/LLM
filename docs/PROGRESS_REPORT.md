@@ -7,8 +7,8 @@ a test); anything without evidence is marked *awaiting*. Last update: 24 Oct 202
 ## Gates (in order; nothing starts before the gate above it)
 | # | Gate | Owner | Status | Evidence / next step |
 |---|---|---|---|---|
-| 0 | 32K tokenizer approved and frozen | Raju (approve), Pankaj (freeze) | **awaiting approval** | two candidates built and verified (round-trip, C++ parity 3003/3003): `tokenizers/vocab32k_v2/` and `tokenizers/vocab32k_digits_v2/` (numbers digit by digit, ~5–6% more tokens; recommended). Raju/Pankaj choose one, then it is frozen |
-| 1 | Compute budget decided | Raju | **awaiting** | Gokul: ₹330/H100-hour, credit ≈ ₹1,000 ≈ 3 hours; 1.51B on 30B tokens ≈ 257 H100-hours ≈ ₹85,000 (est.) |
+| 0 | 32K tokenizer approved and frozen | Raju (approve), Pankaj (freeze) | **Raju said "vocab32k" (24 Oct) — which of the two candidates is to be confirmed** | two candidates built and verified (round-trip, C++ parity 3003/3003): `tokenizers/vocab32k_v2/` and `tokenizers/vocab32k_digits_v2/` (numbers digit by digit, ~5–6% more tokens; recommended). Raju/Pankaj choose one, then it is frozen |
+| 1 | Compute budget decided | Raju | **decided 24 Oct**: smaller model first, 3 GPU-hours total, no more available (Gokul: team heads will not allow) | 1.51B on 30B tokens (≈ 257 H100-hours) is out of reach; the 3-hour session is `docs/TRAINING_PLAN_1p5B.md` §5b |
 | 2 | All cleaned data in one shared Drive folder | Raju (create/confirm folder), all owners (upload) | **awaiting** | requested in the group; no folder link seen yet |
 | 3 | Recount per domain from the manifests | Pankaj | blocked by gates 0 and 2 | `tokenize_*.py --count-only` is ready |
 | 4 | Tokenize, merge per domain, `check_bins.py` PASS | Ravi (data), Gokul (machine) | blocked by gates 0 and 2 | tools ready and tested: `tokenize_parquet.py`, `tokenize_text.py`, `merge_bins.py`, `check_bins.py` |
@@ -23,14 +23,16 @@ a test); anything without evidence is marked *awaiting*. Last update: 24 Oct 202
 | Gokul | share the three cleaned folders (Drive link) | awaiting | 22 Oct |
 | Gokul | Medical extraction (`scripts/pubmed_to_parquet.py`), CPU only | awaiting Raju's decision to include Medical | 21 Oct |
 | Prabanjan | math dedup | **done**: 4,924,517 documents kept (331 duplicates, 8,444 broken-encoding, 1 short removed) | 21 Oct |
-| Prabanjan | upload `maths_final_corpus.clean.txt` (as `.gz`) to Drive | awaiting | 21 Oct |
+| Prabanjan | upload `maths_final_corpus.clean.txt` (as `.gz`) to Drive | **"I have uploaded" (24 Oct)**; link/file not yet checked | 21 Oct |
 | Prabanjan | Multi-step / Astronomy / Finance corpora | **delivered** (373 MB zip), checked by Pankaj | 21 Oct |
 | Prabanjan | Physics file | delivered earlier; not read in full | — |
 | Ravi | final 32K vocabulary | **closed**: cannot exist before data; built by Pankaj instead | 21 Oct |
 | Ravi | training-text rule for the v4.0 files | **done**: his rule adopted in `v4_text` (verified against the files) | 23 Oct |
 | Ravi | Scientific Programming dedup by sha256 (491,834 distinct names in 1,831,796 rows) | **awaiting** — Ravi said Avinash's final merge will do it | 21 Oct |
 | Avinash | merged file with dedup (promised "by tomorrow", 21–22 Oct) | **awaiting**; he asked Pankaj to run index/quality/embeddings/cache — deferred, not on the training path | 22 Oct |
-| Avinash | cross-dataset near-duplicate removal; domain mapping to the 15 capabilities | awaiting | 20 Oct |
+| Avinash | domain mapping to the 15 capabilities | asked 24 Oct what the list is: answered with `docs/CAPABILITIES.md`; mapping awaiting | 24 Oct |
+| Avinash | steps 4–6 (intrinsic properties, 768-dim embeddings, surrogate cache) | **postponed**: not needed for LLM training (Raju, 24 Oct: required later for the PINN side) | 24 Oct |
+| Avinash | cross-dataset near-duplicate removal | awaiting | 20 Oct |
 | Om | 1.51B benchmark | awaiting GPU time; FSDP/FP8/FA3 not in the repo | 21 Oct |
 | Swaraj | gap analysis of the LLM against the requirements, before training | awaiting (Raju: focus on the 3B model) | 21 Oct |
 | Afnan, Avinash | six engineering capabilities: owners and dates | **no reply seen**; no data exists | 20 Oct |

@@ -1,0 +1,22 @@
+{
+  "notes": "Example for the ~2B-token run of the 100M model. Edit the paths to where the files really are (mounted Drive or local) and the caps after sizing each source with --count-only. Weights are shares of training tokens (docs/TRAINING_PLAN_1p5B.md section 3). Physics is not listed: add it once its file format is known.",
+  "vocab": "tokenizers/vocab32k_v2/vocab32k.tok",
+  "out": "bins",
+  "workers": 6,
+  "val_frac": 0.005,
+  "plan_tokens": 2400000000,
+  "domains": [
+    {"name": "math",      "kind": "text",    "paths": ["data/math/maths_final_corpus.clean.txt.gz"], "max_tokens": 480000000, "weight": 0.20},
+    {"name": "code",      "kind": "parquet", "paths": ["data/ravi/code.parquet"],                    "sample_rg": 0.09, "weight": 0.12},
+    {"name": "sciqa",     "kind": "parquet", "paths": ["data/ravi/scientific_qa.parquet"],           "sample_rg": 0.10, "weight": 0.10},
+    {"name": "bio",       "kind": "parquet", "paths": ["data/gokul/biology/*.parquet"],              "max_files": 4,   "weight": 0.10},
+    {"name": "sciprog",   "kind": "parquet", "paths": ["data/ravi/scientific_programming.dedup.parquet"], "sample_rg": 0.12, "weight": 0.08},
+    {"name": "earth",     "kind": "parquet", "paths": ["data/gokul/earth_environment/*.parquet"],    "max_files": 6,   "weight": 0.07},
+    {"name": "scidisc",   "kind": "parquet", "paths": ["data/gokul/scientific_discovery/*.parquet"], "max_files": 10,  "weight": 0.07},
+    {"name": "chem",      "kind": "text",    "paths": ["data/chem/chem_clean_*.txt"],                "max_tokens": 120000000, "weight": 0.05},
+    {"name": "cad",       "kind": "parquet", "paths": ["data/ravi/cad_step.parquet"],                "sample_rg": 0.12, "weight": 0.04},
+    {"name": "multistep", "kind": "text",    "paths": ["data/prab/multistep_corpus.txt"],            "blank": true, "max_tokens": 80000000, "weight": 0.03},
+    {"name": "astro",     "kind": "text",    "paths": ["data/prab/astronomy_corpus.txt"],            "blank": true, "max_tokens": 15000000, "weight": 0.005},
+    {"name": "finance",   "kind": "text",    "paths": ["data/prab/finance_corpus.txt"],              "max_tokens": 8000000, "weight": 0.002}
+  ]
+}

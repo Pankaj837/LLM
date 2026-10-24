@@ -116,6 +116,29 @@ torchrun --nproc_per_node=8 -m llm.train --train-bin data/train.bin --val-bin da
 ```
 (on one GPU drop `torchrun ...` and use `python -m llm.train`). Stop at 40 minutes: GPU time is the scarce resource.
 
+## 5b. The 3-hour GPU session (Raju, 24 Oct: "smaller model first, vocab32k, use the 3 hours wisely to set the benchmark")
+Gokul confirmed there will be no more GPU hours, so the whole session is ≈ 3 H100-hours ≈ ₹990. Everything that can run on a CPU runs
+**before** the clock starts (tokenizing, merging, checking: `scripts/build_dataset.py`). GPU minutes, in this order:
+
+| Min | What | Why / stop rule |
+|---|---|---|
+| 0–15 | `git clone`, `git checkout scale-run-rc2`, `pip install -e ".[dev]"`, copy the prepared bins | setup is billed time; do it once, nothing else |
+| 15–25 | **Benchmark** (below): 100m / 300m / 1p5b, several micro-batch sizes, synthetic tokens | decides everything; gives measured tokens/s, memory, cost per 1B tokens |
+| 25–35 | 1.51B smoke test: 60 steps, save, resume to 80 steps | proves checkpoint/resume and the multi-process path on the real hardware |
+| 35–150 | **100M run** on the prepared mix; `--max-steps` from the measured speed (below) | the first real model; a mid-run checkpoint every 500 steps |
+| 150–180 | reserve | a failed start, one re-run, per-domain evaluation (`eval_domains.py`) |
+
+```
+python scripts/benchmark.py --presets 100m 300m 1p5b --batch-sizes 1 2 4 8 16 32 --seq-len 2048 --rupees-per-hour 330 --out bench.json
+```
+Post `bench.json` (or the printed table) in the group: it replaces every estimate in §2. **100M run length:** `max_steps = tokens_per_s × 6,000 s ÷ 262,144`
+(100 minutes of the 115-minute window, the rest is evaluation and margin; 262,144 tokens per step, recipe in §4). With the estimated 4×10⁵ tokens/s that is about 2.4B tokens
+(~9,000 steps); if the measured speed is lower the run is simply shorter: never extend it past the reserve.
+
+**Data for the 100M run** (≈ 2B tokens, built on a CPU machine beforehand): `python scripts/build_dataset.py configs/run_100m.example.json`
+tokenizes only what the mix needs (row-group samples and token caps per domain), merges per domain, runs the integrity check and prints
+the `--train-mix` and evaluation arguments. Size candidates first with `--count-only`; edit paths and caps to the files actually on the machine.
+
 ## 6. Pre-launch checklist (every item, in order, before paying for GPU time)
 1. `python scripts/verify_vocab.py <vocab> --holdout ... --cli encode_cli` → PASS, and the SHA-256 equals the frozen hash.
 2. Every source has its dedup report (Gokul ×3, Ravi Scientific Programming, Prabanjan math) and its inputs are complete (`--expect-files`).
@@ -142,7 +165,8 @@ requirement gaps. Avinash: dataset integration, dedup and cross-domain checks. P
 quality validation, domain evaluation.
 
 ## 9. Open decisions and risks
-Decisions for Raju: (1) choose and freeze one of the two 32K tokenizers (`vocab32k_v2`, or `vocab32k_digits_v2` with numbers encoded digit by digit at ~5–6% more tokens — recommended, see `tokenizers/README.md`); (2) compute: budget/another machine for the 1.51B run, or a
+**Decided 24 Oct (Raju):** first model smaller (the 100M above); "vocab32k" (to be confirmed: `vocab32k_v2` or `vocab32k_digits_v2`); the 3 GPU hours are all there is (Gokul: no more GPU hours); Pankaj sets the benchmark.
+Still open: (1) choose and freeze one of the two 32K tokenizers (`vocab32k_v2`, or `vocab32k_digits_v2` with numbers encoded digit by digit at ~5–6% more tokens — recommended, see `tokenizers/README.md`); (2) compute: budget/another machine for the 1.51B run, or a
 smaller first model, or 1.51B on 5B tokens; (3) the data mix in §3; (4) include Medical or not; (5) who delivers
 engineering and general-language data; (6) true 3B or 2B as the ceiling.
 Risks: GPU time and count; the DDP path and the 1.51B model have never run on CUDA; all numbers in §2–§3 are estimates;

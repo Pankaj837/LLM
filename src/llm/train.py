@@ -283,6 +283,8 @@ def _train(cfg: TrainConfig, device: torch.device, amp_dtype: Optional[torch.dty
         if done % cfg.log_interval == 0 or done == end_step:
             record = {"step": done, "loss": step_loss, "lr": lr, "grad_norm": grad_norm,
                       "tokens_per_s": tokens_seen / max(time.time() - t0, 1e-9)}
+            if device.type == "cuda":
+                record["peak_mem_gb"] = torch.cuda.max_memory_allocated(device) / 1e9
         if main_rank and val_ds is not None and (done % cfg.eval_interval == 0 or done == end_step):
             record.update({"step": done, **evaluate(model, val_ds, cfg.batch_size, cfg.eval_batches, device, amp_dtype)})
             if record["val_loss"] < best_val:

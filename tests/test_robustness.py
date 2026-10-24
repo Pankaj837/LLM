@@ -83,3 +83,38 @@ def test_dedup_parquet_keeps_same_named_inputs_apart_and_writes_real_row_groups(
     outs = sorted((tmp_path / "o").glob("*.parquet"))
     assert len(outs) == 2
     assert all(pq.ParquetFile(p).metadata.num_row_groups == 1 for p in outs)       # 3000 rows, not one group per 2000-row batch
+
+
+def test_sample_rg_takes_evenly_spaced_row_groups_never_a_prefix(tmp_path, two_vocabs):
+    va, _ = two_vocabs
+    docs = [f"group{i // 10} document {i} about cells and the number {i}" for i in range(80)]
+    p = tmp_path / "s.parquet"
+    pq.write_table(pa.table({"doc_id": [f"d{i}" for i in range(80)], "domain": ["bio"] * 80, "text": docs}), p, row_group_size=10)
+    assert pq.ParquetFile(p).metadata.num_row_groups == 8
+    out = tmp_path / "o"
+    assert tp.main([str(p), "--vocab", str(va), "--out", str(out), "--workers", "1", "--val-frac", "0", "--sample-rg", "0.25",
+                    "--chunk-mb", "0.0001", "--no-merge"]) == 0
+    m = json.loads((out / "manifest.json").read_text())
+    assert m["docs"] == 20                                                   # 2 of 8 row groups x 10 documents
+    taken = sorted(int(j["job"].split(".rg")[1]) for j in m["shards"])
+    assert taken == [2, 6]                                                   # spread over the file, not rows 0-19
+    with pytest.raises(SystemExit):
+        tp.main([str(p), "--vocab", str(va), "--out", str(out), "--sample-rg", "0"])
+
+
+def test_max_tokens_stops_reading_a_text_input_early(tmp_path, two_vocabs):
+    va, _ = two_vocabs
+    (tmp_path / "big.txt").write_text("\n".join(TEXTS * 400) + "\n", encoding="utf-8")
+    out = tmp_path / "o"
+    base = [f"bio={tmp_path / 'big.txt'}", "--vocab", str(va), "--workers", "1", "--val-frac", "0"]
+    assert tt.main([*base, "--out", str(out / "all")]) == 0
+    full = json.loads((out / "all" / "manifest.json").read_text())["train_tokens"]
+    old = tt.BATCH_DOCS
+    tt.BATCH_DOCS = 1000                       # small batches so the cap can bite on a small file
+    try:
+        assert tt.main([*base, "--out", str(out / "cap"), "--max-tokens", "5000"]) == 0
+    finally:
+        tt.BATCH_DOCS = old
+    capped = json.loads((out / "cap" / "manifest.json").read_text())["train_tokens"]
+    assert 5000 <= capped < full
+    assert read_header(str(out / "cap" / "train.bin")).total_tokens == capped

@@ -46,7 +46,7 @@ from llm.tokenizer import BPETokenizer  # noqa: E402
 BATCH = 2000
 MOD = 1_000_000
 CHUNK_MB = 256
-RULE_VERSION = 3      # bump when v4_text / clean_text / the val split change: finished jobs are then recomputed
+RULE_VERSION = 4      # bump when v4_text / clean_text / the val split change: finished jobs are then recomputed
 _SURROGATE = re.compile("[\ud800-\udfff]")
 
 
@@ -143,7 +143,7 @@ def process_file(job) -> dict:
     import pyarrow.parquet as pq
 
     path, out_dir, vocab, val_frac, dedup, min_chars, count_only, force = job[:8]
-    rg_lo, rg_hi, name = (job[8:11] if len(job) >= 11 else (None, None, None))
+    rg_lo, rg_hi, name = (job[8:11] if len(job) >= 11 else (None, None, None))      # rg_lo may be an explicit list of row groups
     os.makedirs(out_dir, exist_ok=True)
     stem = name or Path(path).stem
     stats_p = Path(out_dir) / f"{stem}.stats.json"
@@ -180,7 +180,7 @@ def process_file(job) -> dict:
         for f in (ftrain, fval):
             f.write(b"\0" * HEADER_SIZE)
     try:
-        rgs = list(range(rg_lo, rg_hi)) if rg_lo is not None else None
+        rgs = (list(rg_lo) if isinstance(rg_lo, (list, tuple)) else list(range(rg_lo, rg_hi))) if rg_lo is not None else None
         for batch in pf.iter_batches(batch_size=BATCH, columns=cols, row_groups=rgs):
             d = batch.to_pydict()
             n = batch.num_rows
@@ -275,14 +275,25 @@ def plan_jobs(files, a) -> list:
         md = pq.ParquetFile(f).metadata
         n = md.num_row_groups
         target = max(1, int(a.chunk_mb * (1 << 20)))
-        ranges, lo, acc = [], 0, 0
-        for r in range(n):
+        sel = list(range(n))
+        if a.sample_rg < 1.0:       # evenly spaced row groups: files are often sorted by source, so never take a prefix
+            k = max(1, round(a.sample_rg * n))
+            sel = sorted({int((i + 0.5) * n / k) for i in range(k)})
+        groups, cur, acc = [], [], 0
+        for r in sel:
+            cur.append(r)
             acc += md.row_group(r).total_byte_size
             if acc >= target:
-                ranges.append((lo, r + 1))
-                lo, acc = r + 1, 0
-        if lo < n:
-            ranges.append((lo, n))
+                groups.append(cur)
+                cur, acc = [], 0
+        if cur:
+            groups.append(cur)
+        if a.sample_rg < 1.0:
+            for g in groups:
+                jobs.append((f, a.out, a.vocab, a.val_frac, a.dedup, a.min_chars, a.count_only, a.force, g, None,
+                         f"{stem}.rg{g[0]:05d}"))
+            continue
+        ranges = [(g[0], g[-1] + 1) for g in groups]
         if len(ranges) <= 1:
             jobs.append((f, a.out, a.vocab, a.val_frac, a.dedup, a.min_chars, a.count_only, a.force, None, None, stem))
         else:
@@ -307,8 +318,12 @@ def main(argv=None) -> int:
     ap.add_argument("--delete-shards", action="store_true",
                     help="remove per-job bins after a successful merge (this also removes the per-domain validation files)")
     ap.add_argument("--chunk-mb", type=float, default=CHUNK_MB, help="target uncompressed MB of row groups per parallel job")
+    ap.add_argument("--sample-rg", type=float, default=1.0,
+                    help="use only this fraction of each file's row groups, evenly spaced (e.g. 0.1 for a 10%% sample)")
     ap.add_argument("--force", action="store_true")
     a = ap.parse_args(argv)
+    if not 0 < a.sample_rg <= 1:
+        ap.error("--sample-rg must be in (0, 1]")
     if not a.count_only and not a.vocab:
         ap.error("--vocab is required unless --count-only")
 

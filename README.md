@@ -93,7 +93,13 @@ torchrun --nproc_per_node=8 -m llm.train --train-mix bins/code.train.bin=0.6 bin
     --vocab tokenizers/vocab32k_v2/vocab32k.tok --out runs/1p5b --preset 1p5b --seq-len 2048 --batch-size 4 --grad-accum 8
 python scripts/eval_domains.py --ckpt runs/1p5b/ckpt_last.pt --val math="runs/bins/math*.val.bin" code=runs/bins/code.val.bin
 ```
-Recipe, budget, mix proposal, smoke test and the pre-launch checklist: `docs/TRAINING_PLAN_1p5B.md`.
+One command from raw files to a checked, mixed training set (capped per domain), and a measured GPU benchmark:
+```bash
+python scripts/build_dataset.py configs/run_100m.example.json      # tokenize + merge per domain + integrity check + prints --train-mix
+python scripts/benchmark.py --presets 100m 300m 1p5b --batch-sizes 1 2 4 8 16 --seq-len 2048 --out bench.json     # tokens/s, memory, rupees per 1B tokens
+```
+Recipe, budget, mix proposal, the 3-hour GPU session, smoke test and the pre-launch checklist: `docs/TRAINING_PLAN_1p5B.md`;
+the 15 capabilities and what data exists for each: `docs/CAPABILITIES.md`.
 
 ### C++ tokenizer parity (verified)
 ```bash

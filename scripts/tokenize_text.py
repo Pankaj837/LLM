@@ -124,7 +124,7 @@ def process_input(domain: str, path: str, name: str, a, ex, seen) -> dict:
     stats_p = out / f"{name}.stats.json"
     st_in = os.stat(path)
     fp = tp.fingerprint(rule=tp.RULE_VERSION, vocab=BPETokenizer.file_sha256(a.vocab) if not a.count_only else None,
-                        val_frac=a.val_frac, dedup=a.dedup, min_chars=a.min_chars, blank=domain in a.blank_set,
+                        val_frac=a.val_frac, dedup=a.dedup, min_chars=a.min_chars, blank=domain in a.blank_set, max_tokens=a.max_tokens,
                         size=st_in.st_size, mtime=int(st_in.st_mtime))
     if not a.count_only and stats_p.exists() and not a.force:
         done = json.loads(stats_p.read_text())
@@ -159,6 +159,8 @@ def process_input(domain: str, path: str, name: str, a, ex, seen) -> dict:
             for batch in batches:
                 pending.append(ex.submit(_encode_batch, batch))
                 drain(False)
+                if a.max_tokens and st["train_tokens"] + st["val_tokens"] >= a.max_tokens:
+                    break                   # enough from this input (overshoots by the batches already in flight)
                 if time.time() - last > 30:
                     last = time.time()
                     print(f"  {name}: docs={st['docs']:,} tokens={st['train_tokens'] + st['val_tokens']:,} "
@@ -195,6 +197,8 @@ def main(argv=None) -> int:
     ap.add_argument("--min-chars", type=int, default=0)
     ap.add_argument("--count-only", action="store_true")
     ap.add_argument("--chars-per-token", type=float, default=3.6, help="only for the --count-only estimate")
+    ap.add_argument("--max-tokens", type=int, default=0,
+                    help="stop reading an input after about this many tokens (a prefix: shuffle or sample first if the order carries meaning)")
     ap.add_argument("--no-merge", action="store_true")
     ap.add_argument("--force", action="store_true")
     a = ap.parse_args(argv)

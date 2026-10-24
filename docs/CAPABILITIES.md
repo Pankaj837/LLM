@@ -8,13 +8,13 @@ Token numbers are the estimates of `docs/DATA_STATUS_2026-10-20.md`; "none" mean
 | 1 | Mathematics | Prabanjan | 4.92M documents (~9.3B tokens) |
 | 2 | Physics | Prabanjan | 165,528 documents (~0.6B); not read in full |
 | 3 | Chemistry | Aarav → Ravi | chemistry text ~0.5B; Avinash's "chemical" records are database rows, not prose |
-| 4 | Engineering reasoning | Afnan | **none** |
+| 4 | Engineering reasoning | Afnan (left the internship, 24 Oct: **needs a new owner**) | **none** |
 | 5 | Multi-step calculations | Prabanjan | 18.0M generated arithmetic Q&A (~0.43B) |
 | 6 | Scientific Q&A | Aarav → Ravi | 5.93M rows (~2.5B) |
 | 7 | Code | Ravi | 2.69M files (3.28B reported; 83% TypeScript) |
 | 8 | CAD/STEP understanding | Ravi | 940,576 rows (~0.75B; 40.5% procedural) |
-| 9 | Numerical simulation (CFD/FEA/PDEs) | Afnan | only synthetic OpenFOAM templates, no text |
-| 10 | Physics + AI (PINNs/FNO/neural operators) | Afnan | **none** |
+| 9 | Numerical simulation (CFD/FEA/PDEs) | Afnan (left: **needs a new owner**) | only synthetic OpenFOAM templates, no text |
+| 10 | Physics + AI (PINNs/FNO/neural operators) | Afnan (left: **needs a new owner**) | **none** |
 | 11 | Generative engineering | Ravi | **none** delivered |
 | 12 | Experimental validation | Avinash | **none** |
 | 13 | Scientific discovery | Aarav → Gokul | 559,865 documents after dedup (~1.6B) |

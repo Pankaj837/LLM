@@ -1,9 +1,11 @@
 # Tokenizers
 
+**Decision (Raju, 24–25 Oct): `vocab32k_v2` is frozen** — see `FROZEN.md`. The text below explains how the two candidates differ and is kept for the later digits evaluation.
+
 | Directory | What | SHA-256 | Status |
 |---|---|---|---|
-| `vocab32k_v2/` | 32K byte-level BPE; number chunks learned from the data | `10b3c5aecf6b81746bf86f8c18f8c576bf716a3620e7632e8fc2684006b51cdc` | candidate |
-| `vocab32k_digits_v2/` | same sample and trainer, **no token with two adjacent digits** (numbers digit by digit) | `b2e45a916f6b01868d36ca181887021fcee36e8d91f1d4835745553d3397aa87` | candidate — **recommended** |
+| `vocab32k_v2/` | 32K byte-level BPE; number chunks learned from the data | `10b3c5aecf6b81746bf86f8c18f8c576bf716a3620e7632e8fc2684006b51cdc` | **FROZEN 25 Oct** (`FROZEN.md`) |
+| `vocab32k_digits_v2/` | same sample and trainer, **no token with two adjacent digits** (numbers digit by digit) | `b2e45a916f6b01868d36ca181887021fcee36e8d91f1d4835745553d3397aa87` | not frozen: to be evaluated separately, only if digit-level numerical reasoning shows a clear need (Raju) |
 
 Both were trained on the same 227 MB balanced sample of the delivered data, both pass the same verification (lossless
 round-trip, C++ encoder gives identical ids on 3003/3003 lines, EOS cannot be forged by text; `scripts/verify_vocab.py`).

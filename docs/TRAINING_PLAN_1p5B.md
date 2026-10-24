@@ -139,6 +139,13 @@ Post `bench.json` (or the printed table) in the group: it replaces every estimat
 tokenizes only what the mix needs (row-group samples and token caps per domain), merges per domain, runs the integrity check and prints
 the `--train-mix` and evaluation arguments. Size candidates first with `--count-only`; edit paths and caps to the files actually on the machine.
 
+### What the first CUDA run showed (Gokul, 24 Oct, laptop RTX 4050 with 6 GB — not the H100)
+`--preset small` (6M parameters), seq 512, batch 1 × accumulation 4, 200 steps on a subset of his corpus, bf16 autocast chosen automatically:
+loss 9.71 → 7.57, validation loss 9.77 → 7.90 (uniform would be 10.37), no NaN, ~5,200 tokens/s. So the **CUDA / bf16 training path works** for a small
+model. It says nothing yet about the H100, DDP/NCCL or the 100M/1.51B presets: at seq 2048 even the first benchmark rows exceeded 6 GB (expected:
+1.51B needs ~24 GB of state alone). The H100 session in §5b is still the real benchmark. On a 6 GB GPU use
+`python scripts/benchmark.py --presets tiny small 100m --seq-len 512 --batch-sizes 1 2 4`.
+
 ## 6. Pre-launch checklist (every item, in order, before paying for GPU time)
 1. `python scripts/verify_vocab.py <vocab> --holdout ... --cli encode_cli` → PASS, and the SHA-256 equals the frozen hash.
 2. Every source has its dedup report (Gokul ×3, Ravi Scientific Programming, Prabanjan math) and its inputs are complete (`--expect-files`).
@@ -147,6 +154,14 @@ the `--train-mix` and evaluation arguments. Size candidates first with `--count-
 5. Smoke test (§5) passed, including resume.
 6. Disk: space for the bins plus ~40 GB of checkpoints; the per-domain validation files are present.
 7. Budget and run length confirmed in writing (§9).
+
+## 6b. After pretraining: instruction and structured-output fine-tuning (not yet planned)
+Swaraj's gap list (24 Oct, on the 51M experts): (1) too little capacity to do domain reasoning **and** keep the rigid `scientific_ir` JSON syntax;
+(2) base-model behaviour, no instruction following (repetition loops, textbook text instead of extraction); (3) values are not bound to the right
+entities and units are not normalised across multi-material prompts. Pretraining alone cannot fix (2) and (3): they need a supervised stage with
+examples of the target JSON. Preparation already in the repo: the vocabulary reserves `<|system|>`, `<|user|>`, `<|assistant|>`, `<|end_of_turn|>`,
+`<|tool_call|>`, `<|tool_result|>` so that stage does not resize a frozen vocabulary. Missing: the `scientific_ir` examples (who writes or exports them,
+how many, which schema version) and an owner (proposal: Swaraj with Avinash's agent/tool-use capability); to be decided after the first run.
 
 ## 7. Evaluation suite
 - Per-domain held-out loss/perplexity with `scripts/eval_domains.py` (one validation file per domain: tokenize with
@@ -165,8 +180,8 @@ requirement gaps. Avinash: dataset integration, dedup and cross-domain checks. P
 quality validation, domain evaluation.
 
 ## 9. Open decisions and risks
-**Decided 24 Oct (Raju):** first model smaller (the 100M above); "vocab32k" (to be confirmed: `vocab32k_v2` or `vocab32k_digits_v2`); the 3 GPU hours are all there is (Gokul: no more GPU hours); Pankaj sets the benchmark.
-Still open: (1) choose and freeze one of the two 32K tokenizers (`vocab32k_v2`, or `vocab32k_digits_v2` with numbers encoded digit by digit at ~5–6% more tokens — recommended, see `tokenizers/README.md`); (2) compute: budget/another machine for the 1.51B run, or a
+**Decided (Raju, 24–25 Oct):** first model smaller (the 100M above); tokenizer `vocab32k_v2` **frozen** (`tokenizers/FROZEN.md`), `vocab32k_digits_v2` to be evaluated separately later and only if digit-level numerical reasoning shows a clear need; the 3 GPU hours are all there is (Gokul: no more GPU hours); Pankaj sets the benchmark.
+Still open: (1) ~~choose and freeze one of the two 32K tokenizers~~ done; the digits question is deferred (`vocab32k_v2`, or `vocab32k_digits_v2` with numbers encoded digit by digit at ~5–6% more tokens — recommended, see `tokenizers/README.md`); (2) compute: budget/another machine for the 1.51B run, or a
 smaller first model, or 1.51B on 5B tokens; (3) the data mix in §3; (4) include Medical or not; (5) who delivers
 engineering and general-language data; (6) true 3B or 2B as the ceiling.
 Risks: GPU time and count; the DDP path and the 1.51B model have never run on CUDA; all numbers in §2–§3 are estimates;

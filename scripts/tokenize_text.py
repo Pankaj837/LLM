@@ -15,8 +15,9 @@ disk) and a pool of workers tokenizes batches, so all cores stay busy and memory
 Per input it writes ``<domain>.<file>.train.bin`` / ``.val.bin`` (valid TOK1 files; the validation set is a
 deterministic hash-based share of DOCUMENTS), merges them into ``train.bin`` / ``val.bin`` unless ``--no-merge``,
 and writes ``manifest.json`` (tokenizer sha256, per-domain counts, inputs). EOS is appended after every document.
-A finished input is skipped on re-run. ``--dedup`` drops exact duplicates across all inputs of this run (8 bytes per
-kept document in memory); ``--count-only`` reads and counts characters without tokenizing.
+A finished input is skipped on re-run, but only if the vocabulary, settings and input file are unchanged (a fingerprint
+is stored with it). ``--dedup`` drops exact duplicates across all inputs of this run (about 80 bytes of memory per
+kept document: 5M documents ~ 400 MB); ``--count-only`` reads and counts characters without tokenizing.
 """
 from __future__ import annotations
 
@@ -121,17 +122,25 @@ def _batches(path: str, blank: bool, seen, dedup: bool, min_chars: int, stats: d
 def process_input(domain: str, path: str, name: str, a, ex, seen) -> dict:
     out = Path(a.out)
     stats_p = out / f"{name}.stats.json"
+    st_in = os.stat(path)
+    fp = tp.fingerprint(rule=tp.RULE_VERSION, vocab=BPETokenizer.file_sha256(a.vocab) if not a.count_only else None,
+                        val_frac=a.val_frac, dedup=a.dedup, min_chars=a.min_chars, blank=domain in a.blank_set,
+                        size=st_in.st_size, mtime=int(st_in.st_mtime))
     if not a.count_only and stats_p.exists() and not a.force:
-        return json.loads(stats_p.read_text())
+        done = json.loads(stats_p.read_text())
+        if done.get("fingerprint") == fp:
+            return done
+        print(f"[tokenize] {name}: settings, vocabulary or input changed since the earlier run -> recomputing", flush=True)
     blank = domain in a.blank_set
-    st = {"file": os.path.basename(path), "job": name, "domain": domain, "in": 0, "docs": 0, "dup_dropped": 0,
+    st = {"file": os.path.basename(path), "job": name, "fingerprint": fp, "domain": domain, "in": 0, "docs": 0, "dup_dropped": 0,
           "short_dropped": 0, "chars": 0, "train_tokens": 0, "val_tokens": 0}
     batches = _batches(path, blank, seen, a.dedup, a.min_chars, st)
     if a.count_only:
         for _ in batches:
             pass
     else:
-        ftrain, fval = open(out / f"{name}.train.bin", "wb"), open(out / f"{name}.val.bin", "wb")
+        tmp_t, tmp_v = out / f"{name}.train.bin.tmp", out / f"{name}.val.bin.tmp"
+        ftrain, fval = open(tmp_t, "wb"), open(tmp_v, "wb")
         for f in (ftrain, fval):
             f.write(b"\0" * HEADER_SIZE)
         pending: deque = deque()
@@ -145,6 +154,7 @@ def process_input(domain: str, path: str, name: str, a, ex, seen) -> dict:
                 st["train_tokens"] += nt
                 st["val_tokens"] += nv
 
+        ok = False
         try:
             for batch in batches:
                 pending.append(ex.submit(_encode_batch, batch))
@@ -154,13 +164,22 @@ def process_input(domain: str, path: str, name: str, a, ex, seen) -> dict:
                     print(f"  {name}: docs={st['docs']:,} tokens={st['train_tokens'] + st['val_tokens']:,} "
                           f"({(time.time() - t0):.0f}s)", flush=True)
             drain(True)
+            ok = True
         finally:
-            tok_id = BPETokenizer.from_file(a.vocab)
-            tp._write_header(ftrain, tok_id.n_vocab, tok_id.eos_id, st["train_tokens"], SPLIT_TRAIN)
-            tp._write_header(fval, tok_id.n_vocab, tok_id.eos_id, st["val_tokens"], SPLIT_VAL)
+            if ok:
+                tok_id = BPETokenizer.from_file(a.vocab)
+                tp._write_header(ftrain, tok_id.n_vocab, tok_id.eos_id, st["train_tokens"], SPLIT_TRAIN)
+                tp._write_header(fval, tok_id.n_vocab, tok_id.eos_id, st["val_tokens"], SPLIT_VAL)
             ftrain.close()
             fval.close()
-        stats_p.write_text(json.dumps(st))
+            if not ok:                      # a failed input leaves nothing that could be mistaken for a finished one
+                tmp_t.unlink(missing_ok=True)
+                tmp_v.unlink(missing_ok=True)
+        os.replace(tmp_t, out / f"{name}.train.bin")
+        os.replace(tmp_v, out / f"{name}.val.bin")
+        tmp = stats_p.with_suffix(".json.tmp")
+        tmp.write_text(json.dumps(st))
+        os.replace(tmp, stats_p)
     return st
 
 

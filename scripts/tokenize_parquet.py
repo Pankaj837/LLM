@@ -46,6 +46,7 @@ from llm.tokenizer import BPETokenizer  # noqa: E402
 BATCH = 2000
 MOD = 1_000_000
 CHUNK_MB = 256
+RULE_VERSION = 3      # bump when v4_text / clean_text / the val split change: finished jobs are then recomputed
 _SURROGATE = re.compile("[\ud800-\udfff]")
 
 
@@ -124,6 +125,11 @@ def v4_text(description, properties) -> str:
     return description or ""
 
 
+def fingerprint(**parts) -> str:
+    """Hash of everything that determines a job's output; a finished job is reused only if it is identical."""
+    return hashlib.blake2b(json.dumps(parts, sort_keys=True, default=str).encode(), digest_size=12).hexdigest()
+
+
 def _write_header(f, vocab_size: int, eos_id: int, total: int, split: int) -> None:
     f.seek(0)
     f.write(struct.pack(HEADER_FMT, MAGIC, 1, vocab_size, eos_id, total, split, 0))
@@ -141,8 +147,14 @@ def process_file(job) -> dict:
     os.makedirs(out_dir, exist_ok=True)
     stem = name or Path(path).stem
     stats_p = Path(out_dir) / f"{stem}.stats.json"
+    st_in = os.stat(path)
+    fp = fingerprint(rule=RULE_VERSION, vocab=BPETokenizer.file_sha256(vocab) if (vocab and not count_only) else None, val_frac=val_frac, dedup=dedup,
+                     min_chars=min_chars, rgs=[rg_lo, rg_hi], size=st_in.st_size, mtime=int(st_in.st_mtime))
     if not count_only and stats_p.exists() and not force:
-        return json.loads(stats_p.read_text())
+        done = json.loads(stats_p.read_text())
+        if done.get("fingerprint") == fp:
+            return done
+        print(f"[tokenize] {stem}: settings, vocabulary or input changed since the earlier run -> recomputing", flush=True)
 
     pf = pq.ParquetFile(path)
     names = set(pf.schema_arrow.names)
@@ -156,14 +168,15 @@ def process_file(job) -> dict:
     if use_chars_only:
         cols = [c for c in ("char_count", "domain") if c in names]
 
-    stats = {"file": os.path.basename(path), "job": stem, "docs": 0, "dup_dropped": 0, "short_dropped": 0, "chars": 0,
+    stats = {"file": os.path.basename(path), "job": stem, "fingerprint": fp, "docs": 0, "dup_dropped": 0, "short_dropped": 0, "chars": 0,
              "train_tokens": 0, "val_tokens": 0, "per_domain": {}}
     seen: set = set()
     thresh = int(round(val_frac * MOD))
     tok = None if count_only else BPETokenizer.from_file(vocab)
     ftrain = fval = None
     if not count_only:
-        ftrain, fval = open(Path(out_dir) / f"{stem}.train.bin", "wb"), open(Path(out_dir) / f"{stem}.val.bin", "wb")
+        tmp_t, tmp_v = Path(out_dir) / f"{stem}.train.bin.tmp", Path(out_dir) / f"{stem}.val.bin.tmp"
+        ftrain, fval = open(tmp_t, "wb"), open(tmp_v, "wb")
         for f in (ftrain, fval):
             f.write(b"\0" * HEADER_SIZE)
     try:
@@ -205,14 +218,23 @@ def process_file(job) -> dict:
                 np.asarray(ids, dtype="<u2").tofile(fval if is_val else ftrain)
                 stats["val_tokens" if is_val else "train_tokens"] += len(ids)
                 pd_["tokens"] += len(ids)
-    finally:
+    except BaseException:
         if not count_only:
-            _write_header(ftrain, tok.n_vocab, tok.eos_id, stats["train_tokens"], SPLIT_TRAIN)
-            _write_header(fval, tok.n_vocab, tok.eos_id, stats["val_tokens"], SPLIT_VAL)
             ftrain.close()
             fval.close()
+            tmp_t.unlink(missing_ok=True)       # a failed job leaves nothing that could be mistaken for a finished one
+            tmp_v.unlink(missing_ok=True)
+        raise
     if not count_only:
-        stats_p.write_text(json.dumps(stats))
+        _write_header(ftrain, tok.n_vocab, tok.eos_id, stats["train_tokens"], SPLIT_TRAIN)
+        _write_header(fval, tok.n_vocab, tok.eos_id, stats["val_tokens"], SPLIT_VAL)
+        ftrain.close()
+        fval.close()
+        os.replace(tmp_t, Path(out_dir) / f"{stem}.train.bin")
+        os.replace(tmp_v, Path(out_dir) / f"{stem}.val.bin")
+        tmp = stats_p.with_suffix(".json.tmp")
+        tmp.write_text(json.dumps(stats))
+        os.replace(tmp, stats_p)
     return stats
 
 
@@ -316,7 +338,8 @@ def main(argv=None) -> int:
             for k in t:
                 t[k] += v[k]
     manifest = {"files": len(files), "jobs": len(jobs),
-                "inputs": [{"path": f, "bytes": os.path.getsize(f)} for f in files], "docs": sum(r["docs"] for r in results), "chars": sum(r["chars"] for r in results),
+                "inputs": [{"path": f, "bytes": os.path.getsize(f)} for f in files],
+                "docs": sum(r["docs"] for r in results), "chars": sum(r["chars"] for r in results),
                 "dup_dropped": sum(r["dup_dropped"] for r in results), "per_domain": per_domain, "shards": results}
     if a.count_only:
         cpt = a.chars_per_token

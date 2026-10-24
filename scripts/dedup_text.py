@@ -13,7 +13,7 @@ and a ``<out>/dedup_report.json`` with the counts (kept / duplicates / broken / 
     python scripts/dedup_text.py maths_final_corpus.txt.gz --out cleaned_math
     python scripts/dedup_text.py multistep_calculations_corpus.txt quant_finance_corpus.txt --out cleaned
 
-Memory: 8 bytes per kept document (a hash set), e.g. ~5M documents ≈ a few hundred MB. Exact duplicates only;
+Memory: about 80 bytes per kept document (a Python set of hashes): ~5M documents ≈ 400 MB, 18M ≈ 1.5 GB. Exact duplicates only;
 near-duplicate removal across datasets is a separate, later step.
 """
 from __future__ import annotations

@@ -21,6 +21,9 @@ from __future__ import annotations
 
 import argparse
 import contextlib
+import platform
+import subprocess
+import sys
 from datetime import timedelta
 import json
 import math
@@ -88,6 +91,19 @@ class TrainConfig:
     resume: Optional[str] = None
     stop_step: Optional[int] = None        # exit early (e.g. time-limited job) WITHOUT changing the LR schedule
     model_overrides: Dict[str, Any] = field(default_factory=dict)
+
+
+def run_info() -> Dict[str, Any]:
+    """What produced a run: code commit, library versions, hardware. Written next to the metrics so any result can be reproduced."""
+    here = os.path.dirname(os.path.abspath(__file__))
+    try:
+        commit = subprocess.run(["git", "rev-parse", "HEAD"], cwd=here, capture_output=True, text=True, timeout=10).stdout.strip() or None
+        dirty = bool(subprocess.run(["git", "status", "--porcelain", "--", here], cwd=here, capture_output=True, text=True, timeout=10).stdout.strip())
+    except (OSError, subprocess.SubprocessError):
+        commit, dirty = None, None
+    return {"git_commit": commit, "git_dirty": dirty, "python": sys.version.split()[0], "torch": torch.__version__,
+            "cuda": torch.version.cuda, "gpu": torch.cuda.get_device_name(0) if torch.cuda.is_available() else None,
+            "host": platform.node(), "platform": platform.platform()}
 
 
 def parse_mix(items: List[str]) -> List[Any]:
@@ -217,7 +233,7 @@ def _train(cfg: TrainConfig, device: torch.device, amp_dtype: Optional[torch.dty
             for path, ep in zip(train_ds.paths, train_ds.epochs(planned)):
                 print(f"[train]   {os.path.basename(path)}: {ep:.2f} epochs" + ("  <-- repeated more than 4x" if ep > 4 else ""), flush=True)
         with open(os.path.join(cfg.out_dir, "train_config.json"), "w", encoding="utf-8") as f:
-            json.dump({"train": asdict(cfg), "model": model_cfg.to_dict(), "world_size": world}, f, indent=2)
+            json.dump({"train": asdict(cfg), "model": model_cfg.to_dict(), "world_size": world, "run_info": run_info()}, f, indent=2)
 
     metrics_path = os.path.join(cfg.out_dir, "metrics.jsonl")
     history: List[Dict[str, Any]] = []

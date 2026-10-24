@@ -17,3 +17,4 @@ data/*
 *.egg-info/
 src/*.egg-info/
 build/
+!tokenizers/**/*.tok

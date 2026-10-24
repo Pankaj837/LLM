@@ -45,11 +45,11 @@ def doc_key(text: str) -> int:
 def _docs(fi, records):
     if records == "line":
         for line in fi:
-            yield line.rstrip("\n")
+            yield line.rstrip("\r\n")
         return
     block = []
     for line in fi:
-        line = line.rstrip("\n")
+        line = line.rstrip("\r\n")
         if line.strip():
             block.append(line)
         elif block:

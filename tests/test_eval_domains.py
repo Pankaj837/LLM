@@ -39,3 +39,14 @@ def test_per_domain_losses_are_finite_deterministic_and_tiny_files_are_reported(
     assert ed.main(["--ckpt", ck, "--val", f"a={v1}", f"b={v2}", "--seq-len", "32", "--device", "cpu",
                     "--dtype", "fp32", "--out", str(out)]) == 0
     assert set(json.loads(out.read_text())["domains"]) == {"a", "b"}
+
+    # a wildcard pools several validation files of one domain, weighted by tokens evaluated
+    shard1, shard2 = (_bin(tmp_path / f"dom.part{i}.val.bin", 1500 + 700 * i, 10 + i) for i in range(2))
+    pooled = ed.evaluate_domains(ck, {"dom": str(tmp_path / "dom.part*.val.bin")}, 32, 4, 10, device="cpu", dtype="fp32")["domains"]["dom"]
+    each = ed.evaluate_domains(ck, {"p1": shard1, "p2": shard2}, 32, 4, 10, device="cpu", dtype="fp32")["domains"]
+    tok = each["p1"]["tokens"] + each["p2"]["tokens"]
+    expected = (each["p1"]["val_loss"] * each["p1"]["tokens"] + each["p2"]["val_loss"] * each["p2"]["tokens"]) / tok
+    assert pooled["tokens"] == tok and abs(pooled["val_loss"] - expected) < 1e-9
+    import pytest
+    with pytest.raises(FileNotFoundError):
+        ed.evaluate_domains(ck, {"none": str(tmp_path / "nothing*.bin")}, 32, 4, 10, device="cpu", dtype="fp32")

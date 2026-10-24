@@ -40,11 +40,11 @@ def main(argv=None) -> int:
         cl = tiktoken.get_encoding("cl100k_base")
     except Exception:
         cl = None
-    rnd, lines = random.Random(2), []
+    lines = []
     print(f"{'domain':<14}{'bytes':>10}{'tokens':>10}{'B/tok':>8}" + ("  cl100k B/tok" if cl else ""))
     for f in sorted(glob.glob(a.holdout)):
         docs = [json.loads(x)["t"] for x in open(f, encoding="utf-8") if x.strip()]
-        rnd.shuffle(docs)
+        random.Random(f"2:{os.path.basename(f)}").shuffle(docs)       # per-domain seed: a domain's numbers never depend on the others
         b = t = c = 0
         for i, s in enumerate(docs):
             if b > a.bytes_per_domain:

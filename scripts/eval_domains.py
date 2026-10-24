@@ -15,12 +15,12 @@ window is reported as ``windows: 0`` rather than silently skipped.
 from __future__ import annotations
 
 import argparse
+import glob
 import json
 import math
 import os
 import sys
 
-import torch
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src"))
 from llm.checkpoint import load_checkpoint, read_checkpoint  # noqa: E402
@@ -41,18 +41,31 @@ def evaluate_domains(ckpt: str, vals: dict, seq_len: int, batch_size: int, batch
     load_checkpoint(ckpt, model, expected_vocab_sha256=BPETokenizer.file_sha256(vocab) if vocab else None)
     model.eval()
     out = {"checkpoint": ckpt, "step": meta.get("step"), "seq_len": seq_len, "domains": {}}
-    for name, path in vals.items():
-        try:
-            ds = TokenDataset(path, seq_len, cfg.vocab_size)
-        except ValueError as e:
-            if "too few" not in str(e):
-                raise
+    for name, pattern in vals.items():
+        # a domain may have several validation files (big inputs are tokenized in parallel chunks): a wildcard
+        # pools them, each file contributing at most batch_size * batches windows, weighted by tokens evaluated
+        paths = sorted(glob.glob(pattern)) if any(c in pattern for c in "*?[") else [pattern]
+        if not paths:
+            raise FileNotFoundError(f"{name}: nothing matches {pattern}")
+        tot_loss = tot_tok = tot_win = 0
+        for path in paths:
+            try:
+                ds = TokenDataset(path, seq_len, cfg.vocab_size)
+            except ValueError as e:
+                if "too few" not in str(e):
+                    raise
+                continue
+            used = min(len(range(0, len(ds), seq_len)), batch_size * batches)
+            r = evaluate(model, ds, batch_size, batches, dev, amp)
+            tot_loss += r["val_loss"] * used * seq_len
+            tot_tok += used * seq_len
+            tot_win += used
+        if tot_tok == 0:
             out["domains"][name] = {"windows": 0, "tokens": 0, "val_loss": None, "val_ppl": None}
-            continue
-        windows = len(range(0, len(ds), seq_len))
-        r = evaluate(model, ds, batch_size, batches, dev, amp)
-        used = min(windows, batch_size * batches)
-        out["domains"][name] = {"windows": used, "tokens": used * seq_len, **r}
+        else:
+            loss = tot_loss / tot_tok
+            out["domains"][name] = {"windows": tot_win, "tokens": tot_tok, "val_loss": loss,
+                                    "val_ppl": math.exp(min(loss, 50.0))}
     losses = [d["val_loss"] for d in out["domains"].values() if d["val_loss"] is not None]
     out["mean_val_loss"] = sum(losses) / len(losses) if losses else None
     out["ok"] = all(math.isfinite(x) for x in losses)

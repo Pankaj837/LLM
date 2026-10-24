@@ -37,6 +37,8 @@ jobs:
         run: python -m pytest -m "not gpu"
       - name: Team smoke script
         run: python scripts/smoke_test.py
+      - name: Lint (dependency-free)
+        run: python scripts/lint.py
 
   mutation-check:
     # slower (~3 min): proves the tests can fail. Runs on main only.

@@ -18,6 +18,7 @@ Loading always uses ``torch.load(weights_only=True)``.
 """
 from __future__ import annotations
 
+import os
 import warnings
 from typing import Any, Dict, Optional, Tuple
 
@@ -74,7 +75,9 @@ def save_checkpoint(
     }
     if optimizer is not None:
         payload["optimizer"] = optimizer.state_dict()
-    torch.save(payload, path)
+    tmp = f"{path}.tmp"
+    torch.save(payload, tmp)
+    os.replace(tmp, path)          # atomic: a crash or pre-emption mid-write never leaves a corrupt checkpoint
 
 
 def read_checkpoint(path: str) -> Tuple[Dict[str, torch.Tensor], Optional[ModelConfig], Dict[str, Any], Dict[str, Any]]:

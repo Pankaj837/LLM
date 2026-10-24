@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import base64
 import heapq
+import re
 from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Dict, Iterable, List, Sequence, Tuple
@@ -25,10 +26,16 @@ from typing import Dict, Iterable, List, Sequence, Tuple
 from .tokenizer import pretokenize
 
 
-def train_bpe(texts: Iterable[str], vocab_size: int, min_count: int = 2, reserved_specials: int = 1) -> List[bytes]:
+_ADJACENT_DIGITS = re.compile(rb"[0-9]{2}")
+
+
+def train_bpe(texts: Iterable[str], vocab_size: int, min_count: int = 2, reserved_specials: int = 1,
+              split_digits: bool = False) -> List[bytes]:
     """Return the token list (index == id) of length <= ``vocab_size - reserved_specials``.
 
-    Stops early when no pair occurs at least ``min_count`` times.
+    Stops early when no pair occurs at least ``min_count`` times. With ``split_digits`` no token may contain two
+    adjacent ASCII digits, so every number is encoded digit by digit (consistent place value for arithmetic, the
+    choice of LLaMA/PaLM-style models). The encoder needs no change: it only merges what the vocabulary contains.
     """
     target = vocab_size - reserved_specials
     if target < 256:
@@ -55,7 +62,17 @@ def train_bpe(texts: Iterable[str], vocab_size: int, min_count: int = 2, reserve
     def key(pair: Tuple[int, int], c: int):
         return (-c, vocab[pair[0]], vocab[pair[1]], pair)
 
-    heap = [key(p, c) for p, c in pair_count.items() if c >= min_count]
+    blocked_cache: Dict[Tuple[int, int], bool] = {}
+
+    def blocked(pair: Tuple[int, int]) -> bool:
+        if not split_digits:
+            return False
+        b = blocked_cache.get(pair)
+        if b is None:
+            b = blocked_cache[pair] = bool(_ADJACENT_DIGITS.search(vocab[pair[0]] + vocab[pair[1]]))
+        return b
+
+    heap = [key(p, c) for p, c in pair_count.items() if c >= min_count and not blocked(p)]
     heapq.heapify(heap)
 
     while len(vocab) < target and heap:
@@ -100,7 +117,7 @@ def train_bpe(texts: Iterable[str], vocab_size: int, min_count: int = 2, reserve
         pair_count.pop(pair, None)
         for p in touched:
             cnt = pair_count.get(p, 0)
-            if cnt >= min_count:
+            if cnt >= min_count and not blocked(p):
                 heapq.heappush(heap, key(p, cnt))
     return vocab
 

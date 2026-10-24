@@ -23,7 +23,12 @@
 8. **Release gate** (`test_checkpoint.py -k trained`, opt-in via `LLM_CKPT`) — fails on a checkpoint that looks
    like random initialisation. Verified to **pass** on our trained biology checkpoint and to **fail** on the
    delivered `pretrain_model.pt`.
-9. **Mutation check** (`scripts/mutation_check.py`) — the ultimate check that the suite can fail. See below.
+9. **Data pipeline and scale-up** (`test_tokenize_parquet.py`, `test_tokenize_text.py`, `test_dedup_text.py`, `test_check_bins.py`,
+   `test_pubmed_to_parquet.py`, `test_train_vocab.py`, `test_eval_domains.py`, `test_mixture.py`, plus the preset and DDP tests in
+   `test_train.py`) — synthetic data only, no external files. The DDP test spawns two CPU (gloo) processes and requires their
+   weights to equal one process with gradient accumulation 2. **No CUDA/NCCL path is tested.** The pipeline tests need `pyarrow`
+   (in the `dev` extra, so CI runs them).
+10. **Mutation check** (`scripts/mutation_check.py`) — the ultimate check that the suite can fail. See below.
 
 ## Running
 
@@ -41,9 +46,9 @@ python scripts/smoke_test.py
 ```
 
 ## Current totals (CPU, this repository)
-- Without `BIO_ZIP`/`EARTH_ZIP`/a built C++ tokenizer: 265 passed, 15 skipped (GPU 7, C++ parity 2, real-data 4, release gate 1, legacy checkpoint 1).
-- With `BIO_ZIP` + `EARTH_ZIP`: 269 passed, 11 skipped.
-- **With the C++ tokenizer built and `TOK_CLI`/`TOK_VOCAB` set: 271 passed** (the 2 C++ parity tests run for real
+- Without `BIO_ZIP`/`EARTH_ZIP`/a built C++ tokenizer: 301 passed, 15 skipped (GPU 7, C++ parity 2, real-data 4, release gate 1, legacy checkpoint 1) — 24 Oct 2026.
+- With `BIO_ZIP` + `EARTH_ZIP`: 305 passed, 11 skipped.
+- **With the C++ tokenizer built and `TOK_CLI`/`TOK_VOCAB` set: 303 passed** (the 2 C++ parity tests run for real
   instead of skipping) — see `docs/CPP_TOKENIZER_PARITY.md` for the actual output.
 - Lint: 0 problems. Team smoke script: 29/29. Team's C++ test suite (`native/tokenizer`): 46/46.
 - Mutation check: **25/25 mutants killed, 0 survived**.

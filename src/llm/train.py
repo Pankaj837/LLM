@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import argparse
 import contextlib
+from datetime import timedelta
 import json
 import math
 import os
@@ -33,7 +34,7 @@ import torch.distributed as dist
 import torch.nn.functional as F
 
 from .checkpoint import load_checkpoint, read_checkpoint, save_checkpoint
-from .data import TokenDataset
+from .data import MixtureDataset, TokenDataset
 from .model import TransformerModel
 from .model_config import ModelConfig
 from .tokenizer import BPETokenizer
@@ -61,6 +62,7 @@ PRESETS: Dict[str, Dict[str, Any]] = {
 @dataclass
 class TrainConfig:
     train_bin: str = ""
+    train_mix: Optional[List[str]] = None  # ["path.bin=weight", ...]: weighted domains instead of one train_bin
     val_bin: Optional[str] = None
     vocab: Optional[str] = None            # .tok file; only its hash is recorded
     out_dir: str = "runs/default"
@@ -86,6 +88,17 @@ class TrainConfig:
     resume: Optional[str] = None
     stop_step: Optional[int] = None        # exit early (e.g. time-limited job) WITHOUT changing the LR schedule
     model_overrides: Dict[str, Any] = field(default_factory=dict)
+
+
+def parse_mix(items: List[str]) -> List[Any]:
+    """["a.bin=0.4", "b.bin=0.1"] -> [("a.bin", 0.4), ("b.bin", 0.1)] (the weight follows the LAST '=')."""
+    out = []
+    for it in items:
+        path, sep, w = it.rpartition("=")
+        if not sep or not path:
+            raise ValueError(f"--train-mix expects PATH=WEIGHT, got {it!r}")
+        out.append((path, float(w)))
+    return out
 
 
 def lr_at(step: int, cfg: TrainConfig) -> float:
@@ -151,7 +164,8 @@ def train(cfg: TrainConfig) -> Dict[str, Any]:
         if use_cuda:
             torch.cuda.set_device(local_rank)
         device = torch.device(f"cuda:{local_rank}") if use_cuda else torch.device("cpu")
-        dist.init_process_group(backend="nccl" if use_cuda else "gloo")
+        # long timeout: rank 0 alone writes multi-GB checkpoints / runs evaluation while the others wait at the next collective
+        dist.init_process_group(backend="nccl" if use_cuda else "gloo", timeout=timedelta(minutes=60))
     else:
         device = resolve_device(cfg.device)
     try:
@@ -168,7 +182,7 @@ def _train(cfg: TrainConfig, device: torch.device, amp_dtype: Optional[torch.dty
     if world > 1:
         dist.barrier()
 
-    train_ds = TokenDataset(cfg.train_bin, cfg.seq_len)
+    train_ds = MixtureDataset(parse_mix(cfg.train_mix), cfg.seq_len) if cfg.train_mix else TokenDataset(cfg.train_bin, cfg.seq_len)
     model_cfg = ModelConfig(**{**PRESETS[cfg.preset], "vocab_size": train_ds.header.vocab_size, **cfg.model_overrides})
     if cfg.seq_len > model_cfg.max_position_embeddings:
         raise ValueError(f"seq_len {cfg.seq_len} exceeds max_position_embeddings {model_cfg.max_position_embeddings}")
@@ -195,6 +209,13 @@ def _train(cfg: TrainConfig, device: torch.device, amp_dtype: Optional[torch.dty
     if main_rank:
         print(f"[train] device={device} world={world} amp={amp_dtype} params={n_params/1e6:.2f}M vocab={model_cfg.vocab_size} "
               f"train_tokens={train_ds.header.total_tokens:,} steps {start_step}->{cfg.max_steps}", flush=True)
+        tokens_per_step = cfg.batch_size * cfg.grad_accum * cfg.seq_len * world
+        planned = tokens_per_step * (min(cfg.max_steps, cfg.stop_step or cfg.max_steps) - start_step)
+        print(f"[train] {tokens_per_step:,} tokens per optimizer step, {planned:,} tokens planned "
+              f"({planned / max(train_ds.header.total_tokens, 1):.2f} passes over the data)", flush=True)
+        if isinstance(train_ds, MixtureDataset):
+            for path, ep in zip(train_ds.paths, train_ds.epochs(planned)):
+                print(f"[train]   {os.path.basename(path)}: {ep:.2f} epochs" + ("  <-- repeated more than 4x" if ep > 4 else ""), flush=True)
         with open(os.path.join(cfg.out_dir, "train_config.json"), "w", encoding="utf-8") as f:
             json.dump({"train": asdict(cfg), "model": model_cfg.to_dict(), "world_size": world}, f, indent=2)
 
@@ -266,7 +287,9 @@ def _train(cfg: TrainConfig, device: torch.device, amp_dtype: Optional[torch.dty
 def main(argv: Optional[List[str]] = None) -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     defaults = TrainConfig()
-    ap.add_argument("--train-bin", required=True)
+    ap.add_argument("--train-bin", default="", help="one TOK1 file; or use --train-mix")
+    ap.add_argument("--train-mix", nargs="+", metavar="PATH=WEIGHT",
+                    help="weighted training files, e.g. math.bin=0.3 code.bin=0.2 (weight = share of training tokens)")
     ap.add_argument("--val-bin")
     ap.add_argument("--vocab", help=".tok file (its sha256 is stored in checkpoints)")
     ap.add_argument("--out", dest="out_dir", default=defaults.out_dir)
@@ -281,6 +304,8 @@ def main(argv: Optional[List[str]] = None) -> None:
     ap.add_argument("--resume")
     ap.add_argument("--stop-step", type=int, default=None, help="exit early without changing the LR schedule")
     args = ap.parse_args(argv)
+    if not args.train_bin and not args.train_mix:
+        ap.error("give --train-bin or --train-mix")
     train(TrainConfig(**{k: v for k, v in vars(args).items()}))
 
 

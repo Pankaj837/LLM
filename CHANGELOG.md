@@ -7,6 +7,15 @@ into one package, after an independent component review. See `docs/REVIEW_FINDIN
 
 ### Added
 - `scripts/tokenize_parquet.py` (+ tests): streams Parquet shards into TOK1 `.bin` files with a frozen tokenizer in low memory, in parallel and resumable; `--count-only` gives per-domain token estimates from `char_count` in seconds. Also reads v4.0 entity-schema files (no `text` column): body taken from the `properties` JSON (`code_content`, else question+answer, else `description`) -- a proposed rule the data owners must confirm.
+- 24 Oct audit of the whole scale-up pipeline (see `docs/PROGRESS_REPORT.md`, "Failures and corrections"):
+  - `scripts/tokenize_text.py`: tokenizer for `.txt` / `.txt.gz` corpora (the 34 GB math corpus, Multi-step, Astronomy, Finance, chemistry text); streams gzip, parallel, resumable; Windows `\r\n` and invalid bytes handled.
+  - `scripts/tokenize_parquet.py`: big files are split into row-group jobs so one file uses every core; unique job names (same-named inputs no longer overwrite each other); lone surrogates repaired instead of crashing; inputs recorded in the manifest.
+  - `scripts/merge_bins.py`, `scripts/check_bins.py`: one token file per domain; header / size / id-range / EOS / vocabulary integrity gate.
+  - `llm.data.MixtureDataset` and `llm.train --train-mix PATH=WEIGHT ...`: weighted domain mix with a per-file epoch report and warning; `llm.train` also gets a 60-minute collective timeout for DDP and atomic checkpoint writes.
+  - `scripts/eval_domains.py`: wildcard pools a domain's several validation files.
+  - `llm.bpe_trainer.train_bpe(split_digits=True)` / `scripts/train_vocab.py --split-digits`: no token with two adjacent digits; second tokenizer candidate `tokenizers/vocab32k_digits_v1/` (numbers digit by digit, ~5–6% more tokens). `scripts/verify_vocab.py` now samples deterministically per domain.
+  - `v4_text` rule rebuilt from a field census of the real files (Q&A options/explanations, `doc_content`, DeepCAD, structured QA pairs).
+  - CI installs `pyarrow` (the pipeline tests no longer skip) and runs the repo lint; `.tok` files are stored byte-exact.
 - `scripts/dedup_text.py` and `scripts/dedup_parquet.py` (+ tests): exact de-duplication across files (line-per-document text, `.gz` supported; Parquet text or v4.0), broken-encoding and short-document filters, counts report. `--preset 100m` (100.1M) and `300m` (303.4M) for budget-sized runs.
 - `tokenizers/vocab32k_v1/` (+ `scripts/train_vocab.py`, `scripts/verify_vocab.py`): 32,000-token candidate vocabulary trained on a balanced 218 MB sample of the delivered data; lossless round-trip and 3003/3003 C++ parity lines verified; `.tok` files are now stored byte-exact (`.gitattributes`).
 - `llm.train`: `1p5b` (1.509B) and `2b` (2.012B) presets (32 layers, d=2048, 16 query / 4 KV heads, 4K context; parameter counts checked against an exact formula), and multi-GPU training with DistributedDataParallel (`torchrun --nproc_per_node=N -m llm.train ...`; `--batch-size` is per rank; a 2-process run is tested to match one process with accumulation 2). Not tested on CUDA/NCCL.

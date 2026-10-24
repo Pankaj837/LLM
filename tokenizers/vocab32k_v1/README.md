@@ -1,5 +1,8 @@
 # vocab32k_v1 — 32,000-token byte-level BPE (candidate, 21 Oct 2026)
 
+> There are **two candidates**: this one (digit chunks learned from the data, e.g. `134945` → ` 134`,`9`,`45`) and
+> `../vocab32k_digits_v1/` (every number digit by digit, ~5–6% more tokens). See `../README.md` for how to choose.
+
 | | |
 |---|---|
 | File | `vocab32k.tok` (V1 format; ids 0–255 raw bytes, 31,743 merges, `<|endoftext|>` = 31999) |
@@ -31,13 +34,20 @@ it was replaced before anything was tokenized with it.)
 - `<|endoftext|>` typed in user text does not produce the EOS id.
 - Bytes per token on held-out text (higher = fewer tokens), against OpenAI's cl100k for reference:
 
-| Domain | this vocab | cl100k | Domain | this vocab | cl100k |
-|---|---|---|---|---|---|
-| CAD/STEP | 3.27 | 3.31 | Biology | 3.87 | 3.25 |
-| Earth & Env. | 4.55 | 4.35 | Sci. Discovery | 4.34 | 4.13 |
-| Chemistry | 3.77 | 3.86 | Math | 3.68 | 3.82 |
-| Code | 3.72 | 4.17 | Sci. Programming | 3.45 | 3.95 |
-| Sci. Q&A | 3.29 | 3.28 | | | |
+| Domain | this vocab | cl100k |
+|---|---|---|
+| Math | 3.76 | 3.88 |
+| Code | 3.73 | 4.18 |
+| Scientific Programming | 3.38 | 3.93 |
+| Scientific Q&A | 3.25 | 3.25 |
+| CAD/STEP | 3.27 | 3.32 |
+| Chemistry | 3.94 | 3.93 |
+| Earth & Environment | 4.55 | 4.38 |
+| Scientific Discovery | 4.29 | 4.08 |
+| Biology | 3.84 | 3.22 |
+| Astronomy | 4.54 | 4.59 |
+| Multi-step (synthetic arithmetic) | 2.86 | 2.55 |
+| Finance (numbers only) | 2.58 | 2.65 |
 
 ## Limits (read before relying on it)
 - The sample has **no** physics, engineering, astronomy, quant-finance or general-language text (none was accessible or

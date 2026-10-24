@@ -133,6 +133,53 @@ class TokenDataset:
                 return
 
 
+class MixtureDataset:
+    """Weighted sampling over several ``.bin`` files (one per domain), so the training mix is chosen, not accidental.
+
+    ``sources`` = [(path, weight), ...]; ``weight`` is the share of training tokens drawn from that file (weights are
+    normalised, they need not sum to 1). A batch picks a source per sequence with those probabilities, then a random
+    window inside it. A small file with a large weight is simply repeated (see ``epochs``). Batches are a pure
+    function of the generator, so resume and multi-process runs behave exactly like ``TokenDataset``.
+    """
+
+    def __init__(self, sources: List[Tuple[str, float]], seq_len: int, model_vocab_size: Optional[int] = None,
+                 mmap: bool = True):
+        if not sources:
+            raise ValueError("MixtureDataset needs at least one source")
+        if any(w <= 0 for _, w in sources):
+            raise ValueError("every mixture weight must be > 0")
+        self.paths = [p for p, _ in sources]
+        self.datasets = [TokenDataset(p, seq_len, model_vocab_size, mmap=mmap) for p in self.paths]
+        h0 = self.datasets[0].header
+        for p, ds in zip(self.paths, self.datasets):
+            if (ds.header.vocab_size, ds.header.eos_id) != (h0.vocab_size, h0.eos_id):
+                raise ValueError(f"{p}: vocab_size/eos_id differ from {self.paths[0]} -- files tokenized with different vocabularies")
+        w = torch.tensor([float(w) for _, w in sources], dtype=torch.double)
+        self.probs = w / w.sum()
+        self.seq_len = seq_len
+        self.header = TokHeader(h0.magic, h0.version, h0.vocab_size, h0.eos_id,
+                                sum(ds.header.total_tokens for ds in self.datasets), SPLIT_TRAIN, 0)
+
+    def __len__(self) -> int:
+        return sum(len(ds) for ds in self.datasets)
+
+    def epochs(self, total_tokens: int) -> List[float]:
+        """How many passes over each file ``total_tokens`` of training would make (for a sanity warning)."""
+        return [float(p) * total_tokens / max(ds.header.total_tokens, 1) for p, ds in zip(self.probs, self.datasets)]
+
+    def get_batch(self, batch_size: int, generator: Optional[torch.Generator] = None,
+                  device: Union[str, torch.device] = "cpu") -> Tuple[torch.Tensor, torch.Tensor]:
+        which = torch.multinomial(self.probs, batch_size, replacement=True, generator=generator).tolist()
+        xs, ys = [], []
+        for k in which:
+            ds = self.datasets[k]
+            start = int(torch.randint(0, len(ds), (1,), generator=generator))
+            x, y = ds.window(start)
+            xs.append(x)
+            ys.append(y)
+        return (torch.from_numpy(np.stack(xs)).to(device), torch.from_numpy(np.stack(ys)).to(device))
+
+
 # ── building datasets from text ─────────────────────────────────────────────
 
 def document_split(n_docs: int, val_frac: float = 0.05, seed: int = 0) -> Tuple[List[int], List[int]]:

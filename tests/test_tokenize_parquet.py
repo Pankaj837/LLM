@@ -123,6 +123,49 @@ def test_v4_text_rule_covers_every_field_family():
     assert v("only desc", J.dumps({"stars": 3})) == "only desc" and v("d", {"code_content": "x"}) == "x"
 
 
+def test_row_group_splitting_gives_identical_merged_tokens(setup):
+    tmp, vocab, _ = setup
+    texts = [f"document number {i} about mitochondria and ATP and the number {i * 7}" for i in range(300)]
+    big = tmp / "big.parquet"
+    pq.write_table(pa.table({"doc_id": [f"d{i}" for i in range(300)], "domain": ["bio"] * 300, "text": texts}), big,
+                   row_group_size=50)
+    assert pq.ParquetFile(big).metadata.num_row_groups == 6
+    base = ["--vocab", str(vocab), "--workers", "2", "--val-frac", "0"]
+    assert tp.main([str(big), "--out", str(tmp / "whole"), "--chunk-mb", "100000", *base]) == 0
+    import json
+    m_whole = json.loads((tmp / "whole" / "manifest.json").read_text())
+    assert m_whole["jobs"] == 1
+    # force one job per row group by shrinking the chunk target below one row group's size
+    assert tp.main([str(big), "--out", str(tmp / "tiny"), "--chunk-mb", "0.0001", *base]) == 0
+    m_tiny = json.loads((tmp / "tiny" / "manifest.json").read_text())
+    assert m_tiny["jobs"] == 6 and m_tiny["train_tokens"] == m_whole["train_tokens"]
+    assert (tmp / "tiny" / "train.bin").read_bytes() == (tmp / "whole" / "train.bin").read_bytes()   # same order, same bytes
+
+
+def test_inputs_with_the_same_file_name_do_not_overwrite_each_other(setup):
+    tmp, vocab, _ = setup
+    for sub, text in (("a", "alpha document about cells"), ("b", "beta document about stars")):
+        (tmp / sub).mkdir()
+        pq.write_table(pa.table({"doc_id": ["1"], "domain": [sub], "text": [text]}), tmp / sub / "part-0.parquet")
+    assert tp.main([str(tmp / "a" / "*.parquet"), str(tmp / "b" / "*.parquet"), "--out", str(tmp / "o"),
+                    "--vocab", str(vocab), "--workers", "1", "--val-frac", "0"]) == 0
+    import json
+    m = json.loads((tmp / "o" / "manifest.json").read_text())
+    assert m["jobs"] == 2 and set(m["per_domain"]) == {"a", "b"} and m["docs"] == 2
+
+
+def test_lone_surrogates_in_json_properties_do_not_crash_tokenization(setup):
+    tmp, vocab, _ = setup
+    import json as _json
+    props = r'{"code_content": "x = \ud800 1  # broken escape in the source file"}'
+    assert _json.loads(props)["code_content"].count("\ud800") == 1
+    shard = tmp / "sur.parquet"
+    pq.write_table(pa.table({"entity_id": ["e"], "domain": ["code"], "description": ["d"], "properties": [props]}), shard)
+    st = tp.process_file(_job(shard, tmp / "o", vocab, dedup=False))
+    assert st["docs"] == 1 and st["train_tokens"] > 0
+    assert tp.clean_text("a\ud800b") == "a\ufffdb" and tp.clean_text("fine") == "fine"
+
+
 def test_merge_bins_writes_a_valid_file(setup):
     tmp, vocab, shard = setup
     tp.process_file(_job(shard, tmp / "a", vocab, dedup=False))

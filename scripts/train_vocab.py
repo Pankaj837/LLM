@@ -34,12 +34,14 @@ def main(argv=None) -> int:
     ap.add_argument("samples", nargs="+", help="JSONL files or globs")
     ap.add_argument("--vocab-size", type=int, default=32000)
     ap.add_argument("--out", required=True)
+    ap.add_argument("--split-digits", action="store_true",
+                    help="no token contains two adjacent digits: numbers are encoded digit by digit")
     a = ap.parse_args(argv)
     paths = sorted({p for s in a.samples for p in glob.glob(s)})
     if not paths:
         ap.error("no sample files matched")
     t0 = time.time()
-    vocab = train_bpe(iter_texts(paths), a.vocab_size)
+    vocab = train_bpe(iter_texts(paths), a.vocab_size, split_digits=a.split_digits)
     n = write_tok(vocab, a.out)
     print(f"files={len(paths)} merges={len(vocab)} n_vocab={n} {time.time() - t0:.0f}s sha256={BPETokenizer.file_sha256(a.out)}")
     return 0

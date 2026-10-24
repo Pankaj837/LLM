@@ -3,9 +3,14 @@
 
 Low memory: each shard is read in small batches and only the needed columns (``text``; ``doc_id``,
 ``domain``, ``char_count`` when present). Files in the v4.0 entity schema (no ``text``; body in the
-``properties`` JSON, plus ``description``) are handled by ``v4_text`` -- a proposed rule the data owners
-must confirm; ``--count-only`` on such files parses the JSON, so it is slower than the ``char_count`` path. One shard = one job, so shards run in parallel and a finished
-shard is skipped on re-run (resumable).
+``properties`` JSON, plus ``description``) are handled by ``v4_text`` (rule documented in
+``docs/DATA_STATUS_2026-10-20.md``); ``--count-only`` on such files parses the JSON, so it is slower than the
+``char_count`` path.
+
+Parallelism: big files are split into jobs of whole row groups (about ``--chunk-mb`` of uncompressed data each),
+so one 3 GB Parquet file keeps every core busy. A finished job is skipped on re-run (resumable). Exact-duplicate
+removal (``--dedup``) is per job only; remove duplicates across files first with ``scripts/dedup_parquet.py``.
+Text that cannot be encoded (lone surrogates from JSON escapes) is repaired, never fatal.
 
   # fast token estimate without tokenizing (reads only char_count/domain, seconds not hours)
   python scripts/tokenize_parquet.py data/*.parquet --count-only --out runs/count
@@ -24,6 +29,7 @@ import glob
 import hashlib
 import json
 import os
+import re
 import struct
 import sys
 import time
@@ -39,6 +45,17 @@ from llm.tokenizer import BPETokenizer  # noqa: E402
 
 BATCH = 2000
 MOD = 1_000_000
+CHUNK_MB = 256
+_SURROGATE = re.compile("[\ud800-\udfff]")
+
+
+def clean_text(text: str) -> str:
+    """Make ``text`` encodable as UTF-8: lone surrogates (e.g. from JSON escapes) become U+FFFD."""
+    try:
+        text.encode("utf-8")
+        return text
+    except UnicodeEncodeError:
+        return _SURROGATE.sub("�", text)
 
 
 def _h64(s: str) -> int:
@@ -113,12 +130,16 @@ def _write_header(f, vocab_size: int, eos_id: int, total: int, split: int) -> No
 
 
 def process_file(job) -> dict:
-    """Tokenize (or just count) one Parquet shard. ``job`` = (path, out_dir, vocab, val_frac, dedup, min_chars, count_only, force)."""
+    """Tokenize (or just count) one Parquet file, or a range of its row groups.
+
+    ``job`` = (path, out_dir, vocab, val_frac, dedup, min_chars, count_only, force[, rg_lo, rg_hi, name]).
+    """
     import pyarrow.parquet as pq
 
-    path, out_dir, vocab, val_frac, dedup, min_chars, count_only, force = job
+    path, out_dir, vocab, val_frac, dedup, min_chars, count_only, force = job[:8]
+    rg_lo, rg_hi, name = (job[8:11] if len(job) >= 11 else (None, None, None))
     os.makedirs(out_dir, exist_ok=True)
-    stem = Path(path).stem
+    stem = name or Path(path).stem
     stats_p = Path(out_dir) / f"{stem}.stats.json"
     if not count_only and stats_p.exists() and not force:
         return json.loads(stats_p.read_text())
@@ -135,7 +156,7 @@ def process_file(job) -> dict:
     if use_chars_only:
         cols = [c for c in ("char_count", "domain") if c in names]
 
-    stats = {"file": os.path.basename(path), "docs": 0, "dup_dropped": 0, "short_dropped": 0, "chars": 0,
+    stats = {"file": os.path.basename(path), "job": stem, "docs": 0, "dup_dropped": 0, "short_dropped": 0, "chars": 0,
              "train_tokens": 0, "val_tokens": 0, "per_domain": {}}
     seen: set = set()
     thresh = int(round(val_frac * MOD))
@@ -146,7 +167,8 @@ def process_file(job) -> dict:
         for f in (ftrain, fval):
             f.write(b"\0" * HEADER_SIZE)
     try:
-        for batch in pf.iter_batches(batch_size=BATCH, columns=cols):
+        rgs = list(range(rg_lo, rg_hi)) if rg_lo is not None else None
+        for batch in pf.iter_batches(batch_size=BATCH, columns=cols, row_groups=rgs):
             d = batch.to_pydict()
             n = batch.num_rows
             domains = d.get("domain") or ["unknown"] * n
@@ -159,7 +181,7 @@ def process_file(job) -> dict:
                     pd_["docs"] += 1
                     pd_["chars"] += int(d["char_count"][i])
                     continue
-                text = v4_text(d["description"][i], d["properties"][i]) if v4 else (d["text"][i] or "")
+                text = clean_text(v4_text(d["description"][i], d["properties"][i]) if v4 else (d["text"][i] or ""))
                 if len(text) < min_chars:
                     stats["short_dropped"] += 1
                     continue
@@ -212,6 +234,42 @@ def merge_bins(shards, out: str, vocab_size: int, eos_id: int, split: int) -> in
     return total
 
 
+def plan_jobs(files, a) -> list:
+    """One job per file, or per group of whole row groups (~``chunk_mb`` uncompressed) for big files.
+
+    Job names are the file stem, made unique (short path hash) when two inputs share a stem, plus ``.rgNNNNN``
+    for the chunks of a split file. The list order is the merge order.
+    """
+    import pyarrow.parquet as pq
+
+    stems: dict = {}
+    for f in files:
+        stems.setdefault(Path(f).stem, []).append(f)
+    jobs = []
+    for f in files:
+        stem = Path(f).stem
+        if len(stems[stem]) > 1:
+            stem += "-" + hashlib.blake2b(os.path.abspath(f).encode(), digest_size=3).hexdigest()
+        md = pq.ParquetFile(f).metadata
+        n = md.num_row_groups
+        target = max(1, int(a.chunk_mb * (1 << 20)))
+        ranges, lo, acc = [], 0, 0
+        for r in range(n):
+            acc += md.row_group(r).total_byte_size
+            if acc >= target:
+                ranges.append((lo, r + 1))
+                lo, acc = r + 1, 0
+        if lo < n:
+            ranges.append((lo, n))
+        if len(ranges) <= 1:
+            jobs.append((f, a.out, a.vocab, a.val_frac, a.dedup, a.min_chars, a.count_only, a.force, None, None, stem))
+        else:
+            for lo, hi in ranges:
+                jobs.append((f, a.out, a.vocab, a.val_frac, a.dedup, a.min_chars, a.count_only, a.force, lo, hi,
+                             f"{stem}.rg{lo:05d}"))
+    return jobs
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("inputs", nargs="+", help="Parquet files, globs or directories")
@@ -224,7 +282,9 @@ def main(argv=None) -> int:
     ap.add_argument("--count-only", action="store_true")
     ap.add_argument("--chars-per-token", type=float, default=3.6, help="only used for the --count-only estimate")
     ap.add_argument("--no-merge", action="store_true")
-    ap.add_argument("--delete-shards", action="store_true", help="remove per-shard bins after a successful merge")
+    ap.add_argument("--delete-shards", action="store_true",
+                    help="remove per-job bins after a successful merge (this also removes the per-domain validation files)")
+    ap.add_argument("--chunk-mb", type=float, default=CHUNK_MB, help="target uncompressed MB of row groups per parallel job")
     ap.add_argument("--force", action="store_true")
     a = ap.parse_args(argv)
     if not a.count_only and not a.vocab:
@@ -237,14 +297,17 @@ def main(argv=None) -> int:
     if not files:
         ap.error("no Parquet files matched")
     os.makedirs(a.out, exist_ok=True)
-    jobs = [(f, a.out, a.vocab, a.val_frac, a.dedup, a.min_chars, a.count_only, a.force) for f in files]
+    jobs = plan_jobs(files, a)
+    names = [j[10] for j in jobs]
+    assert len(set(names)) == len(names), "internal error: duplicate job names"
     t0 = time.time()
     with ProcessPoolExecutor(max_workers=a.workers) as ex:
         results = []
         for i, r in enumerate(ex.map(process_file, jobs), 1):
             results.append(r)
             if i % 10 == 0 or i == len(jobs):
-                print(f"[{i}/{len(jobs)}] shards done, {time.time() - t0:.0f}s", flush=True)
+                done = sum(x["train_tokens"] + x["val_tokens"] for x in results)
+                print(f"[{i}/{len(jobs)}] jobs done, {time.time() - t0:.0f}s, {done:,} tokens", flush=True)
 
     per_domain: dict = {}
     for r in results:
@@ -252,7 +315,8 @@ def main(argv=None) -> int:
             t = per_domain.setdefault(dom, {"docs": 0, "chars": 0, "tokens": 0})
             for k in t:
                 t[k] += v[k]
-    manifest = {"files": len(files), "docs": sum(r["docs"] for r in results), "chars": sum(r["chars"] for r in results),
+    manifest = {"files": len(files), "jobs": len(jobs),
+                "inputs": [{"path": f, "bytes": os.path.getsize(f)} for f in files], "docs": sum(r["docs"] for r in results), "chars": sum(r["chars"] for r in results),
                 "dup_dropped": sum(r["dup_dropped"] for r in results), "per_domain": per_domain, "shards": results}
     if a.count_only:
         cpt = a.chars_per_token
@@ -266,7 +330,7 @@ def main(argv=None) -> int:
                         train_tokens=sum(r["train_tokens"] for r in results), val_tokens=sum(r["val_tokens"] for r in results))
         if not a.no_merge:
             for split, name in ((SPLIT_TRAIN, "train"), (SPLIT_VAL, "val")):
-                shards = [os.path.join(a.out, Path(f).stem + f".{name}.bin") for f in files]
+                shards = [os.path.join(a.out, j[10] + f".{name}.bin") for j in jobs]
                 n = merge_bins(shards, os.path.join(a.out, f"{name}.bin"), tok.n_vocab, tok.eos_id, split)
                 assert n == manifest[f"{name}_tokens"], (name, n, manifest[f"{name}_tokens"])
                 if a.delete_shards:

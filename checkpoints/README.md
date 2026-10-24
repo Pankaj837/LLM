@@ -1,5 +1,8 @@
 # Checkpoints — TOY placeholders, not the production model
 
+> Status 24 Oct 2026: the 51M models below are the only real checkpoints; **no scaled (100M–1.5B) model has been trained yet**.
+> The plan and decisions are in `docs/TRAINING_PLAN_1p5B.md`. The roster and "current as of" dates in this file are historical.
+
 **These are not the real model. Do not treat their output as a quality signal, and expect them to be replaced.**
 
 | File | Params | Trained on | Steps | Purpose |

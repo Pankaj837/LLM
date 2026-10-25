@@ -31,7 +31,7 @@ def test_config_to_checked_bins_and_the_printed_mix(tmp_path, capsys):
                        {"name": "qa", "kind": "text", "paths": [str(tmp_path / "qa.txt")], "blank": True, "weight": 0.4},
                        {"name": "tiny", "kind": "text", "paths": [str(tmp_path / "tiny.txt")], "weight": 0.01}]}
     (tmp_path / "cfg.json").write_text(json.dumps(cfg), encoding="utf-8")
-    assert bd.main([str(tmp_path / "cfg.json")]) == 0
+    assert bd.main([str(tmp_path / "cfg.json"), "--allow-unfrozen"]) == 0
     out = capsys.readouterr().out
     bins = tmp_path / "bins"
     assert read_header(str(bins / "bio.train.bin")).total_tokens > 0 and (bins / "qa.val.bin").exists()
@@ -48,7 +48,7 @@ def test_a_missing_input_stops_the_build(tmp_path):
     (tmp_path / "cfg.json").write_text(json.dumps({"vocab": str(vocab), "out": str(tmp_path / "b"), "domains": [
         {"name": "x", "kind": "text", "paths": [str(tmp_path / "nothing*.txt")], "weight": 1}]}), encoding="utf-8")
     with pytest.raises(SystemExit):
-        bd.main([str(tmp_path / "cfg.json")])
+        bd.main([str(tmp_path / "cfg.json"), "--allow-unfrozen"])
 
 
 def test_the_shipped_example_config_is_valid_json_with_known_kinds():
@@ -65,10 +65,23 @@ def test_partial_config_uses_weights_sum_and_writes_a_build_manifest(tmp_path, c
     cfg = {"vocab": str(vocab), "out": str(tmp_path / "bins"), "workers": 1, "val_frac": 0.1, "plan_tokens": 100000, "weights_sum": 0.5,
            "domains": [{"name": "bio", "kind": "text", "paths": [str(tmp_path / "bio.txt")], "weight": 0.25}]}
     (tmp_path / "cfg.json").write_text(json.dumps(cfg), encoding="utf-8")
-    assert bd.main([str(tmp_path / "cfg.json")]) == 0
+    assert bd.main([str(tmp_path / "cfg.json"), "--allow-unfrozen"]) == 0
     out = capsys.readouterr().out
     total = read_header(str(tmp_path / "bins" / "bio.train.bin")).total_tokens
     assert f"{0.25 / 0.5:>9.3f}" in out                                   # share 0.5 of the whole mix, not 1.0 of this config
     m = json.loads((tmp_path / "bins" / "build_manifest.json").read_text())
     assert m["tokens"]["bio"]["train"] == total and len(m["tokenizer_sha256"]) == 64 and m["config"]["weights_sum"] == 0.5
     assert m["inputs"]["bio"][0]["bytes"] == (tmp_path / "bio.txt").stat().st_size and "git_commit" in m["run_info"]
+
+
+def test_a_vocabulary_other_than_the_frozen_one_is_refused_before_any_work(tmp_path):
+    digits = ROOT / "tokenizers" / "vocab32k_digits_v2" / "digits_NOT_FROZEN.tok"      # same size and EOS id as the frozen one
+    (tmp_path / "t.txt").write_text("\n".join(BIO) + "\n", encoding="utf-8")
+    cfg = {"vocab": str(digits), "out": str(tmp_path / "bins"),
+           "domains": [{"name": "t", "kind": "text", "paths": [str(tmp_path / "t.txt")], "weight": 1}]}
+    (tmp_path / "cfg.json").write_text(json.dumps(cfg), encoding="utf-8")
+    with pytest.raises(SystemExit) as e:
+        bd.main([str(tmp_path / "cfg.json")])
+    assert "NOT the frozen tokenizer" in str(e.value) and not (tmp_path / "bins").exists()
+    cfg["vocab"] = str(ROOT / "tokenizers" / "vocab32k_v2" / "vocab32k.tok")
+    bd.require_frozen_vocab(cfg["vocab"])                                              # the frozen one is accepted

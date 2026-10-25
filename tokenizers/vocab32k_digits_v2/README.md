@@ -6,7 +6,7 @@ encoder is unchanged: it only merges what the vocabulary contains, so every numb
 
 | | |
 |---|---|
-| File | `vocab32k.tok` (V1 format; 31,936 merges + 64 special tokens, ids 31,936–31,999; n_vocab 32,000, fits `uint16`) |
+| File | `digits_NOT_FROZEN.tok` (renamed on 25 Oct from `vocab32k.tok` so it can never be mistaken for the frozen file; V1 format; 31,936 merges + 64 special tokens, ids 31,936–31,999; n_vocab 32,000, fits `uint16`) |
 | EOS | `<|endoftext|>` = **31,936** |
 | SHA-256 | `b2e45a916f6b01868d36ca181887021fcee36e8d91f1d4835745553d3397aa87` |
 | Status | **Candidate, verified; one of two options — the team lead chooses, then it is frozen.** Recommendation: this one |

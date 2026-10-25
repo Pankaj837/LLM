@@ -5,7 +5,9 @@
 
 For every file: the header is valid and the file size matches ``total_tokens`` (no truncation); every id is below
 the vocabulary size; the file ends on an EOS; documents (= EOS count) and mean document length are reported. Across
-files: identical vocabulary size and EOS id, and (with ``--vocab``) both equal the frozen tokenizer's. Exit code 1 on
+files: identical vocabulary size and EOS id, and (with ``--vocab``) both equal the frozen tokenizer's. With ``--vocab`` it also
+decodes and re-encodes 20 chunks spread through each file: the ids must come back unchanged, otherwise the file was tokenized
+with a DIFFERENT vocabulary (the header cannot tell two same-sized vocabularies apart). Exit code 1 on
 any problem, so it can gate a launch script.
 """
 from __future__ import annotations
@@ -23,8 +25,51 @@ from llm.tokenizer import BPETokenizer  # noqa: E402
 
 CHUNK = 1 << 26
 
+PROBE_CHUNKS = 20        # chunks decoded and re-encoded per file, spread evenly through it
+PROBE_TOKENS = 1500      # tokens per chunk (starting at a document start; short documents are probed together)
+PROBE_MAX_BAD = 0.2      # more than this share of mismatching documents => another vocabulary
+PROBE_TAIL = 4           # tokens ignored at an artificial cut (a cut can split a word or a multi-byte character)
 
-def check_file(path: str) -> dict:
+
+def probe_roundtrip(toks, eos_id: int, tokenizer, n: int = PROBE_CHUNKS) -> tuple:
+    """(documents that do not survive decode -> encode, documents probed).
+
+    Text tokenized with one vocabulary and decoded with another is not the original text; re-encoding that text does not give the
+    ids back, for any text (plain ASCII included). Gokul's bio / earth files (25 Oct) were tokenized with ``vocab32k_digits_v2`` while
+    the frozen one is ``vocab32k_v2``: same size, same EOS id, same file name ``vocab32k.tok``. 0 of 300 documents round-tripped.
+    A document cut by the end of the chunk is compared up to its last few tokens only.
+    """
+    bad = total = 0
+    for i in range(n):
+        w = np.asarray(toks[i * len(toks) // n: i * len(toks) // n + 10 * PROBE_TOKENS])
+        ends = np.flatnonzero(w == eos_id)
+        if len(ends) < 1:
+            continue
+        chunk = w[int(ends[0]) + 1: int(ends[0]) + 1 + PROBE_TOKENS].tolist()
+        docs, cur, complete = [], [], []
+        for t in chunk:
+            if t == eos_id:
+                if cur:
+                    docs.append(cur)
+                    complete.append(True)
+                cur = []
+            else:
+                cur.append(t)
+        if cur:
+            docs.append(cur)
+            complete.append(False)                            # cut by the end of the chunk
+        for ids, whole in zip(docs, complete):
+            if len(ids) < 3:
+                continue
+            text = tokenizer.decode(ids)
+            back = tokenizer.encode(text, allowed_special=set())
+            keep = len(ids) if whole else len(ids) - PROBE_TAIL
+            total += 1
+            bad += (back[:keep] != ids[:keep]) or (whole and len(back) != len(ids))
+    return bad, total
+
+
+def check_file(path: str, tokenizer=None) -> dict:
     h, toks = read_tokens(path, mmap=True)
     info = {"path": path, "tokens": int(h.total_tokens), "vocab": h.vocab_size, "eos": h.eos_id, "problems": []}
     eos = docs = 0
@@ -40,6 +85,12 @@ def check_file(path: str) -> dict:
         info["problems"].append("file does not end with EOS (cut mid-document?)")
     if len(toks) == 0:
         info["problems"].append("no tokens")
+    elif tokenizer is not None and not info["problems"]:
+        bad, total = probe_roundtrip(toks, h.eos_id, tokenizer)
+        info["probe"] = (bad, total)
+        if total >= 5 and bad / total > PROBE_MAX_BAD:
+            info["problems"].append(f"{bad} of {total} sampled documents do not survive decode -> encode with this vocabulary: tokenized with a "
+                                    "DIFFERENT vocabulary (e.g. vocab32k_digits_v2 instead of the frozen vocab32k_v2)?")
     info.update(max_id=mx, docs=docs, mean_doc=(len(toks) / docs if docs else float("nan")))
     return info
 
@@ -53,6 +104,7 @@ def main(argv=None) -> int:
     if not paths:
         ap.error("no files matched")
     ref = None
+    t = None
     if a.vocab:
         t = BPETokenizer.from_file(a.vocab)
         ref = (t.n_vocab, t.eos_id)
@@ -62,7 +114,7 @@ def main(argv=None) -> int:
     print(f"{'file':<48}{'tokens':>16}{'docs':>12}{'mean doc':>10}  status")
     for p in paths:
         try:
-            r = check_file(p)
+            r = check_file(p, t)
         except ValueError as e:
             print(f"{os.path.basename(p):<48}{'':>16}{'':>12}{'':>10}  FAIL {e}")
             bad += 1

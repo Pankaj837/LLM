@@ -49,6 +49,29 @@ def test_good_files_pass_and_each_defect_is_reported(tmp_path, capsys):
     assert cb.main([good, other_vocab]) == 1                       # mixed vocabularies in one set
 
 
+def test_a_file_tokenized_with_the_other_32k_candidate_is_caught(tmp_path, capsys):
+    """Gokul's bio / earth bins (25 Oct): same size, same EOS, same file name 'vocab32k.tok', but the digits candidate."""
+    frozen = ROOT / "tokenizers" / "vocab32k_v2" / "vocab32k.tok"
+    digits = ROOT / "tokenizers" / "vocab32k_digits_v2" / "digits_NOT_FROZEN.tok"
+    tf, td = BPETokenizer.from_file(str(frozen)), BPETokenizer.from_file(str(digits))
+    assert (tf.n_vocab, tf.eos_id) == (td.n_vocab, td.eos_id)                # the header cannot tell them apart
+    text = [" ".join("Protein %d binds receptor %d in tissue %d (n = %d); the κ constant is 3.14 and β-sheets form." % (i, j % 7, i % 5, i * j)
+                     for j in range(60)) for i in range(60)]
+    ids = []
+    for s in text:
+        ids += td.encode(s, allowed_special=set()) + [td.eos_id]
+    bad = _bin(tmp_path / "wrong.bin", ids, td.n_vocab, td.eos_id)
+    assert cb.main([bad, "--vocab", str(digits)]) == 0                         # right vocabulary: fine
+    capsys.readouterr()
+    assert cb.main([bad, "--vocab", str(frozen)]) == 1                         # wrong one: caught
+    assert "DIFFERENT vocabulary" in capsys.readouterr().out
+    ids = []
+    for s in text:
+        ids += tf.encode(s, allowed_special=set()) + [tf.eos_id]
+    good = _bin(tmp_path / "right.bin", ids, tf.n_vocab, tf.eos_id)
+    assert cb.main([good, "--vocab", str(frozen)]) == 0
+
+
 def test_merge_bins_script_concatenates_and_refuses_mixed_vocabularies(tmp_path):
     import merge_bins as mb
     from llm.data import read_header, read_tokens

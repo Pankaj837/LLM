@@ -20,5 +20,5 @@ def test_frozen_vocabulary_matches_its_recorded_hash_and_layout():
 
 def test_the_unfrozen_experiment_is_not_the_frozen_file():
     frozen = (ROOT / "tokenizers" / "vocab32k_v2" / "vocab32k.tok").read_bytes()
-    other = (ROOT / "tokenizers" / "vocab32k_digits_v2" / "vocab32k.tok").read_bytes()
+    other = (ROOT / "tokenizers" / "vocab32k_digits_v2" / "digits_NOT_FROZEN.tok").read_bytes()
     assert frozen != other

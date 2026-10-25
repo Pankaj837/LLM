@@ -46,7 +46,7 @@ python scripts/smoke_test.py
 ```
 
 ## Current totals (CPU, this repository)
-- Without `BIO_ZIP`/`EARTH_ZIP`/a built C++ tokenizer: 323 passed, 15 skipped (GPU 7, C++ parity 2, real-data 4, release gate 1, legacy checkpoint 1) — 24 Oct 2026 (after the three audit passes).
+- Without `BIO_ZIP`/`EARTH_ZIP`/a built C++ tokenizer: 334 passed, 15 skipped (GPU 7, C++ parity 2, real-data 4, release gate 1, legacy checkpoint 1) — 25 Oct 2026 (`scale-run-rc6`; includes the CPU rehearsal of the whole GPU session, `tests/test_gpu_session.py`).
 - With `BIO_ZIP` + `EARTH_ZIP`: 327 passed, 11 skipped.
 - **With the C++ tokenizer built and `TOK_CLI`/`TOK_VOCAB` set: 325 passed** (the 2 C++ parity tests run for real
   instead of skipping) — see `docs/CPP_TOKENIZER_PARITY.md` for the actual output.

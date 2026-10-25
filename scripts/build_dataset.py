@@ -26,6 +26,7 @@ import argparse
 import glob
 import json
 import os
+import re
 import shutil
 import sys
 
@@ -35,6 +36,27 @@ import merge_bins as mb  # noqa: E402
 import tokenize_parquet as tp  # noqa: E402
 import tokenize_text as tt  # noqa: E402
 from llm.data import read_header  # noqa: E402
+
+
+FROZEN_MD = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "tokenizers", "FROZEN.md")
+
+
+def frozen_sha() -> str:
+    """The SHA-256 of the frozen tokenizer, read from tokenizers/FROZEN.md."""
+    m = re.search(r"SHA-256\s*\|\s*`([0-9a-f]{64})`", open(FROZEN_MD, encoding="utf-8").read())
+    if not m:
+        raise SystemExit(f"cannot find the SHA-256 in {FROZEN_MD}")
+    return m.group(1)
+
+
+def require_frozen_vocab(vocab: str) -> None:
+    """Refuse any other vocabulary: the two 32K candidates have the same size, EOS id and file name, so nothing else would notice."""
+    from llm.tokenizer import BPETokenizer
+
+    got = BPETokenizer.file_sha256(vocab)
+    if got != frozen_sha():
+        raise SystemExit(f"{vocab} is NOT the frozen tokenizer (sha256 {got[:16]}..., frozen {frozen_sha()[:16]}...). "
+                         "Use tokenizers/vocab32k_v2/vocab32k.tok (git checkout scale-run-rc6), or pass --allow-unfrozen for a rehearsal.")
 
 
 def _expand(paths):
@@ -114,8 +136,11 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("config")
     ap.add_argument("--keep-work", action="store_true", help="keep the per-job intermediate bins (default: delete after merging)")
+    ap.add_argument("--allow-unfrozen", action="store_true", help="rehearsal only: accept a vocabulary other than the frozen one")
     a = ap.parse_args(argv)
     cfg = json.load(open(a.config, encoding="utf-8"))
+    if not a.allow_unfrozen:
+        require_frozen_vocab(cfg["vocab"])           # before any tokenizing: hours of work on the wrong vocabulary are worthless
     out = cfg["out"]
     os.makedirs(out, exist_ok=True)
     totals = {}

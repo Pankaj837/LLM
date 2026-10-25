@@ -1,6 +1,6 @@
 # Tokenizers
 
-**Decision (Raju, 24–25 Oct): `vocab32k_v2` is frozen** — see `FROZEN.md`. The text below explains how the two candidates differ and is kept for the later digits evaluation.
+**Use exactly one file for everything: `tokenizers/vocab32k_v2/vocab32k.tok`** (SHA-256 `10b3c5ae…1cdc`). Raju decided on 24–25 Oct: `vocab32k_v2` is frozen — see `FROZEN.md`. The digits candidate is NOT used for any real run; its file is called `digits_NOT_FROZEN.tok` so the two can never be confused (they have the same size and the same EOS id, so a token file built with the wrong one passes the header check; `scripts/check_bins.py --vocab` catches it by decoding and re-encoding samples, as it did for two files on 25 Oct). The text below explains how the candidates differ and is kept for the later digits evaluation.
 
 | Directory | What | SHA-256 | Status |
 |---|---|---|---|
@@ -13,11 +13,11 @@ Both have the same 64 special tokens (ids 31,936–31,999; EOS `<|endoftext|>` =
 `<|assistant|>`, `<|end_of_turn|>`, `<|tool_call|>`, `<|tool_result|>` and 55 reserved slots, so chat / tool-use / structured-output
 fine-tuning later never needs to resize a frozen vocabulary. Pretraining uses only EOS. Names can still change before the freeze.
 
-## How to choose
+## How the candidates differ (historical; the choice is made: `vocab32k_v2`)
 The only difference is how numbers are written. The data is mathematics, multi-step calculation, physics, quant finance, CAD
 geometry and code, so consistent digits are worth ~5–6% more tokens (per-domain numbers in `vocab32k_digits_v2/README.md`).
-If numbers-only text (finance records, generated arithmetic) is judged unimportant and token cost matters more than arithmetic
-regularity, take `vocab32k_v2`. The two are **not interchangeable**: choose before tokenizing anything for a real run.
+Raju chose `vocab32k_v2` (token cost over arithmetic regularity); digits is to be evaluated separately, later, only if numerical reasoning shows a
+clear need. The two are **not interchangeable**: never mix token files from both in one run.
 
 ## How to freeze
 1. The team lead states the choice in the group; the choice is written here as `FROZEN.md` (directory, SHA-256, date, who approved).

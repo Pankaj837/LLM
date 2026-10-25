@@ -122,18 +122,25 @@ Gokul confirmed there will be no more GPU hours, so the whole session is ≈ 3 H
 
 | Min | What | Why / stop rule |
 |---|---|---|
-| 0–15 | `git clone`, `git checkout scale-run-rc2`, `pip install -e ".[dev]"`, copy the prepared bins | setup is billed time; do it once, nothing else |
-| 15–25 | **Benchmark** (below): 100m / 300m / 1p5b, several micro-batch sizes, synthetic tokens | decides everything; gives measured tokens/s, memory, cost per 1B tokens |
-| 25–35 | 1.51B smoke test: 60 steps, save, resume to 80 steps | proves checkpoint/resume and the multi-process path on the real hardware |
-| 35–150 | **100M run** on the prepared mix; `--max-steps` from the measured speed (below) | the first real model; a mid-run checkpoint every 500 steps |
-| 150–180 | reserve | a failed start, one re-run, per-domain evaluation (`eval_domains.py`) |
+| 0–15 | `git clone`, `git checkout scale-run-rc6`, `pip install -e ".[dev]"`, copy the prepared bins | setup is billed time; do it once, nothing else |
+| 15–25 | **Benchmark**: 100M and 1.5B, several micro-batch sizes, synthetic tokens | decides everything; gives measured tokens/s, memory, cost per 1B tokens |
+| 25–40 | 1.51B smoke test: 60 steps, save, resume to 80 steps, on the real mix | proves checkpoint/resume and the real data path on the real hardware; a failure stops the session |
+| 40–150 | **100M run** on the prepared mix; `max_steps` from a 30-step calibration on the real mix | the first real model; a checkpoint every 500 steps; killed if it overruns its budget by 10% |
+| 150–180 | reserve | per-domain evaluation of the last and the best checkpoint, a restart (re-running the command resumes) |
 
+**All of it is one command, written to be run, not edited** (`scripts/gpu_session.py`, rehearsed end to end on CPU in `tests/test_gpu_session.py`):
 ```
-python scripts/benchmark.py --presets 100m 300m 1p5b --batch-sizes 1 2 4 8 16 32 --seq-len 2048 --rupees-per-hour 330 --out bench.json
+python scripts/gpu_session.py preflight --bins bins --expect-tag scale-run-rc6        # FREE: run it on the CPU machine and again on the GPU machine
+python scripts/gpu_session.py all       --bins bins --expect-tag scale-run-rc6 --minutes 100 --out session
 ```
-Post `bench.json` (or the printed table) in the group: it replaces every estimate in §2. **100M run length:** `max_steps = tokens_per_s × 6,000 s ÷ 262,144`
-(100 minutes of the 115-minute window, the rest is evaluation and margin; 262,144 tokens per step, recipe in §4). With the estimated 4×10⁵ tokens/s that is about 2.4B tokens
-(~9,000 steps); if the measured speed is lower the run is simply shorter: never extend it past the reserve.
+`preflight` refuses to start unless the code is exactly the tag, the tokenizer is the frozen one (and so is the one in every build manifest), every token
+file passes `check_bins`, a balanced validation file (`val_mix.bin`, the same number of whole documents from every domain) exists, and the disk has room.
+Then it benchmarks, picks the micro-batch (fastest that leaves memory headroom and divides the global batch of 128 sequences), runs the smoke test, measures
+the real tokens/s on the mix, sets `max_steps = tokens_per_s × budget ÷ 262,144` (budget = `--minutes` × 0.95), trains, evaluates every domain and writes
+`session/session_report.md`: **post that file in the group** (it replaces every estimate in §2). With the estimated 4×10⁵ tokens/s the run is about 2.4B tokens
+(~9,000 steps); if the measured speed is lower the run is simply shorter. If the session stops, nothing after the failed stage was started, and
+re-running the same command continues (a finished stage is not repeated for its decisions; an interrupted run resumes from `ckpt_last.pt`). Single stages:
+`bench`, `smoke`, `train`, `eval`, `report`. The older manual commands remain valid: `python scripts/benchmark.py --presets 100m 300m 1p5b --batch-sizes 1 2 4 8 16 32 --seq-len 2048 --out bench.json`.
 
 **Data for the 100M run** (≈ 2B tokens, built on a CPU machine beforehand): `python scripts/build_dataset.py configs/run_100m.example.json`
 tokenizes only what the mix needs (row-group samples and token caps per domain), merges per domain, runs the integrity check, writes
@@ -182,7 +189,7 @@ quality validation, domain evaluation.
 
 ## 9. Open decisions and risks
 **Decided (Raju, 24–25 Oct):** first model smaller (the 100M above); tokenizer `vocab32k_v2` **frozen** (`tokenizers/FROZEN.md`), `vocab32k_digits_v2` to be evaluated separately later and only if digit-level numerical reasoning shows a clear need; the 3 GPU hours are all there is (Gokul: no more GPU hours); Pankaj sets the benchmark.
-Still open: (1) ~~choose and freeze one of the two 32K tokenizers~~ done; the digits question is deferred (`vocab32k_v2`, or `vocab32k_digits_v2` with numbers encoded digit by digit at ~5–6% more tokens — recommended, see `tokenizers/README.md`); (2) compute: budget/another machine for the 1.51B run, or a
+Still open: (1) ~~choose and freeze one of the two 32K tokenizers~~ done; the digits question is deferred (`vocab32k_v2` is frozen; `vocab32k_digits_v2`, numbers digit by digit at ~5–6% more tokens, is NOT used unless numerical reasoning shows a clear need, see `tokenizers/README.md`); (2) compute: budget/another machine for the 1.51B run, or a
 smaller first model, or 1.51B on 5B tokens; (3) the data mix in §3; (4) include Medical or not; (5) who delivers
 engineering and general-language data; (6) true 3B or 2B as the ceiling.
 Risks: GPU time and count; the DDP path and the 1.51B model have never run on CUDA; all numbers in §2–§3 are estimates;

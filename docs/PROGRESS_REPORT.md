@@ -4,6 +4,8 @@ Single source of truth for status, blockers, owners and deadlines (Raju, 21 Oct:
 deadlines in one shared progress report"). Updated by Pankaj. **"Evidence" is what was actually seen** (a message, a file,
 a test); anything without evidence is marked *awaiting*. Last update: 24 Oct 2026.
 
+Who was allotted what, when, and whether it was delivered (from 10 Oct): see `docs/ASSIGNMENT_LEDGER.md`.
+
 ## Gates (in order; nothing starts before the gate above it)
 | # | Gate | Owner | Status | Evidence / next step |
 |---|---|---|---|---|

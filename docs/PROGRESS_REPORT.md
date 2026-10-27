@@ -2,9 +2,13 @@
 
 Single source of truth for status, blockers, owners and deadlines (Raju, 21 Oct: "track failures, blockers, owners and
 deadlines in one shared progress report"). Updated by Pankaj. **"Evidence" is what was actually seen** (a message, a file,
-a test); anything without evidence is marked *awaiting*. Last update: 27 Oct 2026.
+a test); anything without evidence is marked *awaiting*. Last update: 27 Oct 2026 (night).
 
 ## Summary (27 Oct 2026)
+**First model trained (27 Oct, owner-reported by Gokul, H100):** 100M parameters, 842.8M tokens, 13 domains, 63 min, validation loss 4.30 → 2.16, per-domain mean 2.12 (best code 1.28, worst astronomy 3.30); smoke test of the 1.5B model passed; measured speed equals the benchmark (224k vs 226k tokens/s); session ≈ ₹379. Details, limits and what the numbers do not prove: `docs/FIRST_RUN_ANALYSIS_2026-10-27.md`. Not yet seen by Pankaj: the checkpoint and the logs; Raju asked (10:07 pm) for real inputs, outputs, evaluation results and failure cases: `scripts/sample_outputs.py` produces them from the checkpoint.
+
+**Capability owners (Raju, 27 Oct, 11:24–11:30 pm):** 9 and 10 Swaraj; 4 Prabanjan; 11, 12, 14 Namit (data collection to tokenization, by Thursday); 15 Gokul / Ravi (by tomorrow). Target for each: complete tokenization, 500M–1B tokens. Namit Aggarwal was added to the group.
+
 **Ready:** the 32K tokenizer (frozen, `vocab32k_v2`); the whole pipeline (tokenize, merge, integrity check, weighted mix, per-domain evaluation); the training code; a one-command GPU session (`scripts/gpu_session.py`: preflight, benchmark, 1.5B smoke test, timed 100M run, evaluation, report), rehearsed end to end on CPU; code tag `scale-run-rc6`, 334 tests pass.
 
 **Data, token files:** verified: Prabanjan, 612M tokens (math, Multi-step, Astronomy, Finance). Reported, not yet verified: Ravi, 767M tokens (code 322.8M, Scientific Q&A 188.6M, chemistry 127.6M, CAD 78.4M, Scientific Programming 49.8M; his Drive folder is private). Rejected: Gokul's Biology and Earth files (built with the wrong 32K vocabulary; being rebuilt). Not yet built: Physics, Scientific Discovery.
@@ -25,8 +29,8 @@ Who was allotted what, when, and whether it was delivered (from 10 Oct): see `do
 | 2 | All cleaned data in one shared Drive folder | Raju (create/confirm folder), all owners (upload) | **awaiting** | owners post their own folders; Ravi's two folders are private (sign-in required), Om asked him for access (27 Oct) |
 | 3 | Recount per domain from the manifests | Pankaj | blocked by gates 0 and 2 | `tokenize_*.py --count-only` is ready |
 | 4 | Tokenize, merge per domain, `check_bins.py` PASS | each owner for own domains | **in progress**: Prabanjan verified (612M); Ravi reports 5 domains PASS, 767M tokens (not verified yet); Gokul bio/earth rejected, rebuild; Physics and Scientific Discovery not built. Each owner runs `build_dataset.py` on own domains (it now refuses a non-frozen vocabulary) | tools ready and tested: `tokenize_parquet.py`, `tokenize_text.py`, `merge_bins.py`, `check_bins.py` |
-| 5 | Smoke test on the GPU (≈ 40 min) | Pankaj (`gpu_session.py`), Gokul, Om | **ready, awaiting GPU**: the whole session (benchmark, smoke, timed run, evaluation) is one tested command | smoke data and the exact command are shared; Om's first benchmark promised "as soon as I train it on the GPU" |
-| 6 | First run (100M, ≈ 1.3 H100-hours) → evaluate per domain | Gokul, Om, Pankaj | blocked by gates 4 and 5 | recipe in `docs/TRAINING_PLAN_1p5B.md` §4 |
+| 5 | Smoke test on the GPU (≈ 40 min) | Pankaj (`gpu_session.py`), Gokul | **DONE 27 Oct (owner-reported)**: 1.5B smoke test PASS on the H100 (loss 8.70 → 7.94, 25.4k tokens/s, 60.8 GB, checkpoint and resume work); benchmark table in `docs/FIRST_H100_SESSION_REPORT_2026-10-27.md` | smoke data and the exact command are shared; Om's first benchmark promised "as soon as I train it on the GPU" |
+| 6 | First run (100M) → evaluate per domain | Gokul, Pankaj | **DONE 27 Oct (owner-reported)**: 842.8M tokens in 63 min, validation 2.162, per-domain table in the report; **checkpoint not yet uploaded / seen**; more tokens possible with the remaining credit (≈ ₹620, ≈ 1.9 h) | recipe in `docs/TRAINING_PLAN_1p5B.md` §4 |
 | 7 | 1.51B run | Raju (budget) | blocked by gate 1 | |
 
 ## Owners and open items

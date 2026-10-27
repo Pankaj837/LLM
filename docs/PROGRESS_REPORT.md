@@ -2,7 +2,18 @@
 
 Single source of truth for status, blockers, owners and deadlines (Raju, 21 Oct: "track failures, blockers, owners and
 deadlines in one shared progress report"). Updated by Pankaj. **"Evidence" is what was actually seen** (a message, a file,
-a test); anything without evidence is marked *awaiting*. Last update: 25 Oct 2026 (night).
+a test); anything without evidence is marked *awaiting*. Last update: 27 Oct 2026.
+
+## Summary (27 Oct 2026)
+**Ready:** the 32K tokenizer (frozen, `vocab32k_v2`); the whole pipeline (tokenize, merge, integrity check, weighted mix, per-domain evaluation); the training code; a one-command GPU session (`scripts/gpu_session.py`: preflight, benchmark, 1.5B smoke test, timed 100M run, evaluation, report), rehearsed end to end on CPU; code tag `scale-run-rc6`, 334 tests pass.
+
+**Data, token files:** verified: Prabanjan, 612M tokens (math, Multi-step, Astronomy, Finance). Reported, not yet verified: Ravi, 767M tokens (code 322.8M, Scientific Q&A 188.6M, chemistry 127.6M, CAD 78.4M, Scientific Programming 49.8M; his Drive folder is private). Rejected: Gokul's Biology and Earth files (built with the wrong 32K vocabulary; being rebuilt). Not yet built: Physics, Scientific Discovery.
+
+**Not available:** a GPU session has not happened (3 hours was the earlier limit; on 26–27 Oct Raju asked everyone to apply for AIKosh access, 22 hours: GPU type and start date unknown). No data exists for capabilities 4, 9, 10, 11, 12, 14, 15 or general language.
+
+**Needs a decision (Raju):** how to use the AIKosh hours once the GPU type is known (a longer 100M run, or a 300M model, needs more tokens than the current 2.4B-token mix); owners for the capabilities without data; Medical.
+
+**Ownership (Raju, 27 Oct):** Swaraj takes ownership of the LLM project in coordination with Pankaj.
 
 Who was allotted what, when, and whether it was delivered (from 10 Oct): see `docs/ASSIGNMENT_LEDGER.md`.
 
@@ -10,11 +21,11 @@ Who was allotted what, when, and whether it was delivered (from 10 Oct): see `do
 | # | Gate | Owner | Status | Evidence / next step |
 |---|---|---|---|---|
 | 0 | 32K tokenizer approved and frozen | Raju (approve), Pankaj (freeze) | **DONE 25 Oct**: `vocab32k_v2` frozen (Raju: digits version only later if numerical reasoning needs it); `tokenizers/FROZEN.md`, guarded by a test | two candidates were built and verified (round-trip, C++ parity 3003/3003); the digits one (`tokenizers/vocab32k_digits_v2/digits_NOT_FROZEN.tok`) is NOT used. 25 Oct: Gokul's bio/earth token files turned out to be built with the digits vocabulary (same size and EOS, so the header check passed) — rejected, to be rebuilt; `check_bins.py` now catches this |
-| 1 | Compute budget decided | Raju | **decided 24 Oct**: smaller model first, 3 GPU-hours total, no more available (Gokul: team heads will not allow) | 1.51B on 30B tokens (≈ 257 H100-hours) is out of reach; the 3-hour session is `docs/TRAINING_PLAN_1p5B.md` §5b |
-| 2 | All cleaned data in one shared Drive folder | Raju (create/confirm folder), all owners (upload) | **awaiting** | requested in the group; no folder link seen yet |
+| 1 | Compute budget decided | Raju | **changed 26–27 Oct**: smaller model first (24 Oct, 3 GPU-hours); then Raju asked everyone to register on AIKosh for 22 hours of GPU access. Registered: Ravi, Gokul. Prabanjan's access (approved for Saturday) handed to Raju / Pankaj. Pankaj, Avinash, Om: asked, registration not confirmed. GPU type and start date unknown | 1.51B on 30B tokens (≈ 257 H100-hours) is out of reach; the 3-hour session is `docs/TRAINING_PLAN_1p5B.md` §5b |
+| 2 | All cleaned data in one shared Drive folder | Raju (create/confirm folder), all owners (upload) | **awaiting** | owners post their own folders; Ravi's two folders are private (sign-in required), Om asked him for access (27 Oct) |
 | 3 | Recount per domain from the manifests | Pankaj | blocked by gates 0 and 2 | `tokenize_*.py --count-only` is ready |
-| 4 | Tokenize, merge per domain, `check_bins.py` PASS | Ravi (data), Gokul (machine) | blocked by gates 0 and 2 | tools ready and tested: `tokenize_parquet.py`, `tokenize_text.py`, `merge_bins.py`, `check_bins.py` |
-| 5 | Smoke test on the GPU (≈ 40 min) | Gokul, Om | **awaiting GPU time** | smoke data and the exact command are shared; Om's first benchmark promised "as soon as I train it on the GPU" |
+| 4 | Tokenize, merge per domain, `check_bins.py` PASS | each owner for own domains | **in progress**: Prabanjan verified (612M); Ravi reports 5 domains PASS, 767M tokens (not verified yet); Gokul bio/earth rejected, rebuild; Physics and Scientific Discovery not built. Each owner runs `build_dataset.py` on own domains (it now refuses a non-frozen vocabulary) | tools ready and tested: `tokenize_parquet.py`, `tokenize_text.py`, `merge_bins.py`, `check_bins.py` |
+| 5 | Smoke test on the GPU (≈ 40 min) | Pankaj (`gpu_session.py`), Gokul, Om | **ready, awaiting GPU**: the whole session (benchmark, smoke, timed run, evaluation) is one tested command | smoke data and the exact command are shared; Om's first benchmark promised "as soon as I train it on the GPU" |
 | 6 | First run (100M, ≈ 1.3 H100-hours) → evaluate per domain | Gokul, Om, Pankaj | blocked by gates 4 and 5 | recipe in `docs/TRAINING_PLAN_1p5B.md` §4 |
 | 7 | 1.51B run | Raju (budget) | blocked by gate 1 | |
 
@@ -31,10 +42,11 @@ Who was allotted what, when, and whether it was delivered (from 10 Oct): see `do
 | Prabanjan | Multi-step / Astronomy / Finance corpora | **delivered** (373 MB zip), checked by Pankaj | 21 Oct |
 | Prabanjan | token files for math, Multi-step, Astronomy, Finance (`bins.zip`, 607 MB) | **built with the real pipeline and verified (25 Oct)**: math 486.5M, Multi-step 88.6M, Astronomy 20.3M, Finance 17.2M tokens; integrity check PASS; decoded with the frozen vocabulary they read as the right text, with the other candidate as gibberish (so the vocabulary is the frozen one). Math was read as a prefix (first 1.83 GB): rerun with `spread` for a representative sample. Physics not yet tokenized | 25 Oct |
 | Prabanjan | Physics file | **read (25 Oct)**: mixed sources (65% Cosmopedia textbook units, 8% raw arXiv LaTeX, OpenWebMath pages), 13% of documents with little physics, document markers `<|document|>`; usable, ~0.64B tokens; supported by `tokenize_text.py --marker-domains` | — |
+| Ravi | token files for 5 domains (27 Oct message: built and verified on tag `scale-run-rc3` with the frozen tokenizer; integrity PASS, 10 files, ~770M tokens: code 322,833,044; sciqa 188,559,089; sciprog 49,848,074; chem 127,623,382; cad 78,449,381) | **reported, not verified**: the numbers add up (767M), but both Drive folders he posted ask for sign-in; built on the older tag, which cannot detect a wrong vocabulary. Asked him to open the folder and re-run `check_bins.py` on `scale-run-rc6`. Scientific Programming repeats ~3.9x at the planned mix | 27 Oct |
 | Ravi | final 32K vocabulary | **closed**: cannot exist before data; built by Pankaj instead | 21 Oct |
 | Ravi | training-text rule for the v4.0 files | **done**: his rule adopted in `v4_text` (verified against the files) | 23 Oct |
 | Ravi | Scientific Programming dedup by sha256 (491,834 distinct names in 1,831,796 rows) | **"deduped all 4 parquet, uploaded as <domain>_cleaned.parquet" (24 Oct)**; the link he posted is the Pranag AI root folder, which shows no such files, and his earlier team folder now asks for sign-in: **cannot verify** — asked for the folder link and row counts | 21 Oct |
-| Avinash | merged file with dedup (promised "by tomorrow", 21–22 Oct) | **awaiting**; he asked Pankaj to run index/quality/embeddings/cache — deferred, not on the training path | 22 Oct |
+| Avinash | merged file with dedup (promised "by tomorrow", 21–22 Oct) | **reported, file not uploaded (27 Oct)**: his message gives `data/processed/universal_merged.parquet`, 64,364,210 rows "subject to the latest verification output", SHA-256 "to be confirmed", and a Drive folder with five small reports (dedup report, domain counts, manifest, a duplicate sample, and a text report he named `pankaj_verification_report.txt`, which Pankaj did not produce). The merged file itself is not in the shared `processed` folder (only `reports`). Reports not yet read. He asks for help with intrinsic properties, 768-dim embeddings and the surrogate cache (laptop RAM); Raju told him to describe the work to Namit | 22 Oct |
 | Avinash | domain mapping to the 15 capabilities | asked 24 Oct what the list is: answered with `docs/CAPABILITIES.md`; mapping awaiting | 24 Oct |
 | Avinash | steps 4–6 (intrinsic properties, 768-dim embeddings, surrogate cache) | **postponed**: not needed for LLM training (Raju, 24 Oct: required later for the PINN side) | 24 Oct |
 | Avinash | cross-dataset near-duplicate removal | awaiting | 20 Oct |
@@ -62,6 +74,6 @@ Who was allotted what, when, and whether it was delivered (from 10 Oct): see `do
 | 24 Oct audit, pass 3 (process) | The vocabulary had one special token only; chat / tool-use / structured-output stages (Raju's requirements) would have needed an embedding resize of a frozen vocabulary; memory notes were stale | 64 special tokens reserved before the freeze; candidates rebuilt as `vocab32k_v2` / `vocab32k_digits_v2`; a fresh clone of the pushed repo passes the whole test suite |
 
 ## Risks
-GPU time (≈ 3 hours available) is the binding constraint; the multi-GPU path and the 1.51B model have never run on CUDA;
+GPU time is the binding constraint (3 hours confirmed; 22 hours through AIKosh requested by Raju, not yet granted, GPU type unknown); the multi-GPU path and the 1.51B model have never run on CUDA;
 all token counts are estimates until the manifests exist; the tokenizer sample has no physics, engineering or general-language
 text; data licences are the owners' claims, unchecked.

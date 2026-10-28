@@ -123,3 +123,24 @@ def test_spread_reads_evenly_spaced_whole_documents_not_a_prefix(tmp_path, vocab
     out = _run(tmp_path, [f"bio={path}"], vocab, "--max-tokens", "3000", "--spread", "4")
     m = json.loads((out / "manifest.json").read_text())
     assert 0 < m["docs"] < 2000
+
+
+def test_end_of_text_separated_documents_keep_their_blank_lines_and_drop_the_separator(tmp_path, vocab):
+    """The engineering reasoning corpus: problem, <think> trace and answer, full of blank lines, one `<|endoftext|>` line between samples."""
+    d1 = "Problem one.\n\nstep a\n\n\n<think> reasoning\n\nmore </think>\n\nAnswer 1"
+    d2 = "Problem two.\n\n\nline"
+    tail = "Cut tail without separator"
+    p = tmp_path / "eng.txt"
+    p.write_text(d1 + "\n<|endoftext|>\n\n" + d2 + "\n<|endoftext|>\n\n" + tail + "\n", encoding="utf-8")
+    assert list(tt.iter_docs(str(p), False, False, eot=True)) == [d1, d2, tail]
+    assert len(list(tt.iter_docs(str(p), True, False))) > 6                   # the blank-line rule would shred them
+    out = _run(tmp_path, [f"eng={p}"], vocab, "--eot-domains", "eng")
+    _, arr = read_tokens(str(out / "train.bin"), mmap=False)
+    assert arr.tolist() == _expected(vocab, [d1, d2, tail])                  # one EOS per sample, no literal separator text
+    assert json.loads((out / "manifest.json").read_text())["docs"] == 3
+    big = "".join(f"Task {i}\n\n\nreasoning {i}\n\nanswer {i * 7}\n<|endoftext|>\n" for i in range(1500))
+    (tmp_path / "big.txt").write_text(big, encoding="utf-8")
+    got = list(tt.iter_docs(str(tmp_path / "big.txt"), False, False, spread=3, slice_bytes=4000, eot=True))
+    assert got and all(g.startswith("Task ") and g.rsplit("answer ", 1)[1].isdigit() for g in got)
+    ids = sorted(int(g.split()[1]) for g in got)
+    assert ids[0] > 50 and ids[-1] < 1450                                    # spread over the file, whole samples only

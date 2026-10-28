@@ -13,7 +13,7 @@ Config (paths relative to the current directory; ``weights`` are shares of train
        {"name": "multistep", "kind": "text", "paths": ["prab/multistep_corpus.txt"], "blank": true, "max_tokens": 60000000, "weight": 0.03}]}
 
 ``kind`` is ``text`` (``.txt``/``.gz``; ``blank`` = documents separated by blank lines; ``marker`` = documents between
-``<|document|>`` and ``<|endofdocument|>`` lines; ``max_tokens`` caps the read, ``spread`` = take it as that many evenly
+``<|document|>`` and ``<|endofdocument|>`` lines; ``eot`` = documents separated by lines reading ``<|endoftext|>``; ``max_tokens`` caps the read, ``spread`` = take it as that many evenly
 spaced slices of a plain-text file instead of a prefix) or
 ``parquet`` (``sample_rg`` = fraction of evenly spaced row groups; ``max_files`` = only the first N matching files). For every
 domain it writes ``<out>/<name>.train.bin`` and ``<name>.val.bin``, then runs the integrity check on all of them and prints the exact
@@ -82,6 +82,8 @@ def build_domain(d: dict, cfg: dict, out: str) -> dict:
             args += ["--blank-domains", name]
         if d.get("marker"):
             args += ["--marker-domains", name]
+        if d.get("eot"):
+            args += ["--eot-domains", name]
         if d.get("max_tokens"):
             args += ["--max-tokens", str(int(d["max_tokens"]))]
         if d.get("spread"):

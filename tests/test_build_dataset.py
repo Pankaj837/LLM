@@ -85,3 +85,20 @@ def test_a_vocabulary_other_than_the_frozen_one_is_refused_before_any_work(tmp_p
     assert "NOT the frozen tokenizer" in str(e.value) and not (tmp_path / "bins").exists()
     cfg["vocab"] = str(ROOT / "tokenizers" / "vocab32k_v2" / "vocab32k.tok")
     bd.require_frozen_vocab(cfg["vocab"])                                              # the frozen one is accepted
+
+
+def test_eot_key_builds_documents_from_end_of_text_lines(tmp_path):
+    vocab = tmp_path / "v.tok"
+    write_tok(train_bpe(BIO * 3, 330), str(vocab))
+    docs = ["\n\n".join(BIO[i:i + 3]) for i in range(0, 90, 3)]                  # 30 documents with blank lines inside
+    (tmp_path / "eng.txt").write_text("\n<|endoftext|>\n".join(docs) + "\n<|endoftext|>\n", encoding="utf-8")
+    cfg = {"vocab": str(vocab), "out": str(tmp_path / "bins"), "workers": 1, "val_frac": 0.1,
+           "domains": [{"name": "eng", "kind": "text", "paths": [str(tmp_path / "eng.txt")], "eot": True, "weight": 1}]}
+    (tmp_path / "cfg.json").write_text(json.dumps(cfg), encoding="utf-8")
+    assert bd.main([str(tmp_path / "cfg.json"), "--allow-unfrozen"]) == 0
+    from llm.data import read_tokens
+    total = 0
+    for split in ("train", "val"):
+        h, toks = read_tokens(str(tmp_path / "bins" / f"eng.{split}.bin"), mmap=False)
+        total += int((toks == h.eos_id).sum())
+    assert total == 30                                                          # one document per sample, not one per paragraph

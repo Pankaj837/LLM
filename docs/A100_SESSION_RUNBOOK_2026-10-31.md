@@ -31,17 +31,17 @@ curl -sI https://github.com | head -1
 curl -sI https://drive.google.com | head -1
 ```
 ```bash
-git clone https://github.com/Pankaj837/LLM.git && cd LLM && git checkout scale-run-rc9
+git clone https://github.com/Pankaj837/LLM.git && cd LLM && git checkout scale-run-rc10
 python -m pip install -e ".[dev]"
 mkdir -p bins            # copy every <name>.train.bin and <name>.val.bin from the shared folder into bins/
 ```
 Free check, no GPU time used (it refuses wrong-vocabulary or damaged files):
 ```bash
-python scripts/gpu_session.py preflight --bins bins --config configs/run_a100_22h.draft.json --expect-tag scale-run-rc9 --min-free-gb 25 --out session
+python scripts/gpu_session.py preflight --bins bins --config configs/run_a100_22h.draft.json --expect-tag scale-run-rc10 --min-free-gb 25 --out session
 ```
 The session itself (the run gets 18 hours; the rest is benchmark, checks, evaluation and the time to download artifacts):
 ```bash
-nohup python scripts/gpu_session.py all --bins bins --config configs/run_a100_22h.draft.json --expect-tag scale-run-rc9 --min-free-gb 25 --minutes 1080 --out session > session.log 2>&1 &
+nohup python scripts/gpu_session.py all --bins bins --config configs/run_a100_22h.draft.json --expect-tag scale-run-rc10 --min-free-gb 25 --minutes 1080 --out session > session.log 2>&1 &
 tail -f session.log
 ```
 If it is interrupted, run the same command again: it resumes from `session/run/ckpt_last.pt` with the same step count.

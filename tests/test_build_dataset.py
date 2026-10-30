@@ -102,3 +102,20 @@ def test_eot_key_builds_documents_from_end_of_text_lines(tmp_path):
         h, toks = read_tokens(str(tmp_path / "bins" / f"eng.{split}.bin"), mmap=False)
         total += int((toks == h.eos_id).sum())
     assert total == 30                                                          # one document per sample, not one per paragraph
+
+
+def test_start_key_builds_documents_from_header_lines(tmp_path):
+    vocab = tmp_path / "v.tok"
+    write_tok(train_bpe(BIO * 3, 330), str(vocab))
+    docs = ["\n\n".join(BIO[i:i + 3]) for i in range(0, 90, 3)]                  # 30 documents with blank lines inside
+    (tmp_path / "chem.txt").write_text("".join(f"chempile-paper|config=x\n{d}\n\n" for d in docs), encoding="utf-8")
+    cfg = {"vocab": str(vocab), "out": str(tmp_path / "bins"), "workers": 1, "val_frac": 0.1,
+           "domains": [{"name": "chem", "kind": "text", "paths": [str(tmp_path / "chem.txt")], "start": "chempile-", "weight": 1}]}
+    (tmp_path / "cfg.json").write_text(json.dumps(cfg), encoding="utf-8")
+    assert bd.main([str(tmp_path / "cfg.json"), "--allow-unfrozen"]) == 0
+    from llm.data import read_tokens
+    total = 0
+    for split in ("train", "val"):
+        h, toks = read_tokens(str(tmp_path / "bins" / f"chem.{split}.bin"), mmap=False)
+        total += int((toks == h.eos_id).sum())
+    assert total == 30

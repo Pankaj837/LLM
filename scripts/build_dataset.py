@@ -84,6 +84,8 @@ def build_domain(d: dict, cfg: dict, out: str) -> dict:
             args += ["--marker-domains", name]
         if d.get("eot"):
             args += ["--eot-domains", name]
+        if d.get("start"):
+            args += ["--start-domains", name, "--start-prefix", str(d["start"])]
         if d.get("max_tokens"):
             args += ["--max-tokens", str(int(d["max_tokens"]))]
         if d.get("spread"):

@@ -1,0 +1,24 @@
+{
+  "notes": "DRAFT mix for the 22-hour A100 session (31 Oct). Used by scripts/gpu_session.py via --config: only 'name' and 'weight' matter there; a domain whose <name>.train.bin is not in --bins is left out and the rest are renormalised. File names must be exactly <name>.train.bin / <name>.val.bin. Weights are shares of training tokens for a ~3B-token run (300M model, estimate), chosen so no verified domain is repeated more than about twice: math (prefix build) ~1 epoch, scidisc ~0.5, engineering (Ravi, OpenHands agent trajectories) ~0.15, cad low because it is templated, multistep/finance/astro low because they are generated or tiny. Pankaj decides the final weights.",
+  "vocab": "tokenizers/vocab32k_v2/vocab32k.tok",
+  "domains": [
+    {"name": "math",           "kind": "text",    "paths": ["unused here"], "weight": 0.147},
+    {"name": "code",           "kind": "parquet", "paths": ["unused here"], "weight": 0.12},
+    {"name": "sciqa",          "kind": "parquet", "paths": ["unused here"], "weight": 0.07},
+    {"name": "chem",           "kind": "text",    "paths": ["unused here"], "weight": 0.04},
+    {"name": "cad",            "kind": "parquet", "paths": ["unused here"], "weight": 0.015},
+    {"name": "sciprog",        "kind": "parquet", "paths": ["unused here"], "weight": 0.03},
+    {"name": "bio",            "kind": "parquet", "paths": ["unused here"], "weight": 0.03},
+    {"name": "earth",          "kind": "parquet", "paths": ["unused here"], "weight": 0.035},
+    {"name": "scidisc",        "kind": "parquet", "paths": ["unused here"], "weight": 0.15},
+    {"name": "multistep",      "kind": "text",    "paths": ["unused here"], "weight": 0.015},
+    {"name": "astro",          "kind": "text",    "paths": ["unused here"], "weight": 0.005},
+    {"name": "finance",        "kind": "text",    "paths": ["unused here"], "weight": 0.003},
+    {"name": "engineering",    "kind": "parquet", "paths": ["unused here"], "weight": 0.12},
+    {"name": "physics",        "kind": "text",    "paths": ["unused here"], "weight": 0.04},
+    {"name": "eng_reasoning",  "kind": "text",    "paths": ["unused here"], "weight": 0.05},
+    {"name": "gen_eng",        "kind": "text",    "paths": ["unused here"], "weight": 0.05},
+    {"name": "exp_val",        "kind": "text",    "paths": ["unused here"], "weight": 0.04},
+    {"name": "tech_comm",      "kind": "text",    "paths": ["unused here"], "weight": 0.04}
+  ]
+}

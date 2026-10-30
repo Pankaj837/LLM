@@ -9,7 +9,8 @@ disk) and a pool of workers tokenizes batches, so all cores stay busy and memory
     # <domain>=<file> names the domain in the manifest; --blank-domains lists domains whose documents are
     # blocks of lines separated by blank lines, --marker-domains those whose documents sit between a line
     # <|document|> and a line <|endofdocument|> (the physics file), --eot-domains those whose documents are
-    # separated by a line <|endoftext|> (the engineering reasoning file); default: one document per line
+    # separated by a line <|endoftext|> (the engineering reasoning file), --start-domains with --start-prefix those
+    # whose documents each begin with a header line (ChemPile: "chempile-code|config=..."); default: one document per line
     python scripts/tokenize_text.py math=maths_final_corpus.clean.txt.gz multistep=multistep_corpus.txt \
         astronomy=astronomy_corpus.txt --blank-domains multistep,astronomy \
         --vocab tokenizers/vocab32k_v2/vocab32k.tok --out runs/bins_text --workers 8 --dedup
@@ -59,10 +60,26 @@ DOC_START, DOC_END = "<|document|>", "<|endofdocument|>"
 DOC_EOT = "<|endoftext|>"
 
 
-def _docs_from_lines(lines, blank, marker, eot=False):
+def _docs_from_lines(lines, blank, marker, eot=False, start=""):
     """Documents from an iterable of lines: one per non-empty line, blank-line separated blocks (``blank``), or the text between
     ``<|document|>`` and ``<|endofdocument|>`` lines (``marker``; the marker lines are dropped, an unterminated tail is kept), or the text
-    between lines that read ``<|endoftext|>`` (``eot``: reasoning corpora whose documents contain many blank lines; the separator lines are dropped)."""
+    between lines that read ``<|endoftext|>`` (``eot``: reasoning corpora whose documents contain many blank lines; the separator lines are dropped),
+    or the text that follows each line beginning with ``start`` (a header line such as ``chempile-code|config=...``; the header line is dropped)."""
+    if start:
+        buf = []
+        for line in lines:
+            line = line.rstrip("\r\n")
+            if line.startswith(start):
+                doc = "\n".join(buf).strip()
+                if doc:
+                    yield doc
+                buf = []
+            else:
+                buf.append(line)
+        doc = "\n".join(buf).strip()
+        if doc:
+            yield doc
+        return
     if eot:
         buf = []
         for line in lines:
@@ -113,8 +130,11 @@ def _docs_from_lines(lines, blank, marker, eot=False):
         yield "\n".join(block)
 
 
-def _trim_slice(text: str, blank: bool, marker: bool, eot: bool = False) -> str:
+def _trim_slice(text: str, blank: bool, marker: bool, eot: bool = False, start: str = "") -> str:
     """A slice cut out of the middle of a file starts and ends mid-document: keep only the whole documents inside it."""
+    if start:
+        i, j = text.find("\n" + start), text.rfind("\n" + start)
+        return text[i + 1:j + 1] if 0 <= i < j else ""
     if eot:
         i, j = text.find("\n" + DOC_EOT), text.rfind("\n" + DOC_EOT)
         return text[i + 1 + len(DOC_EOT):j + 1 + len(DOC_EOT)] if 0 <= i < j else ""
@@ -126,7 +146,7 @@ def _trim_slice(text: str, blank: bool, marker: bool, eot: bool = False) -> str:
     return text[i + len(sep):j + len(sep)] if 0 <= i < j else ""
 
 
-def iter_docs(path: str, blank, marker: bool = False, spread: int = 0, slice_bytes: int = 0, eot: bool = False):
+def iter_docs(path: str, blank, marker: bool = False, spread: int = 0, slice_bytes: int = 0, eot: bool = False, start: str = ""):
     """Yield documents of one file. With ``spread`` > 0 (plain-text files only) read ``spread`` evenly spaced slices of
     ``slice_bytes`` instead of the whole file, so a capped read is representative rather than a prefix."""
     if spread > 0 and slice_bytes > 0 and not path.endswith(".gz"):
@@ -137,11 +157,11 @@ def iter_docs(path: str, blank, marker: bool = False, spread: int = 0, slice_byt
                     off = max(0, min(size - slice_bytes, int(size * (i + 0.5) / spread - slice_bytes / 2)))
                     f.seek(off)
                     raw = f.read(slice_bytes).decode("utf-8", errors="replace").replace("\r\n", "\n")     # Windows files
-                    text = _trim_slice(raw, blank, marker, eot)
-                    yield from _docs_from_lines(io.StringIO(text), blank, marker, eot)
+                    text = _trim_slice(raw, blank, marker, eot, start)
+                    yield from _docs_from_lines(io.StringIO(text), blank, marker, eot, start)
             return
     with _open(path) as f:
-        yield from _docs_from_lines(f, blank, marker, eot)
+        yield from _docs_from_lines(f, blank, marker, eot, start)
 
 
 def _init_worker(vocab: str, val_frac: float) -> None:
@@ -167,9 +187,9 @@ def _encode_batch(docs: list):
     return b"".join(train), b"".join(val), nt, nv
 
 
-def _batches(path: str, blank: bool, marker: bool, seen, dedup: bool, min_chars: int, stats: dict, spread: int = 0, slice_bytes: int = 0, eot: bool = False):
+def _batches(path: str, blank: bool, marker: bool, seen, dedup: bool, min_chars: int, stats: dict, spread: int = 0, slice_bytes: int = 0, eot: bool = False, start: str = ""):
     batch, chars = [], 0
-    for doc in iter_docs(path, blank, marker, spread, slice_bytes, eot):
+    for doc in iter_docs(path, blank, marker, spread, slice_bytes, eot, start):
         stats["in"] += 1
         if len(doc) < min_chars:
             stats["short_dropped"] += 1
@@ -196,7 +216,7 @@ def process_input(domain: str, path: str, name: str, a, ex, seen) -> dict:
     stats_p = out / f"{name}.stats.json"
     st_in = os.stat(path)
     fp = tp.fingerprint(rule=tp.RULE_VERSION, vocab=BPETokenizer.file_sha256(a.vocab) if not a.count_only else None,
-                        val_frac=a.val_frac, dedup=a.dedup, min_chars=a.min_chars, blank=domain in a.blank_set, marker=domain in a.marker_set, eot=domain in a.eot_set, max_tokens=a.max_tokens, spread=a.spread,
+                        val_frac=a.val_frac, dedup=a.dedup, min_chars=a.min_chars, blank=domain in a.blank_set, marker=domain in a.marker_set, eot=domain in a.eot_set, start=a.start_prefix if domain in a.start_set else "", max_tokens=a.max_tokens, spread=a.spread,
                         size=st_in.st_size, mtime=int(st_in.st_mtime))
     if not a.count_only and stats_p.exists() and not a.force:
         done = json.loads(stats_p.read_text())
@@ -206,10 +226,11 @@ def process_input(domain: str, path: str, name: str, a, ex, seen) -> dict:
     blank = domain in a.blank_set
     marker = domain in a.marker_set
     eot = domain in a.eot_set
+    start = a.start_prefix if domain in a.start_set else ""
     st = {"file": os.path.basename(path), "job": name, "fingerprint": fp, "domain": domain, "in": 0, "docs": 0, "dup_dropped": 0,
           "short_dropped": 0, "chars": 0, "train_tokens": 0, "val_tokens": 0}
     slice_bytes = int(a.max_tokens * 4.0 / a.spread) if (a.spread and a.max_tokens) else 0
-    batches = _batches(path, blank, marker, seen, a.dedup, a.min_chars, st, a.spread, slice_bytes, eot)
+    batches = _batches(path, blank, marker, seen, a.dedup, a.min_chars, st, a.spread, slice_bytes, eot, start)
     if a.count_only:
         for _ in batches:
             pass
@@ -277,6 +298,8 @@ def main(argv=None) -> int:
     ap.add_argument("--blank-domains", default="", help="comma-separated domains whose documents are blank-line separated blocks")
     ap.add_argument("--marker-domains", default="", help="comma-separated domains whose documents sit between <|document|> and <|endofdocument|> lines")
     ap.add_argument("--eot-domains", default="", help="comma-separated domains whose documents are separated by lines reading <|endoftext|>")
+    ap.add_argument("--start-domains", default="", help="comma-separated domains whose documents each begin with a header line starting with --start-prefix (the header line is dropped)")
+    ap.add_argument("--start-prefix", default="", help="the header-line prefix for --start-domains, e.g. 'chempile-' (ChemPile text)")
     ap.add_argument("--dedup", action="store_true", help="drop exact-duplicate documents across all inputs of this run")
     ap.add_argument("--min-chars", type=int, default=0)
     ap.add_argument("--count-only", action="store_true")
@@ -293,6 +316,9 @@ def main(argv=None) -> int:
     a.blank_set = {x.strip() for x in a.blank_domains.split(",") if x.strip()}
     a.marker_set = {x.strip() for x in a.marker_domains.split(",") if x.strip()}
     a.eot_set = {x.strip() for x in a.eot_domains.split(",") if x.strip()}
+    a.start_set = {x.strip() for x in a.start_domains.split(",") if x.strip()}
+    if a.start_set and not a.start_prefix:
+        ap.error("--start-domains needs --start-prefix")
 
     items = []
     for spec in a.inputs:

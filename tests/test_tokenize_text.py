@@ -144,3 +144,25 @@ def test_end_of_text_separated_documents_keep_their_blank_lines_and_drop_the_sep
     assert got and all(g.startswith("Task ") and g.rsplit("answer ", 1)[1].isdigit() for g in got)
     ids = sorted(int(g.split()[1]) for g in got)
     assert ids[0] > 50 and ids[-1] < 1450                                    # spread over the file, whole samples only
+
+
+def test_header_line_documents_keep_code_with_blank_lines_whole_and_drop_the_header(tmp_path, vocab):
+    """ChemPile text: every document starts with a `chempile-<kind>|config=...` line; code documents contain many blank lines."""
+    code = "import numpy as np\n\n\ndef energy(x):\n\n    return np.sum(x ** 2)\n\n\nprint(energy([1, 2]))"
+    page = "The laws of probability apply to events that are independent.\n\nSecond paragraph about enthalpy."
+    paper = "Abstract. We study the reaction rate of a catalyst."
+    p = tmp_path / "chem.txt"
+    p.write_text("chempile-code|config=github|repo=x/y|license=mit\n" + code + "\n\nchempile-education|config=LibreText\n" + page
+                 + "\n\nchempile-paper|config=chemrxiv\n" + paper + "\n", encoding="utf-8")
+    assert list(tt.iter_docs(str(p), False, False, start="chempile-")) == [code, page, paper]
+    assert len(list(tt.iter_docs(str(p), True, False))) > 3                      # the blank-line rule cuts the code into pieces
+    out = _run(tmp_path, [f"chem={p}"], vocab, "--start-domains", "chem", "--start-prefix", "chempile-")
+    _, arr = read_tokens(str(out / "train.bin"), mmap=False)
+    assert arr.tolist() == _expected(vocab, [code, page, paper])                 # one EOS per document, no header text
+    assert json.loads((out / "manifest.json").read_text())["docs"] == 3
+    big = "".join(f"chempile-paper|config=x\nPaper {i}\n\nbody {i * 3}\n\n" for i in range(1500))
+    (tmp_path / "big.txt").write_text(big, encoding="utf-8")
+    got = list(tt.iter_docs(str(tmp_path / "big.txt"), False, False, spread=3, slice_bytes=4000, start="chempile-"))
+    assert got and all(g.startswith("Paper ") and g.rsplit("body ", 1)[1].isdigit() for g in got)
+    ids = sorted(int(g.split()[1].split("\n")[0]) for g in got)
+    assert ids[0] > 50 and ids[-1] < 1450                                        # spread over the file, whole documents only

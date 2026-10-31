@@ -163,7 +163,7 @@ def stage_preflight(a, st: Session) -> int:
         mem = p.total_memory / 1e9
         add("GPU visible", torch.cuda.device_count() >= a.gpus, f"{torch.cuda.device_count()} x {p.name}, {mem:.0f} GB, bf16={torch.cuda.is_bf16_supported()}")
         add("bf16 supported", torch.cuda.is_bf16_supported())
-        add("GPU memory", mem >= 24, f"{mem:.0f} GB (the 1.5B smoke test needs about 24 GB of state)", warn=mem < 40)
+        add("GPU memory", mem >= 24 or a.skip_smoke or a.smoke_preset == a.preset, f"{mem:.0f} GB (only the 1.5B smoke test needs about 24 GB of state)", warn=mem < 40)
     else:
         add("GPU visible", a.cpu_ok, "no CUDA device" + (" (rehearsal on CPU)" if a.cpu_ok else ""))
     info = run_info()
@@ -177,7 +177,7 @@ def stage_preflight(a, st: Session) -> int:
     add("tokenizer = frozen hash", sha == frozen_sha(), sha[:16] + "...")
     manifests = sorted(glob.glob(os.path.join(a.bins, "*manifest*.json")))
     bad = [m for m in manifests if json.load(open(m, encoding="utf-8")).get("tokenizer_sha256") != sha]
-    add("build manifests carry the frozen hash", bool(manifests) and not bad,
+    add("build manifests carry the frozen hash", not bad,
         f"{len(manifests)} manifest(s)" + (f", WRONG: {[os.path.basename(m) for m in bad]}" if bad else ""), warn=not manifests)
     present, missing = load_mix(a)
     add("domains with token files", len(present) > 0, f"{len(present)} of {len(present) + len(missing)}"
@@ -313,7 +313,7 @@ def stage_train(a, st: Session) -> int:
     else:
         shutil.rmtree(os.path.join(st.dir, "calib"), ignore_errors=True)
         rc = run_logged([*base, "--out", os.path.join(st.dir, "calib"), "--max-steps", "30", "--warmup-steps", "5", "--eval-interval", "1000",
-                         "--save-interval", "1000"], os.path.join(st.dir, "calib.log"), 600)
+                         "--save-interval", "1000"], os.path.join(st.dir, "calib.log"), 2400)
         recs = [r for r in read_metrics(os.path.join(st.dir, "calib")) if "tokens_per_s" in r]
         if rc != 0 or not recs:
             print("CALIBRATION FAILED (the real mix does not train): do not start the run")

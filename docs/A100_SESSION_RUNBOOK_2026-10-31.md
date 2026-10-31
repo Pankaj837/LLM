@@ -3,9 +3,9 @@
 Written by Pankaj's assistant on 31 Oct (02:30). Everything marked *estimate* is a guess to be replaced by the measurement the session makes in its first minutes; everything marked *checked* was run on the actual files.
 
 ## 0. What is known and what is not
-- Prabanjan reports **"GPU memory is 20GB, NVIDIA A100"** (his message, 30 Oct 7:37 pm). A full A100 has 40 or 80 GB, so this is probably a slice (MIG) of one A100. Unconfirmed: `nvidia-smi` output not yet seen. A 20 GB device **cannot run the 1.5B smoke test** (it needs about 60 GB on the H100 run); the session script skips it automatically with a note, and the 1.5B parameter-count / forward-backward checks in Raju's readiness plan must be done on CPU or another machine.
+- **Confirmed on the machine (31 Oct, Prabanjan's preflight output): `1 x NVIDIA A100-SXM4-40GB MIG 3g.20gb, 21 GB, bf16 supported`.** It is a 3/7 slice of an A100, shared with other tenants (speed varied between 41k and 15k tokens/s). A 20 GB device **cannot run the 1.5B smoke test** (about 60 GB on the H100 run), so the 1.5B benchmark, smoke test and resume gates of Raju's readiness plan cannot be met on it; they need a full GPU.
 - The platform note (Raju's screenshot): the file-copy option opens about **1.5 hours before the slot (about 08:30)**; copy the files into the GPU environment before GPU time starts; **download the produced artifacts before the session ends: the notebook workspace is deleted afterwards**.
-- Unknown: whether the environment can reach GitHub and Google Drive; free disk; whether a notebook stays alive when the browser or internet is off (ask the platform, or keep the tab open).
+- Confirmed 31 Oct: the machine **has internet** (the bins were downloaded from Drive with `dl.sh`); it had **no `git clone` checkout** (the repo came as a zip, so `--expect-tag` fails: leave it out). Still unknown: whether a notebook stays alive when the browser is closed.
 
 ## 1. The data (all `check_bins` PASS with the frozen tokenizer, sha256 10b3c5ae...; train tokens in millions)
 | name in `bins/` | owner | train M | checked |
@@ -31,20 +31,20 @@ curl -sI https://github.com | head -1
 curl -sI https://drive.google.com | head -1
 ```
 ```bash
-git clone https://github.com/Pankaj837/LLM.git && cd LLM && git checkout scale-run-rc10
+git clone https://github.com/Pankaj837/LLM.git && cd LLM && git checkout scale-run-rc11
 python -m pip install -e ".[dev]"
 mkdir -p bins            # copy every <name>.train.bin and <name>.val.bin from the shared folder into bins/
 ```
 Free check, no GPU time used (it refuses wrong-vocabulary or damaged files):
 ```bash
-python scripts/gpu_session.py preflight --bins bins --config configs/run_a100_22h.draft.json --expect-tag scale-run-rc10 --min-free-gb 25 --out session
+python scripts/gpu_session.py preflight --bins bins --config configs/run_a100_22h.draft.json --expect-tag scale-run-rc11 --skip-smoke --smoke-preset 100m --min-free-gb 25 --out session
 ```
 The session itself (the run gets 18 hours; the rest is benchmark, checks, evaluation and the time to download artifacts):
 ```bash
-nohup python scripts/gpu_session.py all --bins bins --config configs/run_a100_22h.draft.json --expect-tag scale-run-rc10 --min-free-gb 25 --minutes 1080 --out session > session.log 2>&1 &
-tail -f session.log
+nohup python scripts/gpu_session.py all --bins bins --config configs/run_a100_22h.draft.json --expect-tag scale-run-rc11 --skip-smoke --smoke-preset 100m --bench-batches 4 --min-free-gb 25 --minutes 1020 --save-interval 200 --out session_main > session_main.log 2>&1 &
+tail -f session_main.log
 ```
-If it is interrupted, run the same command again: it resumes from `session/run/ckpt_last.pt` with the same step count.
+If it is interrupted, run the same command again: it resumes from `session_main/run/ckpt_last.pt` with the same step count. Use a **new `--out` folder for every fresh start** (an old `session.json` carries its step plan and would be resumed). `--minutes` is the training budget: the script stops training at 1.1 x that, so choose it so that start + 1.1 x minutes + 1.5 h is before the end of the slot. On a 20 GB slice add `--skip-smoke --smoke-preset 100m` (the 1.5B benchmark would only run out of memory) and `--bench-batches 4` (micro-batch 8 gave a hidden out-of-memory error during real training on the slice).
 
 ### 2b. If the machine has no GitHub / Google Drive (Prabanjan, 31 Oct 9:02 am: "I am manually uploading zips")
 Upload `LLM_rc10_offline.zip` (the code at tag rc10 without `.git`; torch and numpy must already be installed, nothing else is needed for the session) and the bins (raw `.bin` files or zips of them). No `git clone`, no `pip install`:
@@ -65,3 +65,26 @@ Download `session/` (report, `session.json`, `metrics.jsonl`, `eval_domains.json
 ```bash
 python scripts/sample_outputs.py --ckpt session/run/ckpt_last.pt --vocab tokenizers/vocab32k_v2/vocab32k.tok --val math=bins/math.val.bin physics=bins/physics.val.bin gen_eng=bins/gen_eng.val.bin exp_val=bins/exp_val.val.bin tech_comm=bins/tech_comm.val.bin code=bins/code.val.bin chem=bins/chem.val.bin --out session/sample_outputs
 ```
+
+## 5. What happened on 31 Oct (owner-reported unless marked; the log lines are Prabanjan's pasted output)
+- 10:00 session started on Prabanjan's AIKosh account; bins downloaded with `dl.sh` (34 files, 12 GB, all pass `check_bins`; `eng_reasoning` was not in Drive, so 17 of the 18 planned domains train).
+- The first preflight failed three checks, two of them too strict in `gpu_session.py` (GPU memory below 24 GB although the 1.5B smoke test was skipped; zero manifests): fixed in rc11 (tests added). The third (`--expect-tag`) cannot pass without a git clone. Prabanjan patched his copy with the equivalent `sed`, copied in one manifest (`math_physics_manifest.json`, covering math and physics only), and raised the calibration limit. His run is therefore **commit `46277fced2` (a local git init of the repo zip) plus local edits**, not an exact tag.
+- A first start with the placeholder `--minutes 100` (947 steps) was cancelled; the real run started about 12:45 pm: **`plan: 9134 steps x 262,144 tokens = 2,394,423,296 tokens; measured 41,185 tokens/s (benchmark said 41,678)`**, micro-batch 4 x accumulation 32, peak memory 9.25 GB, `--save-interval 200`.
+- Speed fell during the day: about 41k tokens/s at calibration, 36k at step 300, 32.8k at step 3,140 (probably other tenants on the same A100; not verified).
+- Loss (his pasted lines): training loss 4.94 at step 250 (validation 5.375), 2.51 at step 3,140, 2.47 at step 4,250; validation loss 2.329 (step 4,250, perplexity 10.27), 2.308 (step 4,500, perplexity 10.06).
+- Tokens so far = steps x 262,144 (step 3,140 = 823M). Prabanjan first reported 10^8 by multiplying steps by tokens/s; corrected in the group.
+- Projection (estimate): 8.0 s per step leaves about 9.5 hours after step 4,850 (11:37 pm), so the plan would finish about 09:00 am, after the slot ends at 08:00. The script's own limit (1.1 x 1020 min after the start) would stop training at about 07:35 without the evaluation.
+
+## 6. Finishing the session on time (stop at about 06:30, not at the script's limit)
+The checkpoint is written atomically (`.tmp` then `os.replace`), so `ckpt_last.pt` is always complete and the run can be stopped at any moment; it is refreshed every 200 steps (about 27 minutes). The cosine schedule has `min_lr_ratio` 0.1: at step 8,000 of 9,134 the learning rate is 8.2e-5 against 6.0e-5 at the end, so stopping near step 8,000 loses little.
+```bash
+cd ~/LLM/LLM
+mkdir -p ~/safe && cp session_main/run/ckpt_last.pt ~/safe/ckpt_$(date +%H%M).pt && ls -l ~/safe      # insurance copy; also test the platform's download with it
+tail -n 1 session_main/run/metrics.jsonl; ls -l --time-style=full-iso session_main/run/ckpt_last.pt; date
+pkill -f "gpu_session.py all"; sleep 3; pkill -f llm.train; sleep 10
+pgrep -af "llm.train|gpu_session" || echo stopped
+python scripts/gpu_session.py eval   --bins bins --config configs/run_a100_22h.draft.json --out session_main
+python scripts/gpu_session.py report --bins bins --config configs/run_a100_22h.draft.json --out session_main
+python scripts/sample_outputs.py --ckpt session_main/run/ckpt_last.pt --vocab tokenizers/vocab32k_v2/vocab32k.tok --val math=bins/math.val.bin physics=bins/physics.val.bin gen_eng=bins/gen_eng.val.bin exp_val=bins/exp_val.val.bin tech_comm=bins/tech_comm.val.bin code=bins/code.val.bin chem=bins/chem.val.bin --out session_main/sample_outputs
+```
+Then download `session_main/` (report, `session.json`, `metrics.jsonl`, `eval_domains.json`, `train.log`, `sample_outputs/`) and `session_main/run/ckpt_last.pt` and `ckpt_best.pt`, finishing before 08:00.

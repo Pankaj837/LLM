@@ -5,6 +5,11 @@ Consolidates the delivered components (GQA integration, RoPE / Dynamic NTK / YaR
 into one package, after an independent component review. See `docs/REVIEW_FINDINGS.md` for every finding and
 `docs/TEAM_INSIGHTS.md` for what was kept versus changed.
 
+### Fixed (31 Oct 2026, found on the AIKosh A100 session)
+- `scripts/gpu_session.py` preflight: the "GPU memory" check (>= 24 GB, needed only by the 1.5B smoke test) is no longer fatal when the smoke test is skipped (`--skip-smoke`, or `--smoke-preset` equal to `--preset`); a 20 GB MIG slice of an A100 can run the 100M session. "0 build manifests" is a warning (as the code always intended with `warn=not manifests`), a manifest with the wrong tokenizer hash is still a failure. Both were fatal in `all` and stopped the session before it began.
+- `gpu_session.py` calibration time limit 600 s -> 2400 s: 30 steps of 262,144 tokens take about 540 s at 14.6k tokens/s (the slow end measured on the shared slice).
+- Tests: `test_preflight_only_warns_when_there_are_no_build_manifests`, `test_a_20gb_gpu_slice_fails_preflight_only_when_the_1p5b_smoke_test_would_run` (both fail on the old script).
+
 ### Added
 - `scripts/tokenize_parquet.py` (+ tests): streams Parquet shards into TOK1 `.bin` files with a frozen tokenizer in low memory, in parallel and resumable; `--count-only` gives per-domain token estimates from `char_count` in seconds. Also reads v4.0 entity-schema files (no `text` column): body taken from the `properties` JSON (`code_content`, else question+answer, else `description`) -- a proposed rule the data owners must confirm.
 - 24 Oct audit of the whole scale-up pipeline (see `docs/PROGRESS_REPORT.md`, "Failures and corrections"):

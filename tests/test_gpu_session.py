@@ -110,6 +110,38 @@ def test_preflight_fails_on_the_wrong_tag(built, capsys):
     assert "checked out = no-such-tag" in capsys.readouterr().out
 
 
+def test_preflight_only_warns_when_there_are_no_build_manifests(built, tmp_path, capsys):
+    """Manifests are provenance records, not training input: none at all is a warning (a wrong hash is still a failure)."""
+    import shutil
+    bins = tmp_path / "bins"
+    shutil.copytree(built / "bins", bins)
+    for m in bins.glob("*manifest*.json"):
+        m.unlink()
+    args = _args(built)
+    args[args.index("--bins") + 1] = str(bins)
+    args[args.index("--out") + 1] = str(tmp_path / "out")
+    assert gs.main(["preflight", *args]) == 0
+    out = capsys.readouterr().out
+    assert "0 manifest(s)" in out and "PREFLIGHT: PASS" in out
+
+
+def test_a_20gb_gpu_slice_fails_preflight_only_when_the_1p5b_smoke_test_would_run(built, tmp_path, monkeypatch, capsys):
+    """AIKosh gave a 20 GB MIG slice of an A100: the 100M run fits, only the 1.5B smoke test (about 24 GB) does not."""
+    from types import SimpleNamespace
+    cuda = gs.torch.cuda
+    monkeypatch.setattr(cuda, "is_available", lambda: True)
+    monkeypatch.setattr(cuda, "device_count", lambda: 1)
+    monkeypatch.setattr(cuda, "is_bf16_supported", lambda: True)
+    monkeypatch.setattr(cuda, "get_device_name", lambda i=0: "NVIDIA A100-SXM4-40GB MIG 3g.20gb")
+    monkeypatch.setattr(cuda, "get_device_properties", lambda i=0: SimpleNamespace(total_memory=21e9, name="NVIDIA A100-SXM4-40GB MIG 3g.20gb"))
+    args = _args(built)
+    args[args.index("--out") + 1] = str(tmp_path / "out")
+    assert gs.main(["preflight", *args]) == 1                                   # the 1.5B smoke test is planned: 21 GB is too small
+    assert "GPU memory" in capsys.readouterr().out
+    assert gs.main(["preflight", *args, "--skip-smoke"]) == 0                   # skipped: the 100M run needs about 10 GB
+    assert gs.main(["preflight", *args, "--smoke-preset", "tiny"]) == 0         # smoke preset equal to the training preset: skipped too
+
+
 def test_the_whole_session_runs_end_to_end_on_cpu(built, capsys):
     rc = gs.main(["all", *_args(built)])
     out = capsys.readouterr().out

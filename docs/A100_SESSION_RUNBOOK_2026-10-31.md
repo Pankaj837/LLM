@@ -19,7 +19,7 @@ Written by Pankaj's assistant on 31 Oct (02:30). Everything marked *estimate* is
 | eng_reasoning | Pankaj rebuild (Prabanjan's corpus) | 805.0 | rebuilt 31 Oct on rc9 from `engineering_reasoning_corpus_old.txt` (3,114,429,124 bytes, separators throughout) with `"eot": true, "dedup": true`: 259,525 whole documents (mean 3,102 tokens), PASS, 0% duplicates in a 3,000-document sample, manifest clean at commit f541cad |
 | code, sciqa, cad, sciprog | Ravi | 323 / 189 / 78 / 50 | whole files (28 Oct) |
 | chem | Ravi | 128 | passes; still cut line by line (rebuild with `"start": "chempile-"` pending) |
-| bio, earth, scidisc | Gokul | 45 / 73 / 1,002 | bio, earth whole; scidisc validation whole, training 3 slices |
+| bio, earth, scidisc | Gokul | 45 / 73 / 1,002 | whole files, PASS (scidisc.train: 1,001,617,800 tokens, 139,297 documents, checked in full 31 Oct) |
 | multistep, astro, finance | Prabanjan | 88 / 20 / 17 | whole files (24 Oct) |
 Not in the mix: domains 9 and 10 (Swaraj): the 20 MB samples are mostly unrelated text (96% / 64% of documents contain none of the domain words) and about half the documents are exact duplicates. Prabanjan's `engineering_colab_training.zip` bin (737M tokens, `"blank": true` on the deduplicated file) is **not** used: it is cut at every paragraph.
 
@@ -45,6 +45,17 @@ nohup python scripts/gpu_session.py all --bins bins --config configs/run_a100_22
 tail -f session.log
 ```
 If it is interrupted, run the same command again: it resumes from `session/run/ckpt_last.pt` with the same step count.
+
+### 2b. If the machine has no GitHub / Google Drive (Prabanjan, 31 Oct 9:02 am: "I am manually uploading zips")
+Upload `LLM_rc10_offline.zip` (the code at tag rc10 without `.git`; torch and numpy must already be installed, nothing else is needed for the session) and the bins (raw `.bin` files or zips of them). No `git clone`, no `pip install`:
+```bash
+unzip -q LLM_rc10_offline.zip -d LLM && cd LLM
+python -c "import torch, numpy; print(torch.__version__, torch.cuda.is_available())"
+mkdir -p bins            # put every <name>.train.bin and <name>.val.bin here
+python scripts/gpu_session.py preflight --bins bins --config configs/run_a100_22h.draft.json --min-free-gb 25 --out session
+nohup python scripts/gpu_session.py all --bins bins --config configs/run_a100_22h.draft.json --min-free-gb 25 --minutes 1080 --out session > session.log 2>&1 &
+```
+(`--expect-tag` is left out: without `.git` there is no tag to compare; the preflight still checks the tokenizer hash and every token file.) To prove the copied files are intact, compare `sha256sum bins/*.bin` with `SHA256SUMS.txt`.
 
 ## 3. Which model size (decided from the measurement, rule fixed now)
 The session trains the 100M preset. A 300M model needs about 6B tokens (20 per parameter): at an *estimated* 40k tokens/s on a full A100 that is 42 hours, so it does not fit in 22 hours on any A100 variant; on a 20 GB slice the speed is lower still. The 1.5B model does not fit. The benchmark table in `session/session_report.md` gives the real tokens/s; if the 100M speed is above about 100k tokens/s, the 18-hour run sees more than 6B tokens (about one pass over everything we have); below 40k, about 2.6B.

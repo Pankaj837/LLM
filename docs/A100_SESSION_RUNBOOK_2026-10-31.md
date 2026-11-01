@@ -73,6 +73,7 @@ python scripts/sample_outputs.py --ckpt session/run/ckpt_last.pt --vocab tokeniz
 - Speed fell during the day: about 41k tokens/s at calibration, 36k at step 300, 32.8k at step 3,140 (probably other tenants on the same A100; not verified).
 - Loss (his pasted lines): training loss 4.94 at step 250 (validation 5.375), 2.51 at step 3,140, 2.47 at step 4,250; validation loss 2.329 (step 4,250, perplexity 10.27), 2.308 (step 4,500, perplexity 10.06).
 - Tokens so far = steps x 262,144 (step 3,140 = 823M). Prabanjan first reported 10^8 by multiplying steps by tokens/s; corrected in the group.
+- 1 Nov 12:30 am: Raju: "our motto is to preserve the checkpoints before they vanish". Asked Prabanjan to copy `ckpt_last.pt` to `~/safe/ckpt_now.pt` and download it through the AIKosh file panel. **1 Nov 2:08 am, Prabanjan (owner-reported, no output pasted): "yes I am able to download that checkpoint file"**, so the platform download works for a checkpoint-sized file. The 6:30 am finish block (section 6) was sent to him in the group at 12:33 am.
 - Projection (estimate): 8.0 s per step leaves about 9.5 hours after step 4,850 (11:37 pm), so the plan would finish about 09:00 am, after the slot ends at 08:00. The script's own limit (1.1 x 1020 min after the start) would stop training at about 07:35 without the evaluation.
 
 ## 6. Finishing the session on time (stop at about 06:30, not at the script's limit)

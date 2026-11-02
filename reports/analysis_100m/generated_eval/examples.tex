@@ -1,0 +1,32 @@
+\begin{itemize}\setlength\itemsep{0.6em}
+\item[] \textbf{gsm8k-test/233} (correct)\\
+\textit{Q:} There are 36 penguins sunbathing in the snow.  One-third of them jump in and swim in the ocean.  Another one-third go inside the cave to eat their dinner.  How many penguins are still left sunbathing?\\
+\textit{Expected:} 12.0 \quad \textit{Model:} \texttt{If there are 36 penguins in the snow, then there are 36/3 = 12 penguins left sunbathing. If there are 36 penguins left sunbathing, then there are 36/3 = 12 penguins left sunbathing. The answer is 12. Explanation: Benchmark source: data/CoT/gsm\_rft.json}
+\item[] \textbf{gsm8k-test/1215} (no\_number)\\
+\textit{Q:} Tim enters a competition and has to try and guess the number of red jelly beans in a jar.  The jar has a square base and is 6 inches by 6 inches and 15 inches tall.  He knows that a jelly bean is .15 cubic inches.  He also knows that they get about 80\% efficie\\
+\textit{Expected:} 36.0 \quad \textit{Model:} \texttt{Let's assume the number of red jelly beans in the container is x. Then the number of red jelly beans in the container is (x/2) * (x/2) = (x/2) * (x/2) = (x/2) * (x/2) = (x/2) * (x/2) = (x/2) * (x/2) = (x/2) * (x/2) = (x/2) * (x/2) = (x/2) * (x/2) = (x/2) * (x/}
+\item[] \textbf{gsm8k-test/139} (no\_number)\\
+\textit{Q:} In a candy machine, there are 22 more than four times the number of pink gumballs as there are blue gumballs. If there are 12 blue gumballs how many pink ones are there?\\
+\textit{Expected:} 70.0 \quad \textit{Model:} \texttt{In a candy machine, there are 22 more than four times the number of pink gumballs as there are blue gumballs. If there are 12 blue gumballs how many pink ones are there? Answer: In a candy machine, there are 22 more than four times the number of pink gumballs }
+\item[] \textbf{hw-chn-01} (wrong\_value)\\
+\textit{Q:} How many moles of water are in 36 g of water (molar mass 18 g/mol)?\\
+\textit{Expected:} 2 \quad \textit{Model:} \texttt{6}
+\item[] \textbf{hw-chn-02} (wrong\_value)\\
+\textit{Q:} What is the pH of a 0.001 M solution of hydrochloric acid (fully dissociated)?\\
+\textit{Expected:} 3 \quad \textit{Model:} \texttt{0.001 M}
+\item[] \textbf{hw-chn-03} (wrong\_value)\\
+\textit{Q:} What mass of sodium chloride (molar mass 58.44 g/mol), in grams, is needed to make 0.5 L of a 0.2 M solution?\\
+\textit{Expected:} 5.844 \quad \textit{Model:} \texttt{0.5 L}
+\item[] \textbf{hw-cad-01} (picked a misconception option)\\
+\textit{Q:} In a CAD program, the extrude operation\\
+\textit{Right:} pushes a 2D sketch along a direction to make a 3D solid \quad \textit{Model picked:} spins a 2D sketch around an axis to make a solid of revolution
+\item[] \textbf{hw-co-01} (picked a misconception option)\\
+\textit{Q:} In Python, what does 7 // 2 evaluate to?\\
+\textit{Right:} 3 \quad \textit{Model picked:} 1
+\item[] \textbf{hw-co-02} (picked a misconception option)\\
+\textit{Q:} In Python, what does 0.1 + 0.2 == 0.3 evaluate to?\\
+\textit{Right:} False \quad \textit{Model picked:} 0.3
+\item[] \textbf{hw-eng-07} (correct)\\
+\textit{Q:} Water (kinematic viscosity 1$\times$10\textsuperscript{-6} m\textsuperscript{2}/s) flows at 2 m/s through a pipe of 50 mm diameter. The flow is\\
+\textit{Right:} turbulent, with a Reynolds number of about 100,000 \quad \textit{Model picked:} turbulent, with a Reynolds number of about 100,000
+\end{itemize}

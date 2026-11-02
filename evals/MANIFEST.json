@@ -1,0 +1,188 @@
+{
+ "name": "prana-g-science-eval",
+ "version": "2.1",
+ "sources": {
+  "ARC": {
+   "repo": "allenai/ai2_arc",
+   "revision": "210d026faf9955653af8916fad021475a3f00453",
+   "licence": "CC BY-SA 4.0"
+  },
+  "MMLU": {
+   "repo": "cais/mmlu",
+   "revision": "c30699e8356da336a370243923dbaf21066bb9fe",
+   "licence": "MIT"
+  },
+  "GSM8K": {
+   "repo": "openai/gsm8k",
+   "revision": "740312add88f781978c0658806c59bc2815b9866",
+   "licence": "MIT"
+  },
+  "PubMedQA": {
+   "repo": "qiaojin/PubMedQA",
+   "revision": "9001f2853fb87cab8d220904e0de81ac6973b318",
+   "licence": "MIT"
+  },
+  "handwritten": {
+   "licence": "PRANA-G internal, written for this evaluation"
+  }
+ },
+ "items_by_domain": {
+  "astro": 150,
+  "bio": 290,
+  "cad": 1,
+  "chemistry": 255,
+  "code": 206,
+  "earth": 274,
+  "electrical_eng": 144,
+  "engineering": 40,
+  "exp_val": 24,
+  "finance": 360,
+  "math": 400,
+  "multistep": 200,
+  "physics": 418,
+  "scidisc": 200,
+  "sciml": 16,
+  "sciprog": 4,
+  "sciqa": 600,
+  "simulation": 22,
+  "tech_comm": 15
+ },
+ "items": 3619,
+ "files": [
+  {
+   "file": "handwritten/cad.jsonl",
+   "sha256": "bd6b4f33e406ab1e638a9e2e78e39dca0260c271e2a885986b326791514e759e",
+   "items": 1
+  },
+  {
+   "file": "handwritten/chemistry_numeric.jsonl",
+   "sha256": "fef70f91163e86fe79b0ae4a5835f24ed9a9ae9ea134a5dafc1b87bb758483f9",
+   "items": 5
+  },
+  {
+   "file": "handwritten/code.jsonl",
+   "sha256": "d5e5d03681293932a857cc43c61ae8f6682c34075f85bc3e83d87a8dbaee072c",
+   "items": 6
+  },
+  {
+   "file": "handwritten/engineering.jsonl",
+   "sha256": "bc4ad7612a1798a09df0df3f2a865a4c6d9683d95996aeb191697e43917be562",
+   "items": 30
+  },
+  {
+   "file": "handwritten/engineering_numeric.jsonl",
+   "sha256": "8d64c89a3dec8c275eb83a1dd5bf68e439520f88da57f35bc442eaebf334dee2",
+   "items": 10
+  },
+  {
+   "file": "handwritten/exp_val.jsonl",
+   "sha256": "41670ba34f80ceaff23d05723440c858622dd3a19870cffe7d5c1c89be64b7c1",
+   "items": 19
+  },
+  {
+   "file": "handwritten/exp_val_numeric.jsonl",
+   "sha256": "8adf3a70271b50f25a12c3130419a58e25c8d6df511404dbad895c1f545b787e",
+   "items": 5
+  },
+  {
+   "file": "handwritten/fewshot_science_numeric.json",
+   "sha256": "c2bab5774c985da6cc7e8e57a580a7d7bec4b8f975a1cac7ba1304a442870b09",
+   "items": null
+  },
+  {
+   "file": "handwritten/physics_numeric.jsonl",
+   "sha256": "d6bff5674423af88c386aeb0d8824d59b308e6a26051fc2c76b9e529fc1be595",
+   "items": 5
+  },
+  {
+   "file": "handwritten/physics_units.jsonl",
+   "sha256": "42166324b5f6e8cfa85e231565c6f8d21eb0cb1c0219baabd68f76542fbf4c5f",
+   "items": 11
+  },
+  {
+   "file": "handwritten/sciml.jsonl",
+   "sha256": "f4ddeb2961c71db0ce0ab9cc45ce5f626c7f6ddd9ca2208efe8550addeb27b3a",
+   "items": 16
+  },
+  {
+   "file": "handwritten/sciprog.jsonl",
+   "sha256": "9c90aa31e7003c1ffa368e96dab780470c108ffc1c9322ed845acaea912d7122",
+   "items": 4
+  },
+  {
+   "file": "handwritten/simulation.jsonl",
+   "sha256": "67f3ba316455e7758129ab2882d1d7e848e3c36116535b92697214eda67bafcb",
+   "items": 22
+  },
+  {
+   "file": "handwritten/tech_comm.jsonl",
+   "sha256": "c184cf355d6a1a9170815b1865dd2df83761ec35937a9068f5dbb8d8fe521f8b",
+   "items": 15
+  },
+  {
+   "file": "public/arc.jsonl",
+   "sha256": "76627c0a9cb80af5f260a3c280d815c43a359b8dda2730bf97f8573515e1f002",
+   "items": 600
+  },
+  {
+   "file": "public/arc_earth.jsonl",
+   "sha256": "8802b4bdb3e057619d6c1617d272118c2b8a4ab0a80cb75c9e67ca96552d5dc7",
+   "items": 274
+  },
+  {
+   "file": "public/fewshot_gsm8k.json",
+   "sha256": "830ccfeb4b2e728b8b1dfb34b3e84e4aa62f6a3d19d3c89771f226d937a5299d",
+   "items": null
+  },
+  {
+   "file": "public/gsm8k.jsonl",
+   "sha256": "3bba22ae1b16a23ef0d66192106a90ce2e98562aade2bd032e3fd3c68cde3069",
+   "items": 200
+  },
+  {
+   "file": "public/mmlu_astro.jsonl",
+   "sha256": "2251d5b1ad9b259371668a6790c6e22cf75f334e10c7e983cdab7f629574851a",
+   "items": 150
+  },
+  {
+   "file": "public/mmlu_bio.jsonl",
+   "sha256": "70a46b0a9bd7fd1a33f260dbb122f1b125d14c8b61667f8910a9730496649dd0",
+   "items": 290
+  },
+  {
+   "file": "public/mmlu_chemistry.jsonl",
+   "sha256": "49dc3fe325241cb027d7b6c834424bf5810dd64381d1747914deda2fc2bcdbbd",
+   "items": 250
+  },
+  {
+   "file": "public/mmlu_code.jsonl",
+   "sha256": "06fde000f56d82845379f68517b4b97d2e61da21ea008ffb34d1ed2e7cb8b96f",
+   "items": 200
+  },
+  {
+   "file": "public/mmlu_electrical_eng.jsonl",
+   "sha256": "68360c04947a23f4d54391d6a88a365a683756b5357d94b84f3aeac6e681e390",
+   "items": 144
+  },
+  {
+   "file": "public/mmlu_finance.jsonl",
+   "sha256": "96dee95dbe8ab89230a002940cef1cacea3d3f945591304e59579687ee1c1066",
+   "items": 360
+  },
+  {
+   "file": "public/mmlu_math.jsonl",
+   "sha256": "3339a7f8f8bda2c4384cb20902f3005274d6eef7f26b8c8f5587d79e2a4dec5b",
+   "items": 400
+  },
+  {
+   "file": "public/mmlu_physics.jsonl",
+   "sha256": "d54de1c87b7cfaaeaedb2f3a1aff77801a8a901dcdeb984f50929022902aa5c8",
+   "items": 402
+  },
+  {
+   "file": "public/pubmedqa.jsonl",
+   "sha256": "c2bd830be3d11bc876b4c07a0ad7f834bc90b253ac09125a4dc25d6a79888064",
+   "items": 200
+  }
+ ]
+}

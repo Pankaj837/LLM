@@ -1,0 +1,10 @@
+\begin{tikzpicture}
+\begin{axis}[xbar, y=0.62cm, bar width=0.36cm, xmin=0, xmax=100, xlabel={Accuracy (\%)},
+  symbolic y coords={astro,bio,cad,chemistry,code,earth,electrical\_eng,engineering,exp\_val,finance,math,multistep,physics,scidisc,sciml,sciprog,sciqa,simulation,tech\_comm}, ytick=data, y dir=reverse, enlarge y limits=0.06,
+  legend style={at={(0.5,1.02)}, anchor=south, legend columns=2, font=\footnotesize}, tick label style={font=\footnotesize},
+  xmajorgrids, grid style={gray!25}]
+\addplot+[fill=blue!55, draw=blue!70!black, error bars/.cd, x dir=both, x explicit] coordinates {(32.7,astro) +- (7.9,0) -= (7.0,0) (25.5,bio) +- (5.3,0) -= (4.7,0) (0.0,cad) +- (79.3,0) -= (0.0,0) (25.8,chemistry) +- (5.7,0) -= (5.0,0) (24.8,code) +- (6.4,0) -= (5.4,0) (32.1,earth) +- (5.7,0) -= (5.2,0) (32.2,electrical\_eng) +- (8.0,0) -= (7.1,0) (12.5,engineering) +- (13.6,0) -= (7.0,0) (20.8,exp\_val) +- (19.6,0) -= (11.6,0) (24.6,finance) +- (4.7,0) -= (4.2,0) (22.3,math) +- (4.7,0) -= (4.1,0) (1.5,multistep) +- (2.8,0) -= (1.0,0) (25.9,physics) +- (4.5,0) -= (4.0,0) (50.0,scidisc) +- (6.9,0) -= (6.9,0) (25.0,sciml) +- (24.5,0) -= (14.8,0) (25.0,sciprog) +- (44.9,0) -= (20.4,0) (30.4,sciqa) +- (3.8,0) -= (3.5,0) (31.8,simulation) +- (20.9,0) -= (15.5,0) (33.3,tech\_comm) +- (25.0,0) -= (18.2,0)};
+\addplot+[only marks, mark=|, mark size=5pt, very thick, red!80!black] coordinates {(25.0,astro) (25.0,bio) (25.0,cad) (24.5,chemistry) (25.0,code) (25.0,earth) (25.0,electrical\_eng) (18.8,engineering) (19.8,exp\_val) (25.0,finance) (25.0,math) (0.0,multistep) (24.7,physics) (50.0,scidisc) (25.0,sciml) (25.0,sciprog) (25.0,sciqa) (25.0,simulation) (25.0,tech\_comm)};
+\legend{Model (95\% CI), Chance}
+\end{axis}
+\end{tikzpicture}

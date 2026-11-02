@@ -1,0 +1,225 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.1cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{booktabs}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usepackage{enumitem}
+\usepackage{float}
+\usepackage{caption}
+\usepackage[hidelinks]{hyperref}
+\setlist{nosep, leftmargin=1.4em}
+\captionsetup{font=small, labelfont=bf}
+\sloppy\emergencystretch=3em
+
+\input{generated/macros}
+
+\title{\textbf{PRANA-G 100M: Checkpoint Analysis Report}}
+\author{Namit Aggarwal, PRANA-G AI}
+\date{3 November 2026}
+
+\begin{document}
+\maketitle
+
+\noindent Checkpoint \texttt{ckpt\_best.pt} (step \ValBestStep, \Params{} parameters, 12 layers, hidden size 768) from the 100M training run on an
+A100 MIG slice, trained on 17 domains. All 34 training and validation files used here were checked against the run's preflight log and match it
+token for token. Every number below comes from the result files in \texttt{results/}; \S\ref{sec:repro} gives the one command that reproduces them.
+
+\section{Training and validation loss}
+\begin{figure}[H]\centering
+\input{generated/fig_loss}
+\caption{Training loss (smoothed) and validation loss on the mixed validation set, every 250 steps.}
+\end{figure}
+
+\begin{table}[H]\centering\small
+\begin{tabular}{ll}
+\toprule
+Training loss, first logged step / end (smoothed) & \LossFirst{} / \LossTrainEnd \\
+Validation loss, first evaluation (step 250) / best & \ValFirst{} / \ValBest{} at step \ValBestStep{} (perplexity \ValPplBest) \\
+Training minus validation loss at the end & \Gap{} \\
+Validation loss change over the last 1,000 steps & \ValSlope{} per 1,000 steps \\
+Steps completed & \LastStep{} of \MaxSteps{} planned (\DonePct), \TokensSeen{} tokens \\
+Gradient norm (median / max) & \GradMed{} / \GradMax{}; \GradSpikes{} spikes above 3$\times$ median \\
+Throughput, peak memory & \Tps{} tokens/s, \PeakMem{} GB \\
+\bottomrule
+\end{tabular}
+\caption{Loss summary (from \texttt{metrics.jsonl}).}
+\end{table}
+
+\begin{itemize}
+\item \textbf{No overfitting.} Training and validation loss are equal at the end (difference \Gap), so the model is not memorising its data.
+\item \textbf{Not converged.} Validation loss was still falling (\ValSlope{} per 1,000 steps) when the run stopped; more tokens would still help.
+\item \textbf{The run did not finish.} It stopped at step \LastStep{} of \MaxSteps{} when the GPU slot ended. The last checkpoint was saved at
+  step 8,250, so the final 130 steps were lost.
+\item \textbf{Training was stable.} All losses are finite. Almost all gradient-norm spikes happened in the first 400 steps (warm-up); after step 1,000
+  there were only two small ones (1.76 at step 1,810 and 0.95 at step 4,180).
+\end{itemize}
+
+\section{Domain-wise perplexity and next-token prediction}
+Each domain's validation file was cut into the same non-overlapping 2,048-token windows (100 windows, about 200k tokens; astronomy and finance
+have fewer). For every position the model predicts the next token: \emph{cross-entropy} is the average loss, \emph{perplexity} is $e$ raised to the cross-entropy, \emph{top-1}/\emph{top-5} is how often the true token is the model's first choice / among its five most likely,
+and \emph{calibration error} is the gap between how confident the model is and how often it is right.
+
+\begin{table}[H]\centering\small
+\input{generated/tab_next_token}
+\caption{Next-token prediction for all 17 training domains, sorted by perplexity.}
+\end{table}
+
+\begin{itemize}
+\item \textbf{Very low perplexity points to templated data.} CAD (perplexity 1.24, top-1 95\%) is almost fully predictable, and code, biology and
+  finance (3.6--3.9) are also unusually easy. Text this predictable is usually generated from templates or highly repetitive; such data teaches
+  the model little and should be checked for diversity before the 30B run.
+\item \textbf{The hardest domains are technical communication, astronomy, maths and physics} (perplexity 16--22, top-1 43--47\%), which are also the
+  most varied natural text.
+\item Multi-step reasoning is easy at the token level (perplexity 6.6) but the model solves almost no problems (\S\ref{sec:bench}): predicting
+  the style of a worked solution is not the same as solving it.
+\item Calibration is good: below 1.5\% error in every domain except finance (4.7\%), so the model's confidence matches how often it is right.
+\end{itemize}
+
+\section{Generation quality, repetition and consistency}
+\paragraph{Probes.} Ten fixed one-line prompts with an automatic check, answered greedily and with three seeded samples (temperature 0.8).
+
+\begin{table}[H]\centering\small
+\input{generated/tab_probes}
+\caption{Probe results. ``Loop'' means the greedy answer keeps repeating itself.}
+\end{table}
+
+\noindent The automatic check passes \ProbeGreedy{} of \ProbeN{} greedy answers, but reading them, only \texttt{def add(a, b): return a + b} is
+really correct: the physics answer matched the word ``force'' in a wrong statement, and the maths answer matched ``2x'' inside unrelated algebra.
+Wrong facts are stated confidently (``the speed of light in vacuum is approximately 1.5 times the speed of light'').
+
+\paragraph{Repetition: greedy decoding against sampling.} Six held-out documents per domain were cut after 64 tokens and continued for 96 tokens,
+once greedily and once with a seeded sample (temperature 0.8). The table shows the share of repeated 4-grams and the number of continuations that
+fall into a loop.
+
+\begin{table}[H]\centering\small
+\input{generated/tab_repetition}
+\caption{Repeated 4-grams in the real continuation, in greedy output and in sampled output, and repetition loops.}
+\end{table}
+
+\noindent \textbf{Most of the looping comes from greedy decoding.} Greedy continuations loop in \LoopsGreedy{} of \LoopTexts{} texts; sampled
+continuations of the same prompts loop in only \LoopsSampled, and repeat about as much as real text. Greedy decoding always takes the single most
+likely token, and a small model's most likely continuation is often the text it has just written. Evaluation and demos should therefore use
+sampling (or a repetition penalty), and SFT must still teach the model to stop.
+
+\paragraph{Consistency.}
+\begin{itemize}
+\item Greedy decoding gives identical text when repeated (\ProbeSame/\ProbeN{} probes).
+\item The three samples agree with each other on \ProbeAgree{} of \ProbeN{} probes, mostly because they all fail; correct answers are not stable across samples.
+\item The two checkpoints 50 steps apart give the same benchmark answer on 91.7\% of questions, and their overall accuracy differs by
+  0.06 points (26.9\% and 26.9\%).
+\item Scorer check: reversing the order of the options changed none of \OrderN{} multiple-choice answers, so the benchmark cannot favour a position.
+\end{itemize}
+
+\section{Checkpoint integrity and reproducibility}
+\begin{table}[H]\centering\small
+\input{generated/tab_integrity}
+\caption{Integrity of the two checkpoints.}
+\end{table}
+
+\begin{itemize}
+\item Both files load, all weights are finite, the tokenizer hash matches, and the validation loss stored in \texttt{ckpt\_best.pt} equals the value in
+  the training log exactly.
+\item \textbf{Why the validation loss was reported as null.} Validation loss is measured every 250 steps, but checkpoints are saved every 200 steps.
+  \texttt{ckpt\_last.pt} is from step 8,200, which is not an evaluation step, so it has no validation loss stored, and the sample-output script printed
+  it as null. \texttt{ckpt\_best.pt} (step 8,250) has it: 2.166. Nothing is missing from the training itself. Note that \texttt{ckpt\_last.pt} is
+  50 steps \emph{older} than \texttt{ckpt\_best.pt}, because the run stopped after step 8,250's save.
+\item The two checkpoints have the same configuration and tensors and differ by \RelDiff{} of their weights (50 steps of training).
+\item Repeating a forward pass gives identical outputs (max difference \RepeatDiff); CPU and Apple-GPU outputs differ by at most \CpuDiff{} and
+  predict the same token at every position (\CpuArgmax).
+\item The benchmark re-scores its first 20 questions on every run and requires identical answers; this passed on every run. The whole analysis
+  was produced by one command (\S\ref{sec:repro}).
+\end{itemize}
+
+\section{Re-evaluation of the benchmark}\label{sec:bench}
+The benchmark is frozen at version 2.1: 3,619 questions in 19 domains (the first set of 2,340 questions, of which 2,337 were scored in the first report,
+plus biology, astronomy, finance, earth science, scientific discovery, scientific programming and CAD), with a SHA-256 hash for every file.
+
+\paragraph{Leakage.} Every question was searched for in all 17 training files. 75 were found and removed from scoring, leaving \EvalItems.
+39 are in \texttt{sciqa.train.bin}, which contains maths questions with worked answers that include MMLU high-school maths questions
+word for word (median match 95\%); 28 are in \texttt{math.train.bin} (forum copies), and 8 in physics, technical communication and chemistry.
+Maths is hit hardest: 55 of its 400 questions were removed. The \texttt{sciqa} text also carries leftover source tags (``GSM\_AnsAug'',
+``Expected Answer:''), like the multistep data.
+
+\paragraph{Results.} Overall accuracy is \EvalAcc{} against \EvalChance{} for random guessing.
+
+\begin{table}[H]\centering\small
+\input{generated_eval/tab_domain}
+\caption{Benchmark accuracy by domain (multiple choice: random guessing 25\%, PubMedQA yes/no 50\%; GSM8K numeric: 0\%).}
+\end{table}
+
+\begin{itemize}
+\item \textbf{Above chance:} school science (sciqa 30.4\%), earth science (32.1\%), astronomy (32.7\%) and electrical engineering (32.2\%).
+  Multistep is formally above chance only because its chance level is 0 (3 of 200 solved).
+\item \textbf{At chance:} maths, physics, chemistry, biology, finance, code and every hand-written PRANA-G domain.
+\item \textbf{Scientific discovery:} the model answers ``yes'' to all 200 PubMedQA questions whatever the abstract says (50\%).
+\end{itemize}
+
+\section{Scientific capability gap analysis}
+The table maps the 20 domains of the 30B token plan to what the 100M run trained on, its benchmark result and its validation perplexity.
+
+\begin{table}[H]\centering\scriptsize
+\input{generated/tab_gap}
+\caption{Capability gaps. ``Plan'' is the 30B allocation; ``100M run'' is the approximate number of tokens of that domain the model saw.}
+\end{table}
+
+\begin{enumerate}
+\item \textbf{Three plan domains had no training data:} Engineering Reasoning (2.4B planned; its file was rebuilt but left out of the run), Numerical
+  Simulation and Physics + AI (2.1B each, no data yet). Their benchmark scores are at chance.
+\item \textbf{University-level knowledge is absent} in every domain; only school-level science and electrical engineering are above chance.
+\item \textbf{Reasoning and reading are absent:} 3 of 200 word problems solved; on PubMedQA the model answers ``yes'' to everything.
+\item \textbf{Generation is not usable with greedy decoding} (loops) and states wrong facts confidently.
+\item \textbf{Data quality limits the run:} benchmark copies in sciqa and maths, leftover source tags in sciqa and multistep, and near-templated
+  text in CAD, finance, code and biology.
+\item \textbf{The benchmark is thin where PRANA-G matters most:} the hand-written domains have 1--40 questions each, and engineering agent/tool use
+  (7\% of this run's training) has no test.
+\end{enumerate}
+
+\section{SFT preparation and next training stage}
+SFT teaches a model to use what it already knows in a given format; it cannot add knowledge that pretraining did not give it. At 100M parameters and
+2.2B tokens most failures are knowledge failures, so the list starts with what must be fixed before SFT is worth running.
+
+\paragraph{Priority 1: before SFT (next pretraining stage).}
+\begin{enumerate}
+\item \textbf{Train on all 20 domains of the 30B plan}, including Engineering Reasoning (left out of this run), Numerical Simulation and Physics + AI
+  (no data yet): 6.6B of the 30B tokens.
+\item \textbf{Clean and decontaminate the data:} remove the 75 benchmark questions found in sciqa, maths, physics, technical communication and
+  chemistry; strip the leftover source tags (``Benchmark source: data/CoT/\dots'' in multistep, ``GSM\_AnsAug'' and ``Expected Answer:'' in sciqa);
+  check CAD, finance, code and biology for templated or repeated text.
+\item \textbf{Make runs finish and keep their result:} save a checkpoint at the last step and copy checkpoints off the workspace before it expires
+  (this run lost its last 130 steps); save checkpoints on evaluation steps so every saved checkpoint has a validation loss.
+\item \textbf{Track capability during training:} run the benchmark and the per-domain perplexity on every saved checkpoint, next to the loss curve.
+\end{enumerate}
+
+\paragraph{Priority 2: SFT data, in order of the failures observed.}
+\begin{enumerate}
+\item \textbf{Answer format and stopping} (loops; only 68 of 200 GSM8K answers reach a final answer line): short question--answer pairs that end with
+  an explicit final answer and an end-of-text token.
+\item \textbf{Worked multi-step solutions} (1.5\% on GSM8K, arithmetic probes wrong): step-by-step solutions with checked final answers in maths,
+  physics and engineering, with units.
+\item \textbf{Answering from a given text} (always ``yes'' on PubMedQA): context--question--answer examples with balanced yes/no answers and examples
+  where the text does not contain the answer.
+\item \textbf{Saying ``cannot be determined''} when information is missing: examples where the correct response names the missing quantity.
+\item \textbf{PRANA-G tasks:} engineering calculations with units, simulation set-up and verification, PINN and neural-operator explanations,
+  validation reports and technical writing, once pretraining covers these domains.
+\end{enumerate}
+
+\paragraph{Priority 3: evaluation for the next stage.}
+\begin{enumerate}
+\item Use sampling (or a repetition penalty) for all generation-based evaluation, and report greedy and sampled results side by side.
+\item Grow each hand-written domain to at least 50 questions; add an executable code test for sciprog, CAD/STEP questions and an agent/tool-use test.
+\item Score the 1.5B checkpoints on exactly this frozen benchmark, so the 100M and 1.5B results can be compared directly.
+\end{enumerate}
+
+\section{How to reproduce}\label{sec:repro}
+Code: branch \texttt{namit/science-eval} of \texttt{github.com/Pankaj837/LLM}. Inputs: the checkpoint zip from the training run and the 34
+\texttt{.bin} files from the team Drive (the same files as the run's \texttt{dl.sh}); their SHA-256 hashes are in \texttt{results/inputs\_sha256.txt}.
+\begin{verbatim}
+RUN=path/to/checkpoint_folder BINS=path/to/bins bash scripts/reproduce_analysis.sh
+\end{verbatim}
+This records the input hashes, runs the leakage check, the benchmark on both checkpoints and the analysis, regenerates every table and builds this
+PDF. All steps are deterministic (fixed windows, greedy decoding, seeded sampling); the tests in \texttt{tests/} cover each script.
+
+\end{document}

@@ -1,0 +1,200 @@
+{
+ "n": 32,
+ "overlap": {
+  "math": {
+   "val_docs": 2680,
+   "exact_docs": 0,
+   "exact_doc_share": 0.0,
+   "exact_token_share": 0.0,
+   "windows": 1998,
+   "window_share": 0.07557557557557558
+  },
+  "physics": {
+   "val_docs": 795,
+   "exact_docs": 0,
+   "exact_doc_share": 0.0,
+   "exact_token_share": 0.0,
+   "windows": 2000,
+   "window_share": 0.08
+  },
+  "chem": {
+   "val_docs": 3552,
+   "exact_docs": 0,
+   "exact_doc_share": 0.0,
+   "exact_token_share": 0.0,
+   "windows": 2000,
+   "window_share": 0.233
+  },
+  "bio": {
+   "val_docs": 359,
+   "exact_docs": 0,
+   "exact_doc_share": 0.0,
+   "exact_token_share": 0.0,
+   "windows": 1999,
+   "window_share": 0.376688344172086
+  },
+  "earth": {
+   "val_docs": 303,
+   "exact_docs": 0,
+   "exact_doc_share": 0.0,
+   "exact_token_share": 0.0,
+   "windows": 1957,
+   "window_share": 0.17066939192641797
+  },
+  "scidisc": {
+   "val_docs": 663,
+   "exact_docs": 53,
+   "exact_doc_share": 0.07993966817496229,
+   "exact_token_share": 0.0706793962624003,
+   "windows": 2000,
+   "window_share": 0.084
+  },
+  "sciqa": {
+   "val_docs": 2297,
+   "exact_docs": 0,
+   "exact_doc_share": 0.0,
+   "exact_token_share": 0.0,
+   "windows": 2000,
+   "window_share": 0.0765
+  },
+  "sciprog": {
+   "val_docs": 65,
+   "exact_docs": 0,
+   "exact_doc_share": 0.0,
+   "exact_token_share": 0.0,
+   "windows": 2000,
+   "window_share": 0.2505
+  },
+  "code": {
+   "val_docs": 1048,
+   "exact_docs": 0,
+   "exact_doc_share": 0.0,
+   "exact_token_share": 0.0,
+   "windows": 1998,
+   "window_share": 0.3788788788788789
+  },
+  "cad": {
+   "val_docs": 322,
+   "exact_docs": 0,
+   "exact_doc_share": 0.0,
+   "exact_token_share": 0.0,
+   "windows": 1633,
+   "window_share": 0.771586037966932
+  },
+  "multistep": {
+   "val_docs": 21418,
+   "exact_docs": 0,
+   "exact_doc_share": 0.0,
+   "exact_token_share": 0.0,
+   "windows": 2000,
+   "window_share": 0.0
+  },
+  "astro": {
+   "val_docs": 336,
+   "exact_docs": 0,
+   "exact_doc_share": 0.0,
+   "exact_token_share": 0.0,
+   "windows": 2000,
+   "window_share": 0.007
+  },
+  "finance": {
+   "val_docs": 1385,
+   "exact_docs": 0,
+   "exact_doc_share": 0.0,
+   "exact_token_share": 0.0,
+   "windows": 1999,
+   "window_share": 0.05052526263131566
+  },
+  "engineering": {
+   "val_docs": 67,
+   "exact_docs": 0,
+   "exact_doc_share": 0.0,
+   "exact_token_share": 0.0,
+   "windows": 2000,
+   "window_share": 0.143
+  },
+  "gen_eng": {
+   "val_docs": 596,
+   "exact_docs": 0,
+   "exact_doc_share": 0.0,
+   "exact_token_share": 0.0,
+   "windows": 2000,
+   "window_share": 0.321
+  },
+  "exp_val": {
+   "val_docs": 455,
+   "exact_docs": 0,
+   "exact_doc_share": 0.0,
+   "exact_token_share": 0.0,
+   "windows": 2000,
+   "window_share": 0.062
+  },
+  "tech_comm": {
+   "val_docs": 2292,
+   "exact_docs": 0,
+   "exact_doc_share": 0.0,
+   "exact_token_share": 0.0,
+   "windows": 2000,
+   "window_share": 0.17
+  }
+ },
+ "tags": {
+  "Benchmark source: data/CoT": {
+   "math": 0,
+   "physics": 0,
+   "chem": 0,
+   "bio": 0,
+   "earth": 0,
+   "scidisc": 0,
+   "sciqa": 17178,
+   "sciprog": 0,
+   "code": 0,
+   "cad": 0,
+   "multistep": 0,
+   "astro": 0,
+   "finance": 0,
+   "engineering": 0,
+   "gen_eng": 0,
+   "exp_val": 0,
+   "tech_comm": 0
+  },
+  "GSM_AnsAug": {
+   "math": 0,
+   "physics": 0,
+   "chem": 0,
+   "bio": 0,
+   "earth": 0,
+   "scidisc": 0,
+   "sciqa": 9743,
+   "sciprog": 0,
+   "code": 0,
+   "cad": 0,
+   "multistep": 0,
+   "astro": 0,
+   "finance": 0,
+   "engineering": 0,
+   "gen_eng": 0,
+   "exp_val": 0,
+   "tech_comm": 0
+  },
+  "Expected Answer:": {
+   "math": 1,
+   "physics": 0,
+   "chem": 0,
+   "bio": 0,
+   "earth": 0,
+   "scidisc": 0,
+   "sciqa": 112631,
+   "sciprog": 0,
+   "code": 0,
+   "cad": 0,
+   "multistep": 0,
+   "astro": 0,
+   "finance": 0,
+   "engineering": 0,
+   "gen_eng": 0,
+   "exp_val": 0,
+   "tech_comm": 0
+  }
+ }
+}

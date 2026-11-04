@@ -39,10 +39,13 @@ done
 # shellcheck disable=SC2086
 $PY scripts/analyze_checkpoint.py --ckpt "$RUN/ckpt_best.pt" --compare-ckpt "$RUN/ckpt_last.pt" --metrics "$METRICS" \
     --config "$CONFIG" --vocab $VOCAB --val $VALS --out results/analysis_100m_step8250 --device "$DEVICE"
+# shellcheck disable=SC2086
+$PY scripts/check_val_overlap.py --bins "$BINS" --domains $DOMAINS --vocab $VOCAB --out results/val_overlap.json
 $PY scripts/eval_report_tex.py --results results/eval_science_100m_step8250.json --leakage results/leakage_all.json \
     --compare results/eval_science_100m_step8200.json --out reports/analysis_100m/generated_eval
 $PY scripts/analysis_report_tex.py --analysis results/analysis_100m_step8250.json \
     --curve results/analysis_100m_step8250_curve.csv --eval results/eval_science_100m_step8250.json \
-    --config "$CONFIG" --out reports/analysis_100m/generated
-(cd reports/analysis_100m && tectonic main.tex)
-echo "done: reports/analysis_100m/main.pdf; inputs in results/inputs_sha256.txt"
+    --config "$CONFIG" --overlap results/val_overlap.json --out reports/analysis_100m/generated
+# the report's LaTeX source (reports/analysis_100m/main.tex) is not in git; build the PDF only where it exists
+if [ -f reports/analysis_100m/main.tex ]; then (cd reports/analysis_100m && tectonic main.tex); fi
+echo "done: results/ and reports/analysis_100m/generated; inputs in results/inputs_sha256.txt"

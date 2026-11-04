@@ -101,3 +101,25 @@ def test_end_to_end(tmp_path):
     assert i["pair"]["same_config"] and i["pair"]["relative_l2_difference"] > 0
     assert i["forward"]["repeat_max_abs_diff"] == 0.0
     assert Path(str(out) + "_curve.csv").read_text().startswith("step,train_loss")
+
+
+def test_val_overlap_and_tag_count(tmp_path):
+    import check_val_overlap as cvo
+    tok = BPETokenizer.from_file(str(VOCAB))
+    enc = lambda s: tok.encode(s, allowed_special=set())   # noqa: E731
+    shared = "The beam carries a uniform load along its whole length and rests on two simple supports at the ends."
+    only_val = "A violet amphibian sings opera beneath the frozen lakes of a distant imaginary moon every single winter night."
+    tagged = "Some text here. Explanation: Benchmark source: data/CoT/math50k_camel.json and more words follow it now."
+    eos = tok.eos_id
+    val = enc(shared) + [eos] + enc(only_val) + [eos]
+    train = enc(tagged) + [eos] + enc(shared) + [eos] + enc(tagged) + [eos]
+    write_bin(str(tmp_path / "d.val.bin"), np.array(val, dtype=np.uint16), 32000, eos)
+    write_bin(str(tmp_path / "d.train.bin"), np.array(train, dtype=np.uint16), 32000, eos)
+    out = tmp_path / "o.json"
+    # chunk 11: a document and a tag can straddle chunk edges
+    assert cvo.main(["--bins", str(tmp_path), "--domains", "d", "--vocab", str(VOCAB), "--out", str(out), "--n", "8",
+                     "--windows", "20", "--chunk", "11", "--tags", "Benchmark source: data/CoT"]) == 0
+    res = json.loads(out.read_text())
+    r = res["overlap"]["d"]
+    assert r["val_docs"] == 2 and r["exact_docs"] == 1 and 0 < r["window_share"] < 1
+    assert res["tags"]["Benchmark source: data/CoT"]["d"] == 2

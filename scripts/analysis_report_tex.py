@@ -3,9 +3,9 @@
 
     python scripts/analysis_report_tex.py --analysis results/analysis_100m_step8250.json \
         --curve results/analysis_100m_step8250_curve.csv --eval results/eval_science_100m_step8250.json \
-        --config run/train_config.json --out reports/analysis_100m/generated
+        --config run/train_config.json --overlap results/val_overlap.json --out reports/analysis_100m/generated
 
-``--analysis`` and ``--curve`` come from ``scripts/analyze_checkpoint.py``; ``--eval`` from ``scripts/eval_science.py``. The gap table
+``--analysis`` and ``--curve`` come from ``scripts/analyze_checkpoint.py``; ``--eval`` from ``scripts/eval_science.py``; ``--overlap`` from ``scripts/check_val_overlap.py``. The gap table
 maps the 20 domains of the 30B token plan to the training bins of the run, the benchmark domains and the validation files.
 """
 from __future__ import annotations
@@ -56,6 +56,7 @@ def main(argv=None) -> int:
     ap.add_argument("--curve", required=True)
     ap.add_argument("--eval", required=True)
     ap.add_argument("--config", required=True)
+    ap.add_argument("--overlap", required=True)
     ap.add_argument("--out", required=True)
     a = ap.parse_args(argv)
     with open(a.analysis, encoding="utf-8") as f:
@@ -64,6 +65,8 @@ def main(argv=None) -> int:
         ev = json.load(f)
     with open(a.config, encoding="utf-8") as f:
         tc = json.load(f)
+    with open(a.overlap, encoding="utf-8") as f:
+        ov = json.load(f)
     os.makedirs(a.out, exist_ok=True)
     L, nt, g, it = an["loss"], an["next_token"], an["generation"], an["integrity"]
     best, last = it["checkpoints"]["ckpt_best.pt"], it["checkpoints"].get("ckpt_last.pt")
@@ -122,6 +125,14 @@ def main(argv=None) -> int:
     rows = [f"{esc(p['domain'])} & \\texttt{{{esc(p['prompt'].replace(chr(10), ' ')[:44])}}} & {'pass' if p['greedy_pass'] else 'fail'} & "
             f"{sum(p['sample_passes'])}/{len(p['sample_passes'])} & {'yes' if p['loop'] else 'no'}" for p in g["probes"]]
     write(os.path.join(a.out, "tab_probes.tex"), table("Domain & Prompt & Greedy & Samples passing & Loop", "llccc", rows))
+
+    rows = [f"{esc(d)} & {pct(r['window_share'], 0)} & {r['exact_docs']:,} of {r['val_docs']:,} & {nt[d]['perplexity']:.2f} & {pct(nt[d]['top1'], 0)}"
+            for d, r in sorted(ov["overlap"].items(), key=lambda kv: -kv[1]["window_share"])]
+    write(os.path.join(a.out, "tab_overlap.tex"),
+          table(f"Domain & {ov['n']}-token passages also in training & Whole documents also in training & Perplexity & Top-1", "lrrrr", rows))
+    rows = [f"{esc(t)} & " + " & ".join(f"{c.get(d, 0):,}" for d in ("sciqa", "multistep", "math", "physics")) + f" & {sum(c.values()):,}"
+            for t, c in ov["tags"].items()]
+    write(os.path.join(a.out, "tab_tags.tex"), table("Text & sciqa & multistep & math & physics & All 17 files", "lrrrrr", rows))
 
     ck = [("File size", lambda c: f"{c['bytes'] / 1e9:.2f} GB"), ("SHA-256 (first 16)", lambda c: f"\\texttt{{{c['sha256'][:16]}}}"),
           ("Step", lambda c: f"{c['step']:,}"), ("Parameters", lambda c: f"{c['params']:,}"), ("Tensors", lambda c: str(c["tensors"])),

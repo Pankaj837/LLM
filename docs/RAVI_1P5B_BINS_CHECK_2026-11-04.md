@@ -26,3 +26,12 @@ The frozen tokenizer hash in his output is `10b3c5ae...b51cdc` (correct). Docume
 ## Open
 - `chem`, `cad` and `engineering` bins are not in the Drive folder; chem mean document is 262 tokens; whether chem was built from the verified deduplicated file is not stated (the deduplication check was still pending at 10:40 am on 4 Nov per the group chat).
 - Train-versus-validation overlap and train-file checks not done (training files not downloaded).
+
+## Chemistry proof from Ravi (read; `chemistry_dedup_and_token_proof.md`, received 4 Nov evening)
+Checked arithmetic only; the files it cites (`dedup_report.json`, `build_manifest.json`, the parquet files) were not provided.
+- 11,118,616 rows in, 1,731,859 duplicates dropped, 9,386,757 kept: correct (15.58%).
+- Train documents 9,339,542 + validation documents 47,215 = 9,386,757 = kept rows exactly. This supports "one document per row of the cleaned file" and fits the bins coming from the deduplicated parquet.
+- Token numbers equal `token_summary.pdf` (train 2,447,159,991; val 12,356,427; mean 262 in both).
+- Not proven: the split into 4,863,675 database records (about 90 tokens) and 4,523,082 Q&A records (about 447 tokens) is stated without a count from the data, and the weighted mean is built from those assumed lengths, so it explains 262 but does not independently prove it. By his own numbers the database records are about 52% of documents but only about 18% of tokens.
+- Deduplication was exact match on `text` only; near-duplicates (same molecule in different wording, repeated Q&A) were not checked.
+- Ravi says Raju asked Avinash to create one Drive folder for all domain bins and he will upload chem, cad and engineering there once he has the link (owner-reported).

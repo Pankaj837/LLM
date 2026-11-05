@@ -13,9 +13,9 @@ of just deprecating it. If nothing turns out to depend on it, it can be deleted 
 a smaller, more honest change than parking it here while still needing it importable.
 
 ## What is *not* inside this repository, and was left alone
-This repo (`LLM_Squad1_Final/`) was built by consolidating several sibling directories that sit next to it, not
+This repo (`LLM/`) was built by consolidating several sibling directories that sit next to it, not
 inside it:
-- `../llm/` — the originally delivered, unpackaged codebase (pre-review). Fully superseded; kept where it was found.
+- `../llm_original_delivery/` (was `../llm/`) — the originally delivered, unpackaged codebase (pre-review). Fully superseded; kept where it was found.
 - `../llm_review/` — an earlier, since-superseded review workspace (per-owner analysis, before the ask shifted to
   "component by component, not person by person"). Superseded by this repo's `docs/`.
 - `../New/` — raw uploaded status reports and zips (RoPE/GQA/Dynamic-NTK reports, an early conditional-reward

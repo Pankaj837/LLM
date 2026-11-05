@@ -1,0 +1,39 @@
+{
+  "files": {
+    "code.parquet": {
+      "in": 1002081,
+      "kept": 1002078,
+      "duplicate": 3
+    },
+    "chemistry.parquet": {
+      "in": 11118616,
+      "kept": 9386757,
+      "duplicate": 1731859
+    },
+    "scientific_qa.parquet": {
+      "in": 4523082,
+      "kept": 4523082,
+      "duplicate": 0
+    },
+    "Scientific_Programming.parquet": {
+      "in": 491742,
+      "kept": 491742,
+      "duplicate": 0
+    },
+    "engineering_agent_tool_use.parquet": {
+      "in": 69960,
+      "kept": 69960,
+      "duplicate": 0
+    },
+    "cad_step.parquet": {
+      "in": 958963,
+      "kept": 958797,
+      "duplicate": 166
+    }
+  },
+  "total": {
+    "in": 18164444,
+    "kept": 16432416,
+    "duplicate": 1732028
+  }
+}

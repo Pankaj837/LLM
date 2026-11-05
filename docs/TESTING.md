@@ -46,12 +46,13 @@ python scripts/smoke_test.py
 ```
 
 ## Current totals (CPU, this repository)
-- Without `BIO_ZIP`/`EARTH_ZIP`/a built C++ tokenizer: 338 passed, 15 skipped (GPU 7, C++ parity 2, real-data 4, release gate 1, legacy checkpoint 1) — 25 Oct 2026 (`scale-run-rc8`; includes the CPU rehearsal of the whole GPU session, `tests/test_gpu_session.py`).
+- **5 Nov 2026 (Windows, Python 3.13, torch 2.12, CPU): 359 passed, 15 skipped, 0 failed** (skipped: GPU 7, C++ parity 2, real-data zips 4, release gate 1, legacy checkpoint 1). With the built `encode_cli.exe` and the frozen vocabulary (`TOK_CLI`, `TOK_VOCAB`) the 2 C++ parity tests also pass (run 5 Nov). The suite now takes about 12 minutes alone on this machine (the slowest test, the CPU rehearsal of the whole GPU session, takes about 100 s); the "~45 s" above was the September figure.
+- Before that: 338 passed, 15 skipped on 25 Oct 2026 (`scale-run-rc8`; includes the CPU rehearsal of the whole GPU session, `tests/test_gpu_session.py`).
 - With `BIO_ZIP` + `EARTH_ZIP`: 327 passed, 11 skipped.
 - **With the C++ tokenizer built and `TOK_CLI`/`TOK_VOCAB` set: 325 passed** (the 2 C++ parity tests run for real
   instead of skipping) — see `docs/CPP_TOKENIZER_PARITY.md` for the actual output.
 - Lint: 0 problems. Team smoke script: 29/29. Team's C++ test suite (`native/tokenizer`): 46/46.
-- Mutation check: **25/25 mutants killed, 0 survived**.
+- Mutation check (5 Nov 2026): **31/31 mutants killed, 0 survived** (25 September mutants plus 6 for the checkpoint-reliability code). Correction: since the 24 Oct change to `bpe_trainer.py` (digit-splitting) the "BPE trainer picks the least frequent pair" mutant no longer matched the source and was reported as `BAD PATTERN`, so the earlier "25/25" no longer held; the pattern is fixed and the mutant is killed.
 - Release gate: **passes** on `runs/bio_small/ckpt_last.pt` (trained here), **fails** on the delivered `pretrain_model.pt`
   (as it should — that file is random weights).
 

@@ -1,7 +1,7 @@
 # Checkpoints — TOY placeholders, not the production model
 
-> Status 24 Oct 2026: the 51M models below are the only real checkpoints; **no scaled (100M–1.5B) model has been trained yet**.
-> The plan and decisions are in `docs/TRAINING_PLAN_1p5B.md`. The roster and "current as of" dates in this file are historical.
+> Status 5 Nov 2026: the 51M models below are the September/October submissions. The real model line has since started: a **100M model was trained on the AIKosh A100 slice** (`ckpt_best.pt`, step 8,250, validation loss 2.166, 1.2 GB, **not stored in this repository**; sha256 and results in `docs/A100_RUN_RESULT_2026-11-01.md`). **No 1.5B model has been trained** (only a smoke test on one H100).
+> The plan and decisions are in `docs/PILOT_PLAN_2026-11-04.md` and `docs/TRAINING_PLAN_1p5B.md`. The roster and "current as of" dates in this file are historical.
 
 **These are not the real model. Do not treat their output as a quality signal, and expect them to be replaced.**
 

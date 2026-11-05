@@ -58,3 +58,12 @@ live in `src/llm/data.py` with tests.
 **Decision.** Early exit does not change the learning-rate schedule.
 **Why.** A run “stopped early” by lowering `max_steps` follows a different cosine decay and cannot be resumed
 bit-identically; resume is verified bit-exact.
+
+## D10 — `ckpt_last.pt` is saved at every evaluation, with rolling backups and a graceful stop (5 Nov 2026)
+**Decision.** `ckpt_last.pt` is written every `--save-interval` steps, after every evaluation and on the last step, always
+with the latest validation loss; the file it replaces is kept as `ckpt_step_<step>.pt` (newest 2 kept). `--resume auto`
+takes the newest file that opens cleanly. SIGINT / SIGTERM / SIGBREAK or a `STOP` file in `--out` finish the step, save and
+exit. The best validation loss travels inside the checkpoint so a resumed run cannot overwrite `ckpt_best.pt` with a worse model.
+**Why.** The 100M run's last checkpoint (step 8,200) had no validation loss (saves every 200 steps, evaluation every 250);
+a hand stop at step 8,380 lost 180 steps; a resumed run restarted its best value at infinity. Cost: about 18 GB per 1.5B
+checkpoint, so about 72 GB for last + 2 backups + best (`docs/CHECKPOINT_RELIABILITY_2026-11-04.md`).

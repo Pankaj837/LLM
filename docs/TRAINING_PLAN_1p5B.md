@@ -1,13 +1,13 @@
 # Training plan — scale-up from the 51M models (rev. 24 Oct 2026)
 
 Owner of this plan: Pankaj. Numbers marked *est.* are my calculations and must be replaced by Om/Gokul's measured
-benchmark. **Nothing below has been run on a GPU yet.** Decisions that are not mine are listed in §9.
+benchmark. **Status note, 5 Nov 2026:** this plan is from 24 Oct and its numbers are estimates. Since then a 100M run (H100 27 Oct, A100 slice 31 Oct to 1 Nov, validation loss 2.166) and a 1.5B smoke test on one H100 (25.4k tokens/s, 60.8 GB) have run (`docs/PROGRESS_REPORT.md`); the 1.5B pilot is planned in `docs/PILOT_PLAN_2026-11-04.md` and the data in `docs/DATA_PLAN_30B_2026-11-01.md`. Decisions that are not mine are listed in §9.
 
 ## 1. What is ready in the repo (all tested on CPU)
 | Item | Status |
 |---|---|
 | Presets `100m` (100.1M), `300m` (303.4M), `1p5b` (1.509B), `2b` (2.012B): `1p5b`/`2b` have 32 layers, d=2048, 16 query / 4 KV heads, FFN 5632 / 8192, 4K context, tied embeddings, vocab 32000 | parameter counts checked against an exact formula that reproduces a real built model |
-| Multi-GPU: `torchrun --nproc_per_node=N -m llm.train ...` (DistributedDataParallel; `--batch-size` is per rank; rank 0 alone logs, evaluates and writes checkpoints; 60-minute collective timeout) | a 2-process CPU run reproduces one process with accumulation 2 (weights match); **never run on CUDA/NCCL** |
+| Multi-GPU: `torchrun --nproc_per_node=N -m llm.train ...` (DistributedDataParallel; `--batch-size` is per rank; rank 0 alone logs, evaluates and writes checkpoints; 60-minute collective timeout) | a 2-process CPU run reproduces one process with accumulation 2 (weights match); **multi-GPU never run on CUDA/NCCL (single GPU has: 5 Nov)** |
 | Weighted domain mix: `--train-mix math.bin=0.2 code.bin=0.12 ...` (weight = share of training tokens; prints the epochs each file will be repeated and warns above 4) | tested: sampling frequencies, determinism, bit-exact resume |
 | Atomic checkpoint writes (a crash or pre-emption never leaves a corrupt `ckpt_last.pt`) | tested |
 | bf16 autocast, AdamW, cosine schedule, grad clip, bit-exact resume, per-step metrics | tested |

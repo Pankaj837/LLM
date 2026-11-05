@@ -3,9 +3,9 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "llm-squad1"
+name = "llm"
 version = "0.1.0"
-description = "Squad-1 LLM stack: GQA transformer, RoPE / Dynamic NTK / YaRN, BPE tokenizer, pipeline, conditional reward model"
+description = "LLM stack: GQA transformer, RoPE / Dynamic NTK / YaRN, BPE tokenizer, pipeline, conditional reward model"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = ["torch>=2.4", "numpy>=1.24"]

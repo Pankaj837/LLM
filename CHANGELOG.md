@@ -1,5 +1,27 @@
 # Changelog
 
+## Unreleased
+### Changed (5 Nov 2026, evening)
+- Package renamed `llm-squad1` to `llm`; "Squad-1" removed from the README, docstrings and test header (the old folder name `LLM_Squad1_Final` was my own naming, not a project name).
+- Added `docs/PILOT_1B_TOKEN_DIVISION_2026-11-05.md` (Raju's request: tokens per domain for the 1B pilot) and `docs/evidence/ravi_dedup_report_2026-11-05.json` (Ravi's report, checked against his bins).
+
+### Added (4 Nov 2026, checkpoint reliability; `docs/CHECKPOINT_RELIABILITY_2026-11-04.md`)
+- `llm.train`: `ckpt_last.pt` is also written after every evaluation and on a graceful stop and always carries the latest validation loss; the replaced file is kept as rolling `ckpt_step_<step>.pt` backups (`--keep-backups`, default 2); `--resume auto` continues from the newest checkpoint that opens cleanly (corrupt files skipped, fresh start if none); Ctrl-C / SIGTERM / SIGBREAK / a `STOP` file in `--out` finish the step, save and exit.
+- `llm.checkpoint`: `verify_checkpoint`, `list_resumable`, `find_latest_checkpoint`, `prune_backups`.
+- `scripts/resume_demo.py`: stop-file, signal and hard-kill demonstrations with a bit-for-bit comparison of the final weights.
+- Tests: `tests/test_checkpoint_reliability.py` (12).
+- `find_latest_checkpoint` stops at the first good file (`ckpt_last.pt`, then backups by step) instead of opening every backup; signal handlers are restored in a `finally` so a failed run does not leave them replaced.
+
+### Fixed
+- A resumed run restarted its best validation loss at infinity and could overwrite `ckpt_best.pt` with a worse model; it now restores the best value from the checkpoint.
+
+### Docs and housekeeping (5 Nov 2026)
+- New: `docs/INDEX.md` (current versus history), `PILOT_PLAN`, `CHECKPOINT_RELIABILITY`, `EVAL_REPRODUCTION`, `DATA_CLEANING_REPORT`, `DATASET_CARDS`, `SWARAJ_COLLECTOR_REVIEW`, `AVINASH_DRIVE_CHECK` (all 2026-11-0x), decision D10 in `docs/DECISIONS.md`, `scripts/compare_eval.py`.
+- Updated to the 5 Nov state: `README.md` status table and layout, `docs/PROGRESS_REPORT.md` (5 Nov section, open items by owner, risks), `docs/ASSIGNMENT_LEDGER.md` ("Since 25 Oct"), `docs/PREPILOT_TASKS_STATUS`, status notes in `checkpoints/README.md`, `TRAINING_PLAN_1p5B.md`, `HANDOFF_GPU.md`, `A100_RUN_RESULT` (baseline 26.9% on 3,544 questions replaces 24.5% on 2,337).
+- `scripts/mutation_check.py`: the BPE mutant matched nothing since the 24 Oct digit-splitting change (reported as BAD PATTERN, run exits 1); pattern fixed; six mutants added for the reliability code; now 31/31 killed. `tests/results/*` refreshed (they dated from 27 Sep).
+- Removed: four stray untracked test files in the repository root (identical copies stay in the parent folder).
+- `docs/share/PRANA-G_Status_Update_2026-11-04.docx` replaced by the 5 Nov version.
+
 ## 0.1.0 — first consolidated release
 Consolidates the delivered components (GQA integration, RoPE / Dynamic NTK / YaRN, tokenizer, conditional reward model)
 into one package, after an independent component review. See `docs/REVIEW_FINDINGS.md` for every finding and

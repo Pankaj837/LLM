@@ -19,7 +19,7 @@ ROOT = Path(__file__).resolve().parent.parent
 
 
 def pytest_report_header(config):
-    return f"LLM Squad-1 suite | root={ROOT}"
+    return f"LLM suite | root={ROOT}"
 
 
 @pytest.fixture(scope="session")

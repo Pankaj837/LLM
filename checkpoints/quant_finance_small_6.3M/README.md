@@ -1,6 +1,6 @@
 # Quant Finance model — small preset (6.3M parameters)
 
-Trained with the Squad-1 LLM stack (github.com/Pankaj837/LLM) on the Quant Finance domain from the
+Trained with the LLM stack (github.com/Pankaj837/LLM) on the Quant Finance domain from the
 PranagAI/LLMs-Datasets registry. See `Quant_Finance_Model_Guide.pdf` for the full explanation.
 
 ## Files

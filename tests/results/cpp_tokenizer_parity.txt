@@ -2,8 +2,8 @@ Full pytest run, real datasets + real built C++ tokenizer, Sun Sep 27 22:04:06 I
 ============================= test session starts =============================
 platform win32 -- Python 3.13.13, pytest-9.1.1, pluggy-1.6.0 -- C:\Users\panka\AppData\Local\Programs\Python\Python313\python.exe
 hypothesis profile 'default'
-LLM Squad-1 suite | root=C:\Users\panka\Desktop\New folder\LLM_Squad1_Final
-rootdir: C:\Users\panka\Desktop\New folder\LLM_Squad1_Final
+LLM suite | root=C:\Users\panka\Desktop\New folder\LLM
+rootdir: C:\Users\panka\Desktop\New folder\LLM
 configfile: pyproject.toml
 plugins: anyio-4.14.2, hypothesis-6.168.1, cov-7.1.0
 collecting ... collected 2 items

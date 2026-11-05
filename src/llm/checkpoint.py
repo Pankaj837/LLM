@@ -18,7 +18,9 @@ Loading always uses ``torch.load(weights_only=True)``.
 """
 from __future__ import annotations
 
+import glob
 import os
+import re
 import warnings
 from typing import Any, Dict, Optional, Tuple
 
@@ -123,3 +125,81 @@ def load_checkpoint(
         warnings.warn("checkpoint holds UNTRAINED (randomly initialised) weights; outputs are meaningless "
                       "until a trained checkpoint is used", stacklevel=2)
     return {**meta, "missing_keys": list(missing), "unexpected_keys": list(unexpected), "has_config": cfg is not None}
+
+
+def verify_checkpoint(path: str, *, need_optimizer: bool = False) -> Dict[str, Any]:
+    """Open a checkpoint and return its metadata; raise if it is unreadable, truncated or (optionally) has no optimizer state.
+
+    ``torch.load`` fails on a truncated or corrupt zip, so this is the integrity check used before resuming. Every weight
+    tensor must also be finite (a NaN checkpoint would silently poison a resumed run).
+    """
+    state, _, meta, raw = read_checkpoint(path)
+    if need_optimizer and "optimizer" not in raw:
+        raise ValueError(f"{path}: no optimizer state, cannot resume from it")
+    for k, v in state.items():
+        if v.is_floating_point() and not torch.isfinite(v).all():
+            raise ValueError(f"{path}: non-finite values in {k}")
+    return dict(meta)
+
+
+_STEP_RE = re.compile(r"ckpt_step_(\d+)\.pt$")
+
+
+def list_resumable(out_dir: str) -> list:
+    """Checkpoint files in ``out_dir`` that can be resumed from (``ckpt_last.pt`` and ``ckpt_step_*.pt`` backups), newest first
+    by the step stored inside each file. Unreadable or optimizer-less files are skipped. Returns ``[(step, path), ...]``."""
+    found = []
+    for path in [os.path.join(out_dir, "ckpt_last.pt")] + glob.glob(os.path.join(out_dir, "ckpt_step_*.pt")):
+        if not os.path.isfile(path):
+            continue
+        try:
+            meta = verify_checkpoint(path, need_optimizer=True)
+        except Exception as exc:            # corrupt / truncated / wrong format: report and move on
+            warnings.warn(f"skipping unusable checkpoint {path}: {exc}", stacklevel=2)
+            continue
+        found.append((int(meta.get("step", 0)), path))
+    return sorted(found, reverse=True)
+
+
+def find_latest_checkpoint(out_dir: str) -> Optional[str]:
+    """The newest valid resumable checkpoint in ``out_dir``, or ``None``.
+
+    Candidates are tried newest first without opening the older ones once a good one is found: ``ckpt_last.pt`` is always the
+    newest by construction (when it is replaced, the old file becomes ``ckpt_step_<its step>.pt``), then the backups by the
+    step in their name. Opening a 1.5B checkpoint reads about 18 GB, so checking all of them at every start would be wasteful.
+    A file that cannot be opened is skipped with a warning. (:func:`list_resumable` opens every file and orders by the step
+    stored inside, for inspection.)
+    """
+    backups = []
+    for path in glob.glob(os.path.join(out_dir, "ckpt_step_*.pt")):
+        m = _STEP_RE.search(path.replace("\\", "/"))
+        if m:
+            backups.append((int(m.group(1)), path))
+    candidates = [os.path.join(out_dir, "ckpt_last.pt")] + [p for _, p in sorted(backups, reverse=True)]
+    for path in candidates:
+        if not os.path.isfile(path):
+            continue
+        try:
+            verify_checkpoint(path, need_optimizer=True)
+        except Exception as exc:
+            warnings.warn(f"skipping unusable checkpoint {path}: {exc}", stacklevel=2)
+            continue
+        return path
+    return None
+
+
+def prune_backups(out_dir: str, keep: int) -> list:
+    """Delete all but the newest ``keep`` ``ckpt_step_*.pt`` backups (by step number in the file name). Returns the removed paths."""
+    files = []
+    for path in glob.glob(os.path.join(out_dir, "ckpt_step_*.pt")):
+        m = _STEP_RE.search(path.replace("\\", "/"))
+        if m:
+            files.append((int(m.group(1)), path))
+    removed = []
+    for _, path in sorted(files, reverse=True)[max(keep, 0):]:
+        try:
+            os.remove(path)
+            removed.append(path)
+        except OSError:
+            pass
+    return removed

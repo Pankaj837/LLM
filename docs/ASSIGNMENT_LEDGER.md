@@ -1,4 +1,4 @@
-# Assignment ledger — what was allotted, to whom, when, and what has been delivered (25 Oct 2026)
+# Assignment ledger — what was allotted, to whom, when, and what has been delivered (25 Oct 2026; section "Since 25 Oct" added 5 Nov)
 
 Built from the group messages and files Pankaj showed, from the first assignment (10 Oct) to now. "Done" means a file or result was
 actually seen; "claimed" means the owner said so but it could not be verified; "not delivered" means nothing has been seen. Days late are
@@ -89,7 +89,21 @@ counted from the due date to 25 Oct. Work done in private chats that was not sho
 | Progress report, roles and milestones (21 Oct) | Done |
 | "Complete training and testing by the end of this week" (Raju, 20 Oct) | **Not possible**: 3 GPU hours in total, no more allowed |
 
-## What is still open, by owner
+## Since 25 Oct (added 5 Nov 2026; sources: group messages as relayed by Pankaj, and the checks named in each row)
+| Date | Assignment or event | Status on 5 Nov |
+|---|---|---|
+| 27 Oct (Raju) | Capability owners: 9 and 10 Swaraj; 4 Prabanjan; 11, 12, 14 Namit; 15 Gokul / Ravi; target 500M to 1B tokens each. Swaraj to own the LLM project with Pankaj | Namit's three domains are built and verified (generative engineering 0.59B, experimental validation 0.63B, technical communication 0.53B tokens; `DATA_PLAN_30B_2026-11-01.md`); Prabanjan's capability 4 is 0.81B tokens (bin not on Pankaj's laptop, see `PROGRESS_REPORT.md`); Ravi's engineering agent trajectories are 2.99B tokens (reported, file not seen) |
+| 27 Oct | First H100 session (Gokul) | done, owner-reported (`FIRST_RUN_ANALYSIS_2026-10-27.md`) |
+| 31 Oct to 1 Nov | 22-hour A100 slice (Prabanjan's account) | 100M run finished, evaluated (`A100_RUN_RESULT_2026-11-01.md`) |
+| 1 Nov | Swaraj: final Domain 9 / 10 handover | delivered; v7 verified on 4 Nov (39.90M and 13.06M tokens) |
+| 2 Nov (Raju) | 30B allocation over 20 domains | gap analysis in `DATA_PLAN_30B_2026-11-01.md` |
+| 4 Nov (Raju) | Six pre-pilot tasks: cleaning report, three dataset cards, evaluation of "the 1.5B checkpoint", checkpoint reliability, reproducible evaluation, pilot plan | 4, 5 done; 6 drafted; 1, 2, 3 open (`PREPILOT_TASKS_STATUS_2026-11-04.md`) |
+| 4 Nov | Swaraj leaves the internship (family medical situation) | Domains 9 and 10 have no owner; Raju to assign; Pankaj proposed Avinash |
+| 4 Nov (Raju) | Domains 9 and 10 to 60 to 80M tokens each for the 1B run | open; the two named sources are exhausted (`SWARAJ_COLLECTOR_REVIEW_2026-11-05.md`) |
+| 4 Nov (Raju) | Avinash to create one Drive folder for all domain bins | not done: the 5 Nov link is the 24 Oct data lake (`AVINASH_DRIVE_CHECK_2026-11-05.md`) |
+| 5 Nov | Namit's evaluation branch `namit/science-eval` pushed by Pankaj; evaluation reproduced | done (`EVAL_REPRODUCTION_2026-11-04.md`); two Windows bugs fixed by Namit in `eefe8cf` (diff reviewed 5 Nov, not run) |
+
+## What is still open, by owner (as of 25 Oct; the current list is in `PROGRESS_REPORT.md`, "Open items by owner")
 Ravi: Generative Engineering; verifiable cleaned files; his domains' token files. Avinash: capabilities 12, 14, 15; the merged and deduplicated file;
 the 15-capability mapping; the 1M-row sample for the PINN tests. Om: the architecture and benchmark deliverables. Gokul: the H100 session, cleaned-folder
 links, token files for his three domains. Swaraj: two more gaps, the `scientific_ir` examples, capabilities 9 and 10 if Raju confirms. Prabanjan: physics token

@@ -3,6 +3,7 @@
 > **Scale-up (Oct 2026):** the plan for the 1.51B model — budget, recipe, smoke test, pre-launch checklist, open decisions —
 > is `docs/TRAINING_PLAN_1p5B.md`. Multi-GPU is now `torchrun --nproc_per_node=N -m llm.train ...` (DDP, CPU-tested only).
 > The per-person dataset roster in §4 below is historical (2026-09/10); current ownership is in the plan §8.
+> **5 Nov 2026:** GPU runs have happened since this page was written (H100 27 Oct, A100 slice 31 Oct to 1 Nov; see `docs/PROGRESS_REPORT.md`), so "CPU only" below describes the state of 24 Oct. Multi-GPU is still untested.
 
 Audience: whoever runs this on a CUDA machine. Everything below was developed and verified **on CPU only**
 (Python 3.13, torch 2.12, 8 threads). GPU behaviour is therefore the main unknown; this page lists exactly what to run,

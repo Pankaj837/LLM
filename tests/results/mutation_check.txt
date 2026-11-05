@@ -23,8 +23,15 @@
 [KILLED  ] Pipeline skips vocabulary-hash check                 FAILED tests/test_e2e.py::test_pipeline_rejects_a_checkpoint_trained_with_a_diff
 [KILLED  ] Prompt EOS injection allowed                         FAILED tests/test_c7_c8_checkpoint_pipeline.py::test_user_text_cannot_inject_eos
 [KILLED  ] BPE trainer picks the least frequent pair            FAILED tests/test_bpe_trainer.py::test_frequency_ordering_first_merge_is_the_mos
+[KILLED  ] Final ckpt_last.pt written without the validation loss FAILED tests/test_checkpoint_reliability.py::test_last_checkpoint_always_carries
+[KILLED  ] Resume forgets the best validation loss              FAILED tests/test_checkpoint_reliability.py::test_a_resumed_run_cannot_overwrite
+[KILLED  ] STOP file / signal never stops the run               FAILED tests/test_checkpoint_reliability.py::test_stop_file_saves_and_exits_and_
+[KILLED  ] Rolling backups never pruned                         FAILED tests/test_checkpoint_reliability.py::test_rolling_backups_keep_only_the_
+[KILLED  ] --resume auto accepts a corrupt checkpoint           FAILED tests/test_checkpoint_reliability.py::test_resume_auto_skips_a_corrupt_la
+[KILLED  ] Signal handlers not restored when training raises    FAILED tests/test_checkpoint_reliability.py::test_signal_handlers_are_restored_e
 
-mutants: 25  killed: 25  survived: 0
+mutants: 31  killed: 31  survived: 0
 documented equivalent mutants (expected to survive):
   - DynamicNTK threshold '<=' -> '<': at L == L_orig the scale is exactly 1, so theta = base either way
   - Cached decode step drops rope_context_len: the default is the KV-cache capacity, which equals the value passed
+exit 0

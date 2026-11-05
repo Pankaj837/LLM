@@ -1,25 +1,27 @@
-# LLM Squad-1 — consolidated codebase
+# LLM — consolidated codebase
 
 A from-scratch decoder-only language-model stack: **grouped-query attention** with KV cache, **RoPE with Dynamic NTK / YaRN**
 context extension, a byte-level **BPE tokenizer** (compatible with the C++ `.tok` format), a text **pipeline**, a reference
 **trainer** on the tokenizer team's `.bin` files, and a **conditional reward model**.
 
-Organised by component, verified component by component. Start with `docs/TEAM_INSIGHTS.md` (what was kept, what changed, what
-is still open) and `docs/HANDOFF_GPU.md` (what to run on a GPU).
+Organised by component, verified component by component. **Where things stand and what is open: `docs/PROGRESS_REPORT.md`
+(top section) and `docs/INDEX.md` (which document is current and which is history).** The design notes are
+`docs/TEAM_INSIGHTS.md` (what was kept, what changed) and `docs/HANDOFF_GPU.md` (what to run on a GPU).
 
-## Status
+## Status (5 Nov 2026)
 
 | Component | State |
 |---|---|
 | Config, blocks, GQA + KV cache, generation | verified against independent references; the team's original tests pass unchanged |
 | RoPE / Dynamic NTK / YaRN | per the team's reports and the YaRN paper; cached ≡ uncached at logit level |
-| Tokenizer | Python port verified; **C++ parity verified** — built from the real source and tested, see `docs/CPP_TOKENIZER_PARITY.md` |
-| Checkpoint / pipeline | self-describing, fails loudly; **no full trained reference checkpoint yet** — 2 toy 6.3M placeholders in `checkpoints/` |
-| Trainer + `.bin` data | proven on 2 real datasets (biology, Earth & Environment), bit-exact resume |
-| Scale-up (Oct 2026): presets `100m` / `300m` / `1p5b` / `2b`, multi-GPU DDP, weighted domain mix, atomic checkpoints | parameter counts and 2-process equivalence verified **on CPU only**; never run on CUDA/NCCL — `docs/TRAINING_PLAN_1p5B.md` |
-| Data pipeline (count → dedup → tokenize → check → evaluate per domain) and a 32K vocabulary candidate | tested on synthetic data and real slices; vocabulary verified (round-trip, C++ parity) but **not yet approved/frozen** — `docs/DATA_STATUS_2026-10-20.md`, `tokenizers/vocab32k_v2/` |
+| Tokenizer | Python port verified; **C++ parity verified** — see `docs/CPP_TOKENIZER_PARITY.md`. The 32K vocabulary `vocab32k_v2` is **frozen** (25 Oct; sha256 `10b3c5ae…b51cdc`, `tokenizers/FROZEN.md`, guarded by a test) |
+| Checkpoint / pipeline | self-describing, fails loudly. Since 4 Nov: `ckpt_last.pt` always carries the latest validation loss, rolling backups, `--resume auto`, graceful stop (Ctrl-C / SIGTERM / `STOP` file) — `docs/CHECKPOINT_RELIABILITY_2026-11-04.md`. The only real trained checkpoint of the current line is the **100M run** (step 8,250, validation loss 2.166, 1.2 GB, **not in this repository**; hashes in `docs/A100_RUN_RESULT_2026-11-01.md`). The two 6.3M files in `checkpoints/` are toys |
+| Trainer + `.bin` data | proven on 2 real datasets (biology, Earth & Environment), bit-exact resume (also demonstrated after a hard kill: `scripts/resume_demo.py`) |
+| Scale-up presets `100m` / `300m` / `1p5b` / `2b`, multi-GPU DDP, weighted domain mix, atomic checkpoints | **GPU-tested on one GPU**: 100M run on an H100 (27 Oct, 63 min, owner-reported) and on an A100 20 GB slice (31 Oct to 1 Nov, 2.2B tokens); 1.5B smoke test on one H100 (25.4k tokens/s, 60.8 GB, owner-reported). **Multi-GPU (DDP/NCCL) and a full 1.5B run have not been run** — `docs/PILOT_PLAN_2026-11-04.md` |
+| Data pipeline (count → dedup → tokenize → check → evaluate per domain) | tested on synthetic data and on the real bins of the team; state of the 30B data plan: `docs/DATA_PLAN_30B_2026-11-01.md` |
+| Evaluation | per-domain validation loss and `sample_outputs.py` here; Namit's multiple-choice set and scorer (`scripts/eval_science.py`, on branch `namit/science-eval`) were reproduced exactly on CPU: `docs/EVAL_REPRODUCTION_2026-11-04.md`; `scripts/compare_eval.py` checks any new run against a reference |
 | Reward model | mechanism verified; **synthetic data, not evidence of quality** |
-| GPU / bf16 / torch.compile | **untested** — see `docs/HANDOFF_GPU.md` |
+| bf16 / torch.compile | bf16 training was used in the H100 run (owner-reported, `docs/FIRST_RUN_ANALYSIS_2026-10-27.md`); no recorded use of `torch.compile`; no numerical comparison against fp32 on a trained model |
 | Structured pruning | not part of this repository |
 
 Test totals and the mutation-check result are in `docs/TESTING.md`.
@@ -119,13 +121,17 @@ src/llm/
   checkpoint.py  pipeline.py  train.py                                                      persistence, inference, training
   reward/                                                                                   conditional reward model
 native/tokenizer/  the team's C++ tokenizer, as delivered (+ one added test harness) — see native/README.md
-checkpoints/  two TOY 6.3M placeholders for integration work only — see checkpoints/README.md (replace once trained)
+checkpoints/  the 51M submissions of September/October and two TOY 6.3M files (integration work only) — see checkpoints/README.md
+tokenizers/   the frozen 32K vocabulary (vocab32k_v2) and the unused digits candidate — see tokenizers/FROZEN.md
+configs/   example and draft run configs (build_dataset.py / gpu_session.py input)
 data/      README only (datasets are external/generated, never committed — see data/README.md)
 tests/     one file per component  +  legacy/ (the team's original tests, unchanged)  +  results/ (last real run's output)
-scripts/   smoke_test.py  prepare_biology.py  eval_bio.py  prepare_earth.py  eval_earth.py
-           make_scaffold_checkpoint.py  mutation_check.py  lint.py
-docs/      ARCHITECTURE  COMPONENTS  DECISIONS  REVIEW_FINDINGS  TESTING  HANDOFF_GPU  TEAM_INSIGHTS  REWARD_MODEL
-           BIOLOGY_SMOKE_TEST  EARTH_ENVIRONMENT_SMOKE_TEST  CPP_TOKENIZER_PARITY  HANDOFF_DATA_TEAM
+scripts/   data:   tokenize_parquet  tokenize_text  dedup_parquet  dedup_text  merge_bins  check_bins  build_dataset
+                   train_vocab  verify_vocab  pubmed_to_parquet  prepare_biology  prepare_earth
+           run:    gpu_session  benchmark  resume_demo
+           eval:   eval_domains  sample_outputs  compare_eval  eval_bio  eval_earth
+           checks: smoke_test  mutation_check  lint  make_scaffold_checkpoint
+docs/      start with INDEX.md (current documents versus history); status: PROGRESS_REPORT, PREPILOT_TASKS_STATUS
 archive/   deprecated/uncertain files land here if any are found later — see archive/README.md for what
            was considered and why nothing is in it yet
 ```

@@ -13,6 +13,16 @@ Design choices (kept deliberately conventional so results are comparable across 
   * Checkpoints carry config, step, losses and the vocabulary hash (see ``checkpoint.py``).
 Training fails fast on a non-finite loss.
 
+Reliability (what makes a long or pre-emptible run safe):
+  * ``ckpt_last.pt`` is written every ``--save-interval`` steps, after every evaluation, on the final step and on a
+    graceful stop; it always carries the latest validation loss. Writes are atomic (temp file, then rename).
+  * The previous ``ckpt_last.pt`` is kept as ``ckpt_step_<step>.pt`` (rolling backups; ``--keep-backups`` newest kept).
+  * ``--resume auto`` continues from the newest checkpoint in ``--out`` that opens cleanly (corrupt or truncated files are
+    skipped); with none present it starts fresh. The best validation loss so far is restored, so a resumed run cannot
+    overwrite ``ckpt_best.pt`` with a worse model.
+  * Ctrl-C, SIGTERM (and SIGBREAK on Windows) or a file named ``STOP`` in ``--out`` finish the current step, write
+    ``ckpt_last.pt`` and exit; a hard kill loses at most ``--save-interval`` steps.
+
 Multi-GPU: launch with ``torchrun --nproc_per_node=N -m llm.train ...`` (DistributedDataParallel, one process per
 GPU). ``--batch-size`` is PER RANK; every rank draws different batches, gradients are averaged, only rank 0 logs,
 evaluates and writes checkpoints. A world-size-N run with accumulation 1 matches a single process with accumulation N.
@@ -22,6 +32,7 @@ from __future__ import annotations
 import argparse
 import contextlib
 import platform
+import signal
 import subprocess
 import sys
 from datetime import timedelta
@@ -36,7 +47,7 @@ import torch
 import torch.distributed as dist
 import torch.nn.functional as F
 
-from .checkpoint import load_checkpoint, read_checkpoint, save_checkpoint
+from .checkpoint import find_latest_checkpoint, load_checkpoint, prune_backups, read_checkpoint, save_checkpoint
 from .data import MixtureDataset, TokenDataset
 from .model import TransformerModel
 from .model_config import ModelConfig
@@ -84,11 +95,13 @@ class TrainConfig:
     eval_interval: int = 100
     eval_batches: int = 20
     save_interval: int = 500
+    save_on_eval: bool = True              # also write ckpt_last.pt after every evaluation
+    keep_backups: int = 2                  # rolling ckpt_step_<step>.pt backups of earlier ckpt_last.pt to keep (0 = none)
     log_interval: int = 10
     seed: int = 0
     device: str = "auto"
     dtype: str = "auto"                    # auto | fp32 | bf16
-    resume: Optional[str] = None
+    resume: Optional[str] = None           # checkpoint path, or "auto" = newest valid checkpoint in out_dir (fresh start if none)
     stop_step: Optional[int] = None        # exit early (e.g. time-limited job) WITHOUT changing the LR schedule
     model_overrides: Dict[str, Any] = field(default_factory=dict)
 
@@ -209,13 +222,25 @@ def _train(cfg: TrainConfig, device: torch.device, amp_dtype: Optional[torch.dty
     model = TransformerModel(model_cfg).to(device)
     optimizer = build_optimizer(model, cfg)
     start_step = 0
-    if cfg.resume:
-        info = load_checkpoint(cfg.resume, model, expected_vocab_sha256=vocab_sha)
-        _, _, _, raw = read_checkpoint(cfg.resume)
+    best_val = float("inf")
+    last_val: Optional[float] = None
+    resume_path = cfg.resume
+    if resume_path == "auto":
+        resume_path = find_latest_checkpoint(cfg.out_dir)
+        if main_rank:
+            print("[train] --resume auto: " + (f"continuing from {resume_path}" if resume_path
+                                              else "no usable checkpoint in out_dir, starting fresh"), flush=True)
+    if resume_path:
+        info = load_checkpoint(resume_path, model, expected_vocab_sha256=vocab_sha)
+        _, _, _, raw = read_checkpoint(resume_path)
         if "optimizer" not in raw:
             raise ValueError("resume checkpoint has no optimizer state")
         optimizer.load_state_dict(raw["optimizer"])
         start_step = int(info["step"])
+        extra = info.get("extra") or {}
+        if extra.get("best_val") is not None:
+            best_val = float(extra["best_val"])
+        last_val = info.get("val_loss")
     model.train()
     # every rank holds the full model; DDP averages gradients (identical start: same seed / same checkpoint)
     fwd_model = torch.nn.parallel.DistributedDataParallel(
@@ -237,69 +262,129 @@ def _train(cfg: TrainConfig, device: torch.device, amp_dtype: Optional[torch.dty
 
     metrics_path = os.path.join(cfg.out_dir, "metrics.jsonl")
     history: List[Dict[str, Any]] = []
-    best_val = float("inf")
     last_loss: Optional[float] = None
     t0, tokens_seen = time.time(), 0
     gen = torch.Generator()
 
+    saved_last_step: Optional[int] = start_step if resume_path and os.path.basename(resume_path) == "ckpt_last.pt" else None
+    last_val_step: Optional[int] = None
+
     def checkpoint(name: str, step: int, val: Optional[float]) -> str:
+        """Write ``name`` atomically. For ``ckpt_last.pt`` the file it replaces becomes a rolling ``ckpt_step_<step>.pt`` backup."""
+        nonlocal saved_last_step
         path = os.path.join(cfg.out_dir, name)
         if not main_rank:
             return path
-        save_checkpoint(path, model, model_cfg, step=step, train_loss=last_loss, val_loss=val,
-                        vocab_sha256=vocab_sha, optimizer=optimizer, extra={"seed": cfg.seed, "preset": cfg.preset})
+        extra = {"seed": cfg.seed, "preset": cfg.preset, "best_val": None if best_val == float("inf") else best_val,
+                 "val_step": last_val_step}
+        if name != "ckpt_last.pt":
+            save_checkpoint(path, model, model_cfg, step=step, train_loss=last_loss, val_loss=val,
+                            vocab_sha256=vocab_sha, optimizer=optimizer, extra=extra)
+            return path
+        staged = path + ".new"
+        save_checkpoint(staged, model, model_cfg, step=step, train_loss=last_loss, val_loss=val,
+                        vocab_sha256=vocab_sha, optimizer=optimizer, extra=extra)
+        if cfg.keep_backups > 0 and os.path.exists(path) and saved_last_step is not None and saved_last_step != step:
+            os.replace(path, os.path.join(cfg.out_dir, f"ckpt_step_{saved_last_step:08d}.pt"))
+        os.replace(staged, path)
+        saved_last_step = step
+        prune_backups(cfg.out_dir, cfg.keep_backups)
         return path
+
+    stop_flag = {"requested": None}
+    stop_file = os.path.join(cfg.out_dir, "STOP")
+    old_handlers: Dict[Any, Any] = {}
+
+    def _request_stop(signum, _frame):
+        stop_flag["requested"] = f"signal {signum}"
+        signal.signal(signum, old_handlers.get(signum, signal.SIG_DFL))     # a second signal acts normally (force quit)
+        if main_rank:
+            print(f"[train] signal {signum} received: finishing the current step, then saving ckpt_last.pt and exiting "
+                  f"(send it again to quit at once)", flush=True)
+
+    try:
+        for sig_name in ("SIGINT", "SIGTERM", "SIGBREAK"):
+            if hasattr(signal, sig_name):
+                sig = getattr(signal, sig_name)
+                old_handlers[sig] = signal.signal(sig, _request_stop)
+    except ValueError:      # not the main thread (e.g. a test runner thread): no signal handling; the STOP file still works
+        pass
 
     end_step = min(cfg.max_steps, cfg.stop_step) if cfg.stop_step is not None else cfg.max_steps
     done = start_step
-    for step in range(start_step, end_step):
-        lr = lr_at(step, cfg)
-        for g in optimizer.param_groups:
-            g["lr"] = lr
-        optimizer.zero_grad(set_to_none=True)
-        step_loss = 0.0
-        for micro in range(cfg.grad_accum):
-            gen.manual_seed(cfg.seed * 1_000_003 + (step * cfg.grad_accum + micro) * world + rank)
-            x, y = train_ds.get_batch(cfg.batch_size, gen, device)
-            sync = world == 1 or micro == cfg.grad_accum - 1
-            with (contextlib.nullcontext() if sync else fwd_model.no_sync()):
-                with torch.autocast(device.type, dtype=amp_dtype, enabled=amp_dtype is not None):
-                    loss = loss_fn(fwd_model, x, y) / cfg.grad_accum
-                if not torch.isfinite(loss):
-                    raise FloatingPointError(f"non-finite loss at step {step}: {loss.item()}")
-                loss.backward()
-            step_loss += loss.item()
-            tokens_seen += x.numel() * world
-        grad_norm = torch.nn.utils.clip_grad_norm_(model.parameters(), cfg.grad_clip).item()
-        optimizer.step()
-        if world > 1:   # report the mean loss over ranks
-            t = torch.tensor(step_loss, device=device)
-            dist.all_reduce(t)
-            step_loss = t.item() / world
-        last_loss = step_loss
+    stopped_early = False
+    try:
+        for step in range(start_step, end_step):
+            lr = lr_at(step, cfg)
+            for g in optimizer.param_groups:
+                g["lr"] = lr
+            optimizer.zero_grad(set_to_none=True)
+            step_loss = 0.0
+            for micro in range(cfg.grad_accum):
+                gen.manual_seed(cfg.seed * 1_000_003 + (step * cfg.grad_accum + micro) * world + rank)
+                x, y = train_ds.get_batch(cfg.batch_size, gen, device)
+                sync = world == 1 or micro == cfg.grad_accum - 1
+                with (contextlib.nullcontext() if sync else fwd_model.no_sync()):
+                    with torch.autocast(device.type, dtype=amp_dtype, enabled=amp_dtype is not None):
+                        loss = loss_fn(fwd_model, x, y) / cfg.grad_accum
+                    if not torch.isfinite(loss):
+                        raise FloatingPointError(f"non-finite loss at step {step}: {loss.item()}")
+                    loss.backward()
+                step_loss += loss.item()
+                tokens_seen += x.numel() * world
+            grad_norm = torch.nn.utils.clip_grad_norm_(model.parameters(), cfg.grad_clip).item()
+            optimizer.step()
+            if world > 1:   # report the mean loss over ranks
+                t = torch.tensor(step_loss, device=device)
+                dist.all_reduce(t)
+                step_loss = t.item() / world
+            last_loss = step_loss
 
-        done = step + 1
-        record: Dict[str, Any] = {}
-        if done % cfg.log_interval == 0 or done == end_step:
-            record = {"step": done, "loss": step_loss, "lr": lr, "grad_norm": grad_norm,
-                      "tokens_per_s": tokens_seen / max(time.time() - t0, 1e-9)}
-            if device.type == "cuda":
-                record["peak_mem_gb"] = torch.cuda.max_memory_allocated(device) / 1e9
-        if main_rank and val_ds is not None and (done % cfg.eval_interval == 0 or done == end_step):
-            record.update({"step": done, **evaluate(model, val_ds, cfg.batch_size, cfg.eval_batches, device, amp_dtype)})
-            if record["val_loss"] < best_val:
-                best_val = record["val_loss"]
-                checkpoint("ckpt_best.pt", done, best_val)
-        if record and main_rank:
-            history.append(record)
-            with open(metrics_path, "a", encoding="utf-8") as f:
-                f.write(json.dumps(record) + "\n")
-            print("[train] " + " ".join(f"{k}={v:.4g}" if isinstance(v, float) else f"{k}={v}" for k, v in record.items()), flush=True)
-        if done % cfg.save_interval == 0 and done != end_step:
-            checkpoint("ckpt_last.pt", done, None)
+            done = step + 1
+            record: Dict[str, Any] = {}
+            if done % cfg.log_interval == 0 or done == end_step:
+                record = {"step": done, "loss": step_loss, "lr": lr, "grad_norm": grad_norm,
+                          "tokens_per_s": tokens_seen / max(time.time() - t0, 1e-9)}
+                if device.type == "cuda":
+                    record["peak_mem_gb"] = torch.cuda.max_memory_allocated(device) / 1e9
+            if main_rank and val_ds is not None and (done % cfg.eval_interval == 0 or done == end_step):
+                record.update({"step": done, **evaluate(model, val_ds, cfg.batch_size, cfg.eval_batches, device, amp_dtype)})
+                last_val, last_val_step = record["val_loss"], done
+                if record["val_loss"] < best_val:
+                    best_val = record["val_loss"]
+                    checkpoint("ckpt_best.pt", done, best_val)
+                if cfg.save_on_eval and done != end_step:
+                    checkpoint("ckpt_last.pt", done, last_val)
+            if record and main_rank:
+                history.append(record)
+                with open(metrics_path, "a", encoding="utf-8") as f:
+                    f.write(json.dumps(record) + "\n")
+                print("[train] " + " ".join(f"{k}={v:.4g}" if isinstance(v, float) else f"{k}={v}" for k, v in record.items()), flush=True)
+            if done % cfg.save_interval == 0 and done != end_step and saved_last_step != done:
+                checkpoint("ckpt_last.pt", done, last_val)
+            # graceful stop: any rank may have been signalled, so all agree on it before leaving the loop
+            want_stop = float(stop_flag["requested"] is not None or (main_rank and os.path.exists(stop_file)))
+            if world > 1:
+                t = torch.tensor(want_stop, device=device)
+                dist.all_reduce(t, op=dist.ReduceOp.MAX)
+                want_stop = t.item()
+            if want_stop and done < end_step:
+                if main_rank:
+                    print(f"[train] stop requested ({stop_flag['requested'] or 'STOP file'}) at step {done}: saving ckpt_last.pt", flush=True)
+                    if os.path.exists(stop_file):
+                        os.remove(stop_file)
+                stopped_early = True
+                break
 
-    final_path = checkpoint("ckpt_last.pt", done, best_val if best_val < float("inf") else None)
-    return {"history": history, "final": history[-1] if history else {}, "checkpoint": final_path, "model_config": model_cfg}
+        final_path = checkpoint("ckpt_last.pt", done, last_val)
+    finally:
+        for sig, handler in old_handlers.items():
+            try:
+                signal.signal(sig, handler)
+            except (ValueError, TypeError):
+                pass
+    return {"history": history, "final": history[-1] if history else {}, "checkpoint": final_path, "model_config": model_cfg,
+            "step": done, "stopped_early": stopped_early}
 
 
 def main(argv: Optional[List[str]] = None) -> None:
@@ -313,13 +398,15 @@ def main(argv: Optional[List[str]] = None) -> None:
     ap.add_argument("--out", dest="out_dir", default=defaults.out_dir)
     ap.add_argument("--preset", default=defaults.preset, choices=sorted(PRESETS))
     for name in ("seq_len", "batch_size", "grad_accum", "max_steps", "warmup_steps", "eval_interval", "eval_batches",
-                 "save_interval", "log_interval", "seed"):
+                 "save_interval", "keep_backups", "log_interval", "seed"):
         ap.add_argument("--" + name.replace("_", "-"), type=int, default=getattr(defaults, name))
     for name in ("lr", "min_lr_ratio", "weight_decay", "grad_clip"):
         ap.add_argument("--" + name.replace("_", "-"), type=float, default=getattr(defaults, name))
     ap.add_argument("--device", default="auto")
     ap.add_argument("--dtype", default="auto", choices=["auto", "fp32", "bf16"])
-    ap.add_argument("--resume")
+    ap.add_argument("--resume", help='checkpoint path, or "auto" for the newest valid checkpoint in --out (fresh start if none)')
+    ap.add_argument("--no-save-on-eval", dest="save_on_eval", action="store_false",
+                    help="do not write ckpt_last.pt after each evaluation")
     ap.add_argument("--stop-step", type=int, default=None, help="exit early without changing the LR schedule")
     args = ap.parse_args(argv)
     if not args.train_bin and not args.train_mix:

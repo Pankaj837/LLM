@@ -1,4 +1,4 @@
-"""Squad-1 LLM stack: GQA transformer + RoPE / Dynamic NTK / YaRN + BPE tokenizer + pipeline + trainer.
+"""LLM stack: GQA transformer + RoPE / Dynamic NTK / YaRN + BPE tokenizer + pipeline + trainer.
 
 Common entry points are re-exported here; everything else lives in its component module
 (see docs/ARCHITECTURE.md).

@@ -28,7 +28,9 @@ The frozen tokenizer hash in his output is `10b3c5ae...b51cdc` (correct). Docume
 - Train-versus-validation overlap and train-file checks not done (training files not downloaded).
 
 ## Chemistry proof from Ravi (read; `chemistry_dedup_and_token_proof.md`, received 4 Nov evening)
-Checked arithmetic only; the files it cites (`dedup_report.json`, `build_manifest.json`, the parquet files) were not provided.
+Checked arithmetic only; the files it cites (`dedup_report.json`, `build_manifest.json`, the parquet files) were not provided on 4 Nov.
+
+**Update 5 Nov: `dedup_report.json` received** (copy and hash in `docs/evidence/`, sha256 `21eb9769d129d05655a5462afa44dbd8052a7110275c5836e13e1399d9052337`). Run: totals add up (18,164,444 in = 16,432,416 kept + 1,732,028 duplicate), and for every file kept rows = train documents + validation documents of the bin: code 1,002,078 = 997,104 + 4,974; sciqa 4,523,082 = 4,500,344 + 22,738; sciprog 491,742 = 489,280 + 2,462 (all exact); chemistry 9,386,757, cad 958,797 and agent 69,960 agree within the validation counts I could derive (about 47K, 4.6K and 374). Chemistry lost 15.58%, cad 166, code 3; sciqa, sciprog and agent show 0 duplicates. Limits: the file gives counts only, with no hashes, no definition of "duplicate" (exact text or exact row) and no near-duplicate check; `build_manifest.json` is still missing.
 - 11,118,616 rows in, 1,731,859 duplicates dropped, 9,386,757 kept: correct (15.58%).
 - Train documents 9,339,542 + validation documents 47,215 = 9,386,757 = kept rows exactly. This supports "one document per row of the cleaned file" and fits the bins coming from the deduplicated parquet.
 - Token numbers equal `token_summary.pdf` (train 2,447,159,991; val 12,356,427; mean 262 in both).

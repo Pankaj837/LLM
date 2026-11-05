@@ -76,23 +76,67 @@ MUTANTS = [
     ("Prompt EOS injection allowed", "src/llm/pipeline.py",
      "self.tokenizer.encode(prompt, allowed_special=set())", "self.tokenizer.encode(prompt)", ["tests/test_c7_c8_checkpoint_pipeline.py"]),
     ("BPE trainer picks the least frequent pair", "src/llm/bpe_trainer.py",
-     "    def key(pair: Tuple[int, int], c: int):\n"
-     "        return (-c, vocab[pair[0]], vocab[pair[1]], pair)\n\n"
-     "    heap = [key(p, c) for p, c in pair_count.items() if c >= min_count]\n"
-     "    heapq.heapify(heap)\n\n"
-     "    while len(vocab) < target and heap:\n"
-     "        negc, _, _, pair = heapq.heappop(heap)\n"
-     "        c = pair_count.get(pair, 0)\n"
-     "        if c != -negc:                                          # stale entry",
-     "    def key(pair: Tuple[int, int], c: int):\n"
-     "        return (c, vocab[pair[0]], vocab[pair[1]], pair)   # ascending: least frequent first\n\n"
-     "    heap = [key(p, c) for p, c in pair_count.items() if c >= min_count]\n"
-     "    heapq.heapify(heap)\n\n"
-     "    while len(vocab) < target and heap:\n"
-     "        poppedc, _, _, pair = heapq.heappop(heap)\n"
-     "        c = pair_count.get(pair, 0)\n"
-     "        if c != poppedc:                                        # stale entry",
+     (
+     '    def key(pair: Tuple[int, int], c: int):\n'
+     '        return (-c, vocab[pair[0]], vocab[pair[1]], pair)\n'
+     '\n'
+     '    blocked_cache: Dict[Tuple[int, int], bool] = {}\n'
+     '\n'
+     '    def blocked(pair: Tuple[int, int]) -> bool:\n'
+     '        if not split_digits:\n'
+     '            return False\n'
+     '        b = blocked_cache.get(pair)\n'
+     '        if b is None:\n'
+     '            b = blocked_cache[pair] = bool(_ADJACENT_DIGITS.search(vocab[pair[0]] + vocab[pair[1]]))\n'
+     '        return b\n'
+     '\n'
+     '    heap = [key(p, c) for p, c in pair_count.items() if c >= min_count and not blocked(p)]\n'
+     '    heapq.heapify(heap)\n'
+     '\n'
+     '    while len(vocab) < target and heap:\n'
+     '        negc, _, _, pair = heapq.heappop(heap)\n'
+     '        c = pair_count.get(pair, 0)\n'
+     '        if c != -negc:                                          # stale entry'),
+     (
+     '    def key(pair: Tuple[int, int], c: int):\n'
+     '        return (c, vocab[pair[0]], vocab[pair[1]], pair)   # ascending: least frequent first\n'
+     '\n'
+     '    blocked_cache: Dict[Tuple[int, int], bool] = {}\n'
+     '\n'
+     '    def blocked(pair: Tuple[int, int]) -> bool:\n'
+     '        if not split_digits:\n'
+     '            return False\n'
+     '        b = blocked_cache.get(pair)\n'
+     '        if b is None:\n'
+     '            b = blocked_cache[pair] = bool(_ADJACENT_DIGITS.search(vocab[pair[0]] + vocab[pair[1]]))\n'
+     '        return b\n'
+     '\n'
+     '    heap = [key(p, c) for p, c in pair_count.items() if c >= min_count and not blocked(p)]\n'
+     '    heapq.heapify(heap)\n'
+     '\n'
+     '    while len(vocab) < target and heap:\n'
+     '        poppedc, _, _, pair = heapq.heappop(heap)\n'
+     '        c = pair_count.get(pair, 0)\n'
+     '        if c != poppedc:                                          # stale entry'),
      ["tests/test_bpe_trainer.py"]),
+    # --- checkpoint reliability (added 5 Nov 2026) ---
+    ("Final ckpt_last.pt written without the validation loss", "src/llm/train.py",
+     'final_path = checkpoint("ckpt_last.pt", done, last_val)', 'final_path = checkpoint("ckpt_last.pt", done, None)',
+     ["tests/test_checkpoint_reliability.py"]),
+    ("Resume forgets the best validation loss", "src/llm/train.py",
+     'best_val = float(extra["best_val"])', "pass", ["tests/test_checkpoint_reliability.py"]),
+    ("STOP file / signal never stops the run", "src/llm/train.py",
+     'want_stop = float(stop_flag["requested"] is not None or (main_rank and os.path.exists(stop_file)))', "want_stop = 0.0",
+     ["tests/test_checkpoint_reliability.py"]),
+    ("Rolling backups never pruned", "src/llm/train.py",
+     "        prune_backups(cfg.out_dir, cfg.keep_backups)", "        pass", ["tests/test_checkpoint_reliability.py"]),
+    ("--resume auto accepts a corrupt checkpoint", "src/llm/checkpoint.py",
+     "            verify_checkpoint(path, need_optimizer=True)\n        except Exception as exc:",
+     "            pass\n        except Exception as exc:", ["tests/test_checkpoint_reliability.py"]),
+    ("Signal handlers not restored when training raises", "src/llm/train.py",
+     "    finally:\n        for sig, handler in old_handlers.items():",
+     "    except ZeroDivisionError:\n        for sig, handler in old_handlers.items():",
+     ["tests/test_checkpoint_reliability.py"]),
 ]
 
 # Source changes that do not change behaviour (kept for the record; expected to survive):

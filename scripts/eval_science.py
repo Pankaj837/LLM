@@ -53,7 +53,7 @@ def load_items(evals_dir: str) -> list:
             for line in f:
                 if line.strip():
                     it = json.loads(line)
-                    it["_file"] = os.path.relpath(p, evals_dir)
+                    it["_file"] = os.path.relpath(p, evals_dir).replace(os.sep, "/")
                     items.append(it)
     ids = [it["id"] for it in items]
     if len(ids) != len(set(ids)):
@@ -70,7 +70,7 @@ def manifest_problems(evals_dir: str) -> list:
     probs = []
     for p in sorted(glob.glob(os.path.join(evals_dir, "**", "*.jsonl"), recursive=True)
                     + glob.glob(os.path.join(evals_dir, "*", "fewshot_*.json"))):
-        rel = os.path.relpath(p, evals_dir)
+        rel = os.path.relpath(p, evals_dir).replace(os.sep, "/")   # the manifest always uses forward slashes
         if known.get(rel) != hashlib.sha256(open(p, "rb").read()).hexdigest():
             probs.append(rel)
     return probs

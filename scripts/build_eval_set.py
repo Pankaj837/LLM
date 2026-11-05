@@ -157,7 +157,7 @@ def write_manifest(evals_dir: str = EVALS) -> dict:
     for p in files:
         data = open(p, "rb").read()
         n = sum(1 for line in data.decode("utf-8").splitlines() if line.strip()) if p.endswith(".jsonl") else None
-        entries.append({"file": os.path.relpath(p, evals_dir), "sha256": hashlib.sha256(data).hexdigest(), "items": n})
+        entries.append({"file": os.path.relpath(p, evals_dir).replace(os.sep, "/"), "sha256": hashlib.sha256(data).hexdigest(), "items": n})
         if p.endswith(".jsonl"):
             for line in data.decode("utf-8").splitlines():
                 if line.strip():

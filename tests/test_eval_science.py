@@ -1,6 +1,7 @@
 """scripts/eval_science.py, scripts/check_leakage.py and the frozen question set in evals/."""
 import json
 import shutil
+import subprocess
 import sys
 from pathlib import Path
 
@@ -62,6 +63,23 @@ def test_handwritten_right_answer_is_not_usually_the_longest_option():
     mcq = [it for it in es.load_items(str(EVALS)) if it["type"] == "mcq" and it["source"].startswith("hand-written")]
     longest = sum(max(range(len(it["choices"])), key=lambda i: len(it["choices"][i])) == it["answer"] for it in mcq)
     assert longest / len(mcq) <= 0.3, f"right answer is the longest option in {longest}/{len(mcq)} questions"
+
+
+def test_manifest_check_works_with_windows_paths(monkeypatch):
+    real = es.os.path.relpath
+    monkeypatch.setattr(es.os.path, "relpath", lambda p, d: real(p, d).replace("/", "\\"))
+    monkeypatch.setattr(es.os, "sep", "\\")
+    assert es.manifest_problems(str(EVALS)) == []
+
+
+def test_git_keeps_question_files_byte_for_byte():
+    # CRLF conversion on checkout would change the bytes and break the SHA-256 manifest
+    try:
+        out = subprocess.run(["git", "check-attr", "text", "evals/public/arc.jsonl", "evals/MANIFEST.json"], cwd=ROOT,
+                             capture_output=True, text=True, check=True).stdout
+    except (OSError, subprocess.CalledProcessError):
+        pytest.skip("not a git checkout")
+    assert out.count("text: unset") == 2, out
 
 
 # ------------------------------------------------------------------ scoring pieces

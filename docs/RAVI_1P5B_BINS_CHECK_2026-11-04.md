@@ -73,3 +73,15 @@ Ravi re-uploaded `chem.train.bin` and `chem.val.bin` and posted his `check_bins`
 - **Chemistry blocker closed.** Six bins now total 9,377,070,998 train tokens (cad 840.6M, chem 545.7M, code 1,517.4M, engineering 2,986.7M, sciprog 1,606.3M, sciqa 1,880.4M). Unique tokens held (all 20 domains): **about 14.86B** (16,851M - 87M - 1,901M).
 - Still open for Gate 0: validation-in-training overlap of sciqa, sciprog, code and cad (their training files were not downloaded); Engineering Reasoning bin; `build_manifest.json` has no per-bin sha256.
 - **sha256 list from Ravi (8 Nov, `docs/evidence/ravi_bins_sha256_2026-11-08.txt`).** I re-hashed the files I hold: `chem.train`, `chem.val`, `cad.val`, `engineering.val`, `sciprog.val`, `sciqa.val` and `code.val` all **match** (run). The five other training files (cad, code, engineering, sciprog, sciqa; 16.5 GB together) were not downloaded, so their hashes are owner-reported only; their sizes equal 2 x tokens + 36 bytes (run).
+
+## Gate 0 check on the whole training files (8 Nov 2026, run)
+I downloaded the five remaining training files one at a time (16.5 GB in total, each deleted after the check) and ran: sha256 against Ravi's list, and exact (token level) overlap between each validation file and its own training file.
+| bin | sha256 vs Ravi | train docs (distinct) | validation docs | validation docs also in train |
+|---|---|---|---|---|
+| cad | match | 954,150 (954,150) | 4,647 | 0 |
+| code | match | 997,104 (997,104) | 4,974 | 0 |
+| engineering | match | 69,586 (69,586) | 374 | 0 |
+| sciqa | match | 4,500,344 (4,500,344) | 22,738 | 0 |
+| sciprog | match | 428,476 (**420,929**) | 2,151 | **73** (3.4%) |
+| chem (earlier today) | match | 4,839,198 (4,839,198) | 24,477 | 0 |
+All 12 hashes in Ravi's list are now confirmed. **One defect: sciprog** has 7,547 exact duplicate documents inside the training file (1.8%) and 73 validation documents that also occur in training; fix = drop duplicates before the split (Ravi, small). This is exact-document overlap only; Namit's earlier figures (sciprog 25%, code 38%, chem 23%) count shared passages inside different documents, a different and looser test that I did not repeat on the new bins.

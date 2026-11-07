@@ -34,3 +34,8 @@ No `exec`, `eval`, `subprocess`, `os.system`, `pickle`, `socket`, `requests` or 
 
 ## Recommendation
 Treat the script as documentation of the selection rule, not as the way to grow the corpus. The new owner should: pin the two revisions above; copy the three missing cleanups (placeholders and `# ` lines for Domain 9; U+FFFD, zero-width and BOM for both) into the script before any rerun; and agree with Raju which of (a) to (d) to use before collecting. First batch of any new source: a 20 MB sample for review (the team rule).
+
+
+## Domain 10 volume: what exists (8 Nov 2026, Raju: "Pankaj will cover it")
+**Run (OpenAlex metadata counts, 8 Nov; works with a CC BY licence and a PDF; title or abstract match; overlap with the 930 documents we already hold not removed):** "physics-informed neural network" 2,237; neural operator / operator learning / DeepONet / FNO 1,000; scientific ML / physics-informed ML / physics-guided / neural PDE 1,500; one broad query (the terms above plus differentiable physics, neural surrogate, surrogate model with partial differential) 6,227. CC BY-SA adds about 2%.
+**Estimate (mine):** at our mean of 14,046 tokens per Domain 10 document, 6,200 papers are about 87M tokens at most, about 40 to 70M of it new after removing what Swaraj already collected. The pilot gap (+57M) is borderline reachable; **the full-run gap (+512M, 36,000 more papers) does not exist as open CC BY text**. Domain 10's 2.1B allocation would be 25 to 35 passes. Raju has to cut it or accept the repeats, and give the freed tokens to domains with real volume.

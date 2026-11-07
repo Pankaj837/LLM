@@ -28,6 +28,8 @@
 | Physics + AI (Domain 10) | open | 2.1 | **70** | 13 | 5.38 | **yes, +57M** |
 | **Total** | | **30.0** | **1,000** | 16,851 | | |
 
+**Correction, 6 Nov.** The chemistry bin is mostly old sciqa data (see `RAVI_1P5B_BINS_CHECK_2026-11-04.md`, 6 Nov section): real chemistry held is about 546M, not 2,447M (1B pilot share 40M: still covered, 0.07 passes). Unique tokens held: about 14.9B. sciqa is now 1,880M and sciprog 1,606M (rebuilt). The chemistry bin must be rebuilt before the pilot, otherwise about two thirds of the chemistry share of the pilot would be labelled sciqa text.
+
 ## What it says
 - For 16 of 20 domains the data we hold already covers the 1B pilot with at most one pass. Biology (0.89 passes), multi-step (0.80) and Earth (0.41) use most of what exists.
 - Four domains need more than one pass at 1B: Finance (1.2x), Astronomy (1.5x), Domain 9 (1.75x) and Domain 10 (5.4x). The first three are within the 4-pass limit; Domain 10 is the only one beyond it. The smallest fix is +57M tokens for Domain 10 and +30M for Domain 9, or accept the repeats for the pilot (the pilot checks stability and throughput, not capability).

@@ -1,0 +1,16 @@
+{
+  "vocab": "tokenizers/vocab32k_v2/vocab32k.tok",
+  "out": "bins",
+  "workers": 8,
+  "val_frac": 0.005,
+  "plan_tokens": 2400000000,
+  "domains": [
+    {
+      "name": "chem",
+      "kind": "parquet",
+      "paths": ["data/cleaned/chemistry.parquet"],
+      "weight": 0.10
+    }
+  ]
+}
+

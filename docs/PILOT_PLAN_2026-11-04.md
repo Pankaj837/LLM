@@ -22,6 +22,8 @@ Assumptions: speed stays at the smoke-test value (a larger batch may be faster; 
 - Passes over the data (pilot tokens / unique tokens held), limit 4: all held domains are within 4 passes except Numerical Simulation (39.9M tokens held, 5.3 passes), Physics+AI (13.1M, 16 passes) and Astronomy (4.5 passes). To stay within 4 passes the pilot needs about +13M and +39M tokens for Domains 9 and 10; or those two domains are down-weighted for the pilot.
 - Ravi's six 1.5B bins (11.43B tokens) are the main supply but are **not yet usable**: sciqa still carries source labels, sciprog is mostly general code, chem, cad and engineering are not yet uploaded, and validation files contain text that also occurs in training (see `docs/RAVI_1P5B_BINS_CHECK_2026-11-04.md`). Gate 0 below blocks the pilot until they are fixed.
 
+**8 Nov status of Gate 0:** sciqa labels fixed; sciprog improved; chem, cad and engineering uploaded; **chem rebuilt and verified on 8 Nov (the 6 Nov version contained the old sciqa data)**; validation-in-training overlap of the new bins not yet tested (training files not seen); Engineering Reasoning bin still missing. Cost (Spheron price page, 6 Nov): H100 80 GB $2.98 per hour on demand, $2.20 spot (can be reclaimed), 2.4 TB disk, 20-minute minimum; the 1B pilot is about 13 GPU-hours with the smoke test and evaluation, about $39 on demand.
+
 ## 4. Gates
 | Gate | Check | Pass criterion | Owner |
 |---|---|---|---|

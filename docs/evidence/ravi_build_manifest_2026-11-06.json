@@ -1,0 +1,98 @@
+{
+  "built_at": "2026-11-05T08:28:47+00:00",
+  "run_info": {
+    "git_commit": "cab6dc270eb95179cdd278addc65248ceb923c3a",
+    "git_dirty": false,
+    "python": "3.14.5",
+    "torch": "2.14.1+cpu",
+    "cuda": null,
+    "gpu": null,
+    "host": "LAPTOP-UB9RS7SQ",
+    "platform": "Windows-11-10.0.26300-SP0"
+  },
+  "tokenizer_sha256": "10b3c5aecf6b81746bf86f8c18f8c576bf716a3620e7632e8fc2684006b51cdc",
+  "config": {
+    "vocab": "tokenizers/vocab32k_v2/vocab32k.tok",
+    "out": "bins",
+    "workers": 8,
+    "val_frac": 0.005,
+    "plan_tokens": 2400000000,
+    "domains": [
+      {
+        "name": "sciprog",
+        "kind": "parquet",
+        "paths": [
+          "data/cleaned/scientific_programming_filtered.parquet",
+          "data/cleaned/scientific_programming_supplement.parquet"
+        ],
+        "weight": 0.05,
+        "dedup": true
+      }
+    ]
+  },
+  "config_sha256": "063bd17118ef9ae9c3f83617acc2553758cffa480e94ab1f8a1c4b4dfbdf874c",
+  "tokens": {
+    "code": {
+      "train": 1517422577,
+      "val": 7826749
+    },
+    "chem": {
+      "train": 2447159991,
+      "val": 12356427
+    },
+    "sciqa": {
+      "train": 1880407792,
+      "val": 9475307
+    },
+    "sciprog": {
+      "train": 1606252084,
+      "val": 7637929
+    },
+    "engineering": {
+      "train": 2986716046,
+      "val": 18384897
+    },
+    "cad": {
+      "train": 840606093,
+      "val": 4063889
+    }
+  },
+  "inputs": {
+    "code": [
+      {
+        "path": "data/cleaned/code.parquet",
+        "bytes": 1443534992
+      }
+    ],
+    "chem": [
+      {
+        "path": "data/cleaned/chemistry.parquet",
+        "bytes": 5127393751
+      }
+    ],
+    "sciqa": [
+      {
+        "path": "data/cleaned/scientific_qa.parquet",
+        "bytes": 4060121816
+      }
+    ],
+    "sciprog": [
+      {
+        "path": "data/cleaned/scientific_programming.parquet",
+        "bytes": 1121815298
+      }
+    ],
+    "engineering": [
+      {
+        "path": "data/cleaned/engineering_agent_tool_use.parquet",
+        "bytes": 2750446496
+      }
+    ],
+    "cad": [
+      {
+        "path": "data/cleaned/cad_step.parquet",
+        "bytes": 416577084
+      }
+    ]
+  }
+}

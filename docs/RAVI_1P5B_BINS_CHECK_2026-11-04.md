@@ -37,3 +37,39 @@ Checked arithmetic only; the files it cites (`dedup_report.json`, `build_manifes
 - Not proven: the split into 4,863,675 database records (about 90 tokens) and 4,523,082 Q&A records (about 447 tokens) is stated without a count from the data, and the weighted mean is built from those assumed lengths, so it explains 262 but does not independently prove it. By his own numbers the database records are about 52% of documents but only about 18% of tokens.
 - Deduplication was exact match on `text` only; near-duplicates (same molecule in different wording, repeated Q&A) were not checked.
 - Ravi says Raju asked Avinash to create one Drive folder for all domain bins and he will upload chem, cad and engineering there once he has the link (owner-reported).
+
+
+## Update 6 Nov 2026: new files from Ravi, and a problem in the chemistry bin
+**Evidence labels.** *Run* = my own check. *Read* = Ravi's files (`docs/evidence/ravi_build_manifest_2026-11-06.json`, `docs/evidence/ravi_chem_build_config_2026-11-06.json`). I downloaded the five changed validation files (cad, chem, engineering, sciprog, sciqa, about 100 MB) from the Drive folder `1.5B Bins`; for the chemistry training file I read six 12 MB slices (range requests), not the whole 4.6 GB file. The other training files were not downloaded.
+
+**Folder (run).** All six train and validation pairs are now there. File sizes equal 2 x tokens + 36 bytes for every bin (exact for the five validation files), so nothing is truncated.
+
+**`build_manifest.json` (read).** One manifest for all six bins, same tokenizer hash (correct). It changes two numbers: sciqa train 1,901,493,585 to **1,880,407,792** (-21.1M) and sciprog train 1,672,410,945 to **1,606,252,084** (-66.2M); the other four are unchanged. The six bins now total **11,278,564,583** train tokens (was 11,365,809,237). It still has no per-bin sha256 and no document counts; its `config` lists only the sciprog build (filtered + supplement), and `chem_build.json` is only the chemistry build configuration.
+
+**`check_bins` on the five downloaded validation files (run): PASS.** Tokens / documents: cad 4,063,889 / 4,647, chem 12,356,427 / 47,215, engineering 18,384,897 / 374, sciprog 7,637,929 / 2,151, sciqa 9,475,307 / 22,738. Together with `dedup_report.json`, kept rows equal train + validation documents **exactly** for cad (954,150 + 4,647 = 958,797), chem (9,339,542 + 47,215 = 9,386,757) and agent (69,586 + 374 = 69,960).
+
+**sciqa: the source labels are gone (run).** "Expected Answer", "Augmentation strategy", "Benchmark source" and the other tags: 0 of 22,738 validation documents (before: 23.6%, 8.4%, 5.4%). Content is still MetaMath-style math word problems plus MedMCQA-style questions. 13,419 of the 22,738 validation documents are identical to documents of the old sciqa validation file.
+
+**sciprog: better, not clean (run).** 50.3% of validation documents contain at least one science or numerics term from my list (before 23.6%); 11.1% contain three or more distinct terms. Only 688 of 2,151 documents also appear in the old validation file, so it was rebuilt with a new filter plus a supplement. Samples now include BLAS/SLATEC Fortran, SeqAn and Julia tests, but also Boost headers and selenium tests.
+
+**chemistry: the bin contains the old sciqa data (run on validation, sampled on training). This is a blocker.**
+- All **22,738** documents of the old sciqa validation file (labels included) are in `chem.val.bin`, identical after tokenizing. They are 48% of its 47,215 documents and **77.5% of its tokens** (9,581,589 of 12,356,427). The rest is real chemistry: 16,233 documents starting "Formula:", 6,386 "Compound", 1,858 "Reaction", 2,774,838 tokens.
+- Six slices of 12 MB of `chem.train.bin` (185,550 whole documents): 27.7% of documents and **66.9% of tokens** start with "Question:", and 17,559 documents carry the source labels.
+- Arithmetic: chemistry train 2,447,159,991 minus the old sciqa train 1,901,493,585 leaves about **546M tokens of real chemistry**; the document count fits the same split (9,339,542 minus 4,500,344 old sciqa documents = 4,839,198). The training-file figures are an inference; the validation figures are exact.
+- Consequences: the "chemistry surplus" Raju accepted on 4 Nov does not exist (real chemistry is about 0.55B against a 1.2B allocation, 2.2 passes: still within 4); the source labels are back in the training data through the chemistry bin; and `dedup_report.json` could not see it because it deduplicates each file on its own.
+- Unique tokens held, recomputed: 16,851M minus 87M (rebuilt bins) minus about 1,900M = **about 14.9B**.
+- Fix (Ravi): rebuild chem from the chemistry rows only (no `scientific_qa` rows), re-send `chem.val.bin` and `chem.train.bin` with the `check_bins` output and sha256. Gate 0 of the pilot plan stays closed until then.
+
+**engineering (agent trajectories) and cad (run, validation only).** engineering: 374 documents of mean 49,157 tokens, 78% start with an agent system prompt ("You are opencode...", "...a Claude agent..."); the source and licence of these trajectories are not recorded. cad: 52% of documents start "Parametric B-Rep model of a ..." (templated, as known).
+
+
+## Update 8 Nov 2026: rebuilt chemistry bin verified (run)
+Ravi re-uploaded `chem.train.bin` and `chem.val.bin` and posted his `check_bins` output. I downloaded both whole files (1.09 GB and 5.5 MB) and ran the checks myself.
+- `check_bins` with the frozen tokenizer: **PASS**. Train 545,666,406 tokens / 4,839,198 documents, validation 2,774,838 / 24,477; file sizes equal 2 x tokens + 36 bytes. Identical to Ravi's numbers and to my 6 Nov arithmetic (2,447,159,991 - 1,901,493,585 = 545,666,406).
+- sha256: `chem.train.bin` `f4b5e4469aac14a5a6e5cc9999338779a01242ce827f86c883eafc56962c095b`, `chem.val.bin` `eebd217d996af74ff7323b0b9f7bcb5b548404e8af0cf776363abdd156942479`.
+- Documents starting "Question:" (the old sciqa format): **0 of 4,839,198 (train) and 0 of 24,477 (validation)**; in 20,000 random documents of each file no source label; the documents are "Formula:" (about 67%), "Compound:" (26%) and "Reaction:" (7%) records.
+- Validation documents also present in train: **0**; duplicates inside train: **0** (all 4,839,198 distinct).
+- Remark: mean document length is 113 tokens (property records of molecules, not running text); 546M tokens of it against a 1.2B allocation is 2.2 passes at 30B.
+- **Chemistry blocker closed.** Six bins now total 9,377,070,998 train tokens (cad 840.6M, chem 545.7M, code 1,517.4M, engineering 2,986.7M, sciprog 1,606.3M, sciqa 1,880.4M). Unique tokens held (all 20 domains): **about 14.86B** (16,851M - 87M - 1,901M).
+- Still open for Gate 0: validation-in-training overlap of sciqa, sciprog, code and cad (their training files were not downloaded); Engineering Reasoning bin; `build_manifest.json` has no per-bin sha256.
+- **sha256 list from Ravi (8 Nov, `docs/evidence/ravi_bins_sha256_2026-11-08.txt`).** I re-hashed the files I hold: `chem.train`, `chem.val`, `cad.val`, `engineering.val`, `sciprog.val`, `sciqa.val` and `code.val` all **match** (run). The five other training files (cad, code, engineering, sciprog, sciqa; 16.5 GB together) were not downloaded, so their hashes are owner-reported only; their sizes equal 2 x tokens + 36 bytes (run).

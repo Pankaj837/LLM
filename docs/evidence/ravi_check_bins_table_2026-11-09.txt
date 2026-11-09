@@ -1,0 +1,17 @@
+Ravi's check_bins output on the six final 1.5B bins, pasted in the group 9 Nov 2026 (owner-reported; every count equals my own whole-file check)
+frozen tokenizer: n_vocab=32000 eos_id=31936 sha256=10b3c5aecf6b81746bf86f8c18f8c576bf716a3620e7632e8fc2684006b51cdc
+file                                                      tokens        docs  mean doc  status
+cad.train.bin                                        840,606,093     954,150       881  ok
+cad.val.bin                                            4,063,889       4,647       875  ok
+chem.train.bin                                       545,666,406   4,839,198       113  ok
+chem.val.bin                                           2,774,838      24,477       113  ok
+code.train.bin                                     1,517,422,577     997,104      1522  ok
+code.val.bin                                           7,826,749       4,974      1574  ok
+engineering.train.bin                              2,986,716,046      69,586     42921  ok
+engineering.val.bin                                   18,384,897         374     49157  ok
+sciprog.train.bin                                  1,587,016,100     420,701      3772  ok
+sciprog.val.bin                                        7,492,746       2,116      3541  ok
+sciqa.train.bin                                    1,880,407,792   4,500,344       418  ok
+sciqa.val.bin                                          9,475,307      22,738       417  ok
+RESULT: PASS
+Engineering: train+val = 3,005,100,943 tokens in 69,960 docs. His audit report (raw, rough estimate) said 3,825,901,223 tokens in 81,953 rows: 11,993 rows (14.6%) and 820,800,280 estimated tokens (21.5%) fewer.

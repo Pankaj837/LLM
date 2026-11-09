@@ -28,6 +28,9 @@ Names must be `<name>.train.bin` and `<name>.val.bin`. Domains whose train file 
 | numsim (Domain 9) | 70M | Swaraj's 39.9M tokens not tokenized; Namit's NASA collection in progress; left out unless somebody delivers it |
 | gen_eng, exp_val, tech_comm | 60, 40, 20M | no data exists: left out |
 
+## Final composition of the pilot (9 Nov, for Chandrika and Gokul)
+Domains with data today: cad, chem, code, engineering, sciqa, sciprog, math, physics, multistep, astro, finance, bio, earth, scidisc, physai = **730M of the 1,000M planned tokens**. Without data: eng_reasoning 80M, numsim 70M, gen_eng 60M, exp_val 40M, tech_comm 20M = 270M. `gpu_session.py` leaves them out and renormalises, so every present domain is drawn about 1.37 times its planned share (calculation, not run on the GPU). physai is then about 9.6% of the tokens = about 96M tokens drawn from 52.3M available, i.e. about 1.8 passes over the Domain 10 data. The 1.5B full-run composition stays open until Engineering Reasoning (Prabanjan), Domain 9 (Namit), Biology (+255M) and Earth (+152M) arrive.
+
 Also copy Ravi's `build_manifest.json` into `bins/` (preflight warns without it).
 
 Check the files against the hashes (`docs/evidence/`); every line must say OK:

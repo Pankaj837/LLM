@@ -4,6 +4,9 @@
 ### Added (9 Nov 2026)
 - `scripts/collect_domain10_openalex.py` (Domain 10 top-up from OpenAlex, CC BY / CC0 only, resumable, PDFs not stored), `configs/pilot_1b.json` (20-domain 1B pilot mix), `docs/PILOT_RUN_CHECKLIST_2026-11-09.md` (Gokul's command checklist), `docs/evidence/ravi_sciprog_sha256_2026-11-09.txt`; docs: sciprog verification, Ravi's licence reply checked, ledger owners of Domains 9 and 10.
 
+### Added (9 Nov 2026, night)
+- `docs/evidence/ravi_check_bins_table_2026-11-09.txt`; pilot final-composition section in `docs/PILOT_RUN_CHECKLIST_2026-11-09.md`; progress report rows.
+
 ### Added (9 Nov 2026, evening)
 - `docs/DOMAIN10_SOURCE_AUDIT_2026-11-09.md` (Raju's source audit), `docs/evidence/physai_sha256_2026-11-09.txt` and `physai_manifest_2026-11-09.jsonl` (Domain 10 `physai` bin: 3,704 CC BY papers, 52,255,166 tokens: 2,199 first-query papers, 575 neighbouring-topic papers, 930 of Swaraj's); collector profile `D10_PROFILE=ext` for neighbouring topics; arXiv downloads are serial with 3 s spacing, text extraction in parallel, lone surrogates removed.
 

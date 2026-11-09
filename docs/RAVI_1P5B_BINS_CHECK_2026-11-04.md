@@ -85,3 +85,11 @@ I downloaded the five remaining training files one at a time (16.5 GB in total, 
 | sciprog | match | 428,476 (**420,929**) | 2,151 | **73** (3.4%) |
 | chem (earlier today) | match | 4,839,198 (4,839,198) | 24,477 | 0 |
 All 12 hashes in Ravi's list are now confirmed. **One defect: sciprog** has 7,547 exact duplicate documents inside the training file (1.8%) and 73 validation documents that also occur in training; fix = drop duplicates before the split (Ravi, small). This is exact-document overlap only; Namit's earlier figures (sciprog 25%, code 38%, chem 23%) count shared passages inside different documents, a different and looser test that I did not repeat on the new bins.
+
+## Update 9 Nov 2026: Ravi's de-duplicated sciprog verified on the whole files (run)
+Ravi re-uploaded `sciprog.train.bin` and `sciprog.val.bin` to the Drive folder `1.5B Bins` (new file ids; the old ones were deleted). I downloaded both whole files and ran the checks.
+- sha256 **match Ravi's message**: train `ba35843d37ceb875176d1b0d281ffbacc043bb9ca7d6f2633a87cc893bc88f42`, validation `58476a497258a65f273c7e0426864327e5ec79f0ab9991e004319fc953ec52a0` (saved in `docs/evidence/ravi_sciprog_sha256_2026-11-09.txt`).
+- `check_bins` with the frozen tokenizer: **PASS**. Train 1,587,016,100 tokens / 420,701 documents (3,026.99 MB), validation 7,492,746 / 2,116 (14.29 MB): identical to Ravi's numbers; file sizes equal 2 x tokens + 36.
+- Duplicates inside train: **0** (420,701 distinct); inside validation: **0**; validation documents also in train: **0** (before: 7,547 duplicates and 73 overlapping).
+- **Gate 0 data check closed for all six of Ravi's bins** (cad, chem, code, engineering, sciqa, sciprog: 0 validation-in-train, 0 duplicates in the two rebuilt ones). Six bins train tokens: cad 840,606,093; chem 545,666,406; code 1,517,422,577; engineering 2,986,716,046; sciprog 1,587,016,100; sciqa 1,880,407,792 = **9,357,835,014** (was 9,377,070,998).
+- Not re-checked: the share of scientific content in sciprog (50% of validation documents had a science term on 6 Nov); Namit's `check_leakage.py` (benchmark questions) on the bins; engineering (agent) source and licence.

@@ -21,7 +21,7 @@ Names must be `<name>.train.bin` and `<name>.val.bin`. Domains whose train file 
 | name | pilot tokens | where |
 |---|---|---|
 | cad, chem, code, engineering (agent trajectories), sciqa | 40M, 40M, 60M, 40M, 50M | Drive folder `1.5B Bins` (Ravi) |
-| sciprog | 50M | **new files from Ravi (9 Nov)**, link from Ravi; the old ones were deleted |
+| sciprog | 50M | same Drive folder `1.5B Bins`, **new de-duplicated files of 9 Nov** (verified by me: sha256, `check_bins` PASS, 0 duplicates) |
 | math, physics, multistep, astro, finance, bio, earth, scidisc | 80, 70, 70, 30, 20, 40, 30, 40M | Prabanjan's and Gokul's earlier bins (the 34 files of the A100 run), renamed to these names |
 | eng_reasoning | 80M | **missing** (Prabanjan): the run goes ahead without it unless Raju says wait |
 | numsim (Domain 9), physai (Domain 10) | 70M, 70M | Swaraj's collected files; **not tokenized yet**: left out unless somebody delivers them |
@@ -33,7 +33,7 @@ Check the files against the hashes (`docs/evidence/`); every line must say OK:
 ```
 cd bins
 grep -v sciprog ../docs/evidence/ravi_bins_sha256_2026-11-08.txt | sha256sum -c --ignore-missing
-sha256sum -c ../docs/evidence/ravi_sciprog_sha256_2026-11-09.txt     # hashes read from Ravi's message: if one differs, ask Ravi before using the file
+sha256sum -c ../docs/evidence/ravi_sciprog_sha256_2026-11-09.txt     # both hashes match the files I downloaded on 9 Nov; if one differs on your machine the download is incomplete, download again
 cd ..
 ```
 

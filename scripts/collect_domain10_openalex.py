@@ -38,6 +38,20 @@ TOPIC = re.compile(r"physics[- ]informed|neural operator|operator learning|deepo
                    r"physics[- ]guided|physics[- ]based neural|differentiable physics|neural surrogate|\bPINNs?\b|neural PDE|neural ODE", re.I)
 STOP = set("the of and to in is a that for with as are on by this be from an we which at it or can has was were".split())
 
+# Profile "ext" (set D10_PROFILE=ext in the environment, so process-pool workers see it too):
+# neighbouring Physics + AI topics, same licence filter (CC BY / CC0 only).
+if os.environ.get("D10_PROFILE") == "ext":
+    QUERY = ('"learned simulator" OR "graph network simulator" OR "PDE foundation model" OR "foundation model for PDE" '
+             'OR ("neural network" "partial differential equations") OR "physics-constrained neural" OR "physics-aware neural" '
+             'OR ("reduced-order model" "neural network") OR "neural Galerkin" OR ("mesh-based simulation" "graph neural") '
+             'OR ("physics-informed" "graph neural") OR ("machine learning" "turbulence modeling") '
+             'OR ("deep learning" "computational fluid dynamics") OR "neural ODE" OR "universal differential equations" '
+             'OR ("surrogate model" "neural network" "finite element")')
+    TOPIC = re.compile(r"physics[- ]informed|physics[- ]constrained|physics[- ]aware|neural operator|operator learning|deeponet|"
+                       r"partial differential equation|\bPDEs?\b|neural ODE|universal differential|surrogate model|reduced[- ]order|"
+                       r"graph (?:neural )?network|computational fluid dynamics|\bCFD\b|turbulence model|learned simulator|"
+                       r"Galerkin|finite element|scientific machine learning|differentiable physics", re.I)
+
 
 def norm_title(t: str) -> str:
     return re.sub(r"[^a-z0-9]+", " ", unicodedata.normalize("NFKD", t or "").lower()).strip()

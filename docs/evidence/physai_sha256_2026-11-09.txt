@@ -1,0 +1,10 @@
+physai = PRANA-G Domain 10 (Physics + AI), pilot data, built 9 Nov 2026
+Tokenizer vocab32k_v2 sha256 10b3c5aecf6b81746bf86f8c18f8c576bf716a3620e7632e8fc2684006b51cdc (frozen). check_bins: PASS
+Train 51,255,040 tokens / 3,627 docs; validation 1,000,126 tokens / 77 docs; total 52,255,166 tokens / 3,704 docs
+Sources (all CC BY, per-paper DOI/licence/URL in physai_manifest.jsonl):
+  2,199 papers, PINN / neural operator / DeepONet / FNO query (OpenAlex)      31,204,446 tokens
+    575 papers, neighbouring topics (neural ODE, surrogate models, graph simulators, CFD) 8.0M tokens
+    930 papers, Swaraj's v7 Domain 10 set (common-pile arXiv + peS2o)           13.06M tokens
+Checked: 0 exact duplicate documents, 0 near-duplicate pairs across the three sources
+sha256  physai.train.bin  d0c0d32fc042689faf49c8d7c53d67f6b7eb83f161a691ba6f39430f923bec68
+sha256  physai.val.bin    6b64335c92575dc699dbb4299c4df1eca7d4fe12b8866c282af4e7e635d80f41

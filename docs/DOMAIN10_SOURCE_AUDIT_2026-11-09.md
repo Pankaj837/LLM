@@ -5,7 +5,7 @@ All metadata queries were read-only; nothing from the sources below was download
 
 ## 1. Answer in one paragraph
 
-The big named sources (The Well, PDEBench, PDEArena, CFDBench, PDEGym, FlowBench, LagrangeBench, RealPDEBench) are **numerical simulation arrays** (HDF5/NPY/Zarr, hundreds of GB to several TB each). A text language model cannot learn from them as tokens in any useful way, so they add **almost no training tokens**. What a language model can use from them is their **text**: papers, READMEs, documentation and source code. For the 11 named repositories that is only about **6 MB of code and docs in total (about 1.7M tokens at most, estimate)**, of which about **4.7 MB (about 1.4M tokens)** has a permissive licence. Several of the largest sets are also **non-commercial** (PDEGym, FlowBench, RealPDEBench, both DeepONet repos) and must stay out under our licence rule. The realistic route to the 70M pilot ask is more **CC BY papers on neighbouring topics** (estimate 15 to 30M tokens) plus a **permissive-licence GitHub code lane** (unmeasured, order of tens of millions of tokens).
+The big named sources (The Well, PDEBench, PDEArena, CFDBench, PDEGym, FlowBench, LagrangeBench, RealPDEBench) are **numerical simulation arrays** (HDF5/NPY/Zarr, hundreds of GB to several TB each). A text language model cannot learn from them as tokens in any useful way, so they add **almost no training tokens**. What a language model can use from them is their **text**: papers, READMEs, documentation and source code. For the 11 named repositories that is only about **6 MB of code and docs in total (about 1.7M tokens at most, estimate)**, of which about **4.7 MB (about 1.4M tokens)** has a permissive licence. Several of the largest sets are also **non-commercial** (PDEGym, FlowBench, RealPDEBench, both DeepONet repos) and must stay out under our licence rule. **Result after collection (run, 9 Nov night): the `physai` bin holds 52,255,166 tokens** (3,704 papers, all CC BY): 31.2M from the first query, about 8.0M from the neighbouring-topic papers (575 kept of 916 candidates), 13.06M from Swaraj's held set. The remaining gap to the 70M ask (about 18M) can only come from a **permissive-licence GitHub code lane** (unmeasured, order of tens of millions of tokens, needs someone with a GitHub token) or from the CC BY-SA papers if Raju allows them (under 2M).
 
 ## 2. Named sources
 
@@ -45,14 +45,14 @@ Why not tokenise the arrays: 15 TB of floating-point fields is tens of trillions
 | Lane | Status | Tokens | Notes |
 |---|---|---|---|
 | CC BY papers, current query (done) | built 9 Nov | **31.2M new (run)** + Swaraj's held 13.06M = **44.3M** | all CC BY, DOI and licence per paper |
-| CC BY papers, neighbouring topics | counts only (run) | **15 to 30M (estimate)** | CC BY full-text matches: neural network + PDE 1,480; neural ODE 410; surrogate + finite element 364; physics-informed + graph NN 301; reduced-order + NN 294; deep learning + CFD 246; ML turbulence modelling 154; others small. Assumes 2,500 to 3,000 unique new papers, 59% pass rate (observed 2,199 of 3,699), 14,215 tokens per paper (observed mean). About 2 hours of collection |
+| CC BY papers, neighbouring topics (done) | built 9 Nov | **about 8.0M new (run)**: 575 papers kept of 916 candidates (162 of 183 arXiv, 413 of 733 other hosts) | My first estimate of 15 to 30M was wrong: the per-topic counts (neural network + PDE 1,480; neural ODE 410; surrogate + FE 364; and others) overlap heavily; the union was 1,901 papers, of which 916 were not already held and had a PDF link. Corrected after the build |
 | Named repos' code and docs | listing only (run) | about **1.4M** permissive | tiny |
 | Permissive GitHub code on these topics | not measured | order of **20 to 80M** (rough: about 700 repos x 0.2 to 0.5 MB text each, assumption) | needs file-by-file fetching: without a GitHub token the API allows 60 requests per hour, so it needs a team member with a token or several days. Strip notebook outputs; deduplicate against the `code` bin |
 | CC BY-SA (109) and CC0 (43) papers on the current query | not taken | under 2M | waits for Raju's licence decision |
 | Non-commercial licences (CC BY-NC variants: about 2,400 papers on the current query) | excluded | n/a | licence rule |
 | Publisher PDFs that refuse automated download | not taken | about 1,000 papers lost | not bypassed |
 
-With the neighbouring-topic papers alone Domain 10 would reach about 60 to 75M, which meets the 70M ask without touching the arrays.
+With all paper lanes done, Domain 10 stands at 52.3M tokens (`physai`), about 75% of the 70M ask. The arrays are not needed; the last 18M needs the GitHub code lane or a licence decision on CC BY-SA papers.
 
 ## 5. Decisions needed from Raju
 

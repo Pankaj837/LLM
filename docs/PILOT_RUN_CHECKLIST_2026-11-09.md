@@ -24,7 +24,8 @@ Names must be `<name>.train.bin` and `<name>.val.bin`. Domains whose train file 
 | sciprog | 50M | same Drive folder `1.5B Bins`, **new de-duplicated files of 9 Nov** (verified by me: sha256, `check_bins` PASS, 0 duplicates) |
 | math, physics, multistep, astro, finance, bio, earth, scidisc | 80, 70, 70, 30, 20, 40, 30, 40M | Prabanjan's and Gokul's earlier bins (the 34 files of the A100 run), renamed to these names |
 | eng_reasoning | 80M | **missing** (Prabanjan): the run goes ahead without it unless Raju says wait |
-| numsim (Domain 9), physai (Domain 10) | 70M, 70M | Swaraj's collected files; **not tokenized yet**: left out unless somebody delivers them |
+| physai (Domain 10) | 70M asked; **52.3M available** | `physai.train.bin` / `physai.val.bin` (train 51,255,040 + val 1,000,126 tokens, `check_bins` PASS, sha256 in `docs/evidence/physai_sha256_2026-11-09.txt`); on the Drive once Pankaj uploads it |
+| numsim (Domain 9) | 70M | Swaraj's 39.9M tokens not tokenized; Namit's NASA collection in progress; left out unless somebody delivers it |
 | gen_eng, exp_val, tech_comm | 60, 40, 20M | no data exists: left out |
 
 Also copy Ravi's `build_manifest.json` into `bins/` (preflight warns without it).

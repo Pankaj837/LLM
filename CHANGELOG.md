@@ -5,7 +5,7 @@
 - `scripts/collect_domain10_openalex.py` (Domain 10 top-up from OpenAlex, CC BY / CC0 only, resumable, PDFs not stored), `configs/pilot_1b.json` (20-domain 1B pilot mix), `docs/PILOT_RUN_CHECKLIST_2026-11-09.md` (Gokul's command checklist), `docs/evidence/ravi_sciprog_sha256_2026-11-09.txt`; docs: sciprog verification, Ravi's licence reply checked, ledger owners of Domains 9 and 10.
 
 ### Added (9 Nov 2026, evening)
-- `docs/evidence/domain10_openalex_sha256_2026-11-09.txt` and `domain10_openalex_manifest_2026-11-09.jsonl` (Domain 10: 2,199 CC BY papers, 31.2M tokens); collector: arXiv downloads are serial with 3 s spacing, text extraction in parallel, lone surrogates removed.
+- `docs/DOMAIN10_SOURCE_AUDIT_2026-11-09.md` (Raju's source audit), `docs/evidence/physai_sha256_2026-11-09.txt` and `physai_manifest_2026-11-09.jsonl` (Domain 10 `physai` bin: 3,704 CC BY papers, 52,255,166 tokens: 2,199 first-query papers, 575 neighbouring-topic papers, 930 of Swaraj's); collector profile `D10_PROFILE=ext` for neighbouring topics; arXiv downloads are serial with 3 s spacing, text extraction in parallel, lone surrogates removed.
 
 ### Changed (5 Nov 2026, evening)
 - Package renamed `llm-squad1` to `llm`; "Squad-1" removed from the README, docstrings and test header (the old folder name `LLM_Squad1_Final` was my own naming, not a project name).

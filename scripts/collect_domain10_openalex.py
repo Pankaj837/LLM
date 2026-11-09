@@ -161,18 +161,23 @@ def quality(text: str) -> str | None:
     return None
 
 
-def fetch_one(c: dict, pages: int = 120, max_mb: int = 40):
-    from pypdf import PdfReader
+def download(c: dict, max_mb: int = 40):
+    """(bytes, None) or (None, reject reason)."""
     try:
         req = urllib.request.Request(c["pdf_url"], headers={"User-Agent": UA, "Accept": "application/pdf"})
         with urllib.request.urlopen(req, timeout=60) as r:
             data = r.read(max_mb * 1024 * 1024 + 1)
     except Exception as e:  # noqa: BLE001
-        return {"id": c["id"], "reject": "download: " + type(e).__name__}
+        return None, "download: " + type(e).__name__
     if len(data) > max_mb * 1024 * 1024:
-        return {"id": c["id"], "reject": "pdf larger than %d MB" % max_mb}
+        return None, "pdf larger than %d MB" % max_mb
     if not data.startswith(b"%PDF"):
-        return {"id": c["id"], "reject": "not a PDF (landing page)"}
+        return None, "not a PDF (landing page)"
+    return data, None
+
+
+def extract(c: dict, data: bytes, pages: int = 120):
+    from pypdf import PdfReader
     try:
         rd = PdfReader(io.BytesIO(data))
         txt = "\n".join((p.extract_text() or "") for p in rd.pages[:pages])
@@ -188,6 +193,11 @@ def fetch_one(c: dict, pages: int = 120, max_mb: int = 40):
     return {"id": c["id"], "ok": True, "doi": c["doi"], "title": c["title"], "year": c["year"], "license": c["license"],
             "pdf_url": c["pdf_url"], "landing": c["landing"], "source": c["source"], "n_pages": len(rd.pages),
             "words": len(text.split()), "text_sha256": sha(text), "text": text}
+
+
+def fetch_one(c: dict):
+    data, bad = download(c)
+    return {"id": c["id"], "reject": bad} if bad else extract(c, data)
 
 
 def stage_fetch(a) -> None:
@@ -208,13 +218,23 @@ def stage_fetch(a) -> None:
     reasons: dict = {}
     t0 = time.time()
     with open(res_path, "a", encoding="utf-8") as out:
-        if a.lane == "arxiv":                                   # one request per 3 s
-            it = ((c, fetch_one(c)) for c in todo)
+        if a.lane == "arxiv":                                   # downloads: one request per 3 s (arXiv policy); extraction in parallel
+            ex = cf.ProcessPoolExecutor(max_workers=a.workers)
+
             def gen():
+                futs = {}
                 for c in todo:
                     t = time.time()
-                    yield c, fetch_one(c)
+                    data, bad = download(c)
+                    if bad:
+                        yield c, {"id": c["id"], "reject": bad}
+                    else:
+                        futs[ex.submit(extract, c, data)] = c
+                    for f in [f for f in futs if f.done()]:
+                        yield futs.pop(f), f.result()
                     time.sleep(max(0.0, 3.0 - (time.time() - t)))
+                for f in cf.as_completed(list(futs)):
+                    yield futs[f], f.result()
             results = gen()
         else:
             ex = cf.ProcessPoolExecutor(max_workers=a.workers)

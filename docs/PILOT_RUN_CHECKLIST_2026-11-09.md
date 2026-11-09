@@ -25,11 +25,11 @@ Names must be `<name>.train.bin` and `<name>.val.bin`. Domains whose train file 
 | math, physics, multistep, astro, finance, bio, earth, scidisc | 80, 70, 70, 30, 20, 40, 30, 40M | Prabanjan's and Gokul's earlier bins (the 34 files of the A100 run), renamed to these names |
 | eng_reasoning | 80M | **missing** (Prabanjan): the run goes ahead without it unless Raju says wait |
 | physai (Domain 10) | 70M asked; **52.3M available** | `physai.train.bin` / `physai.val.bin` (train 51,255,040 + val 1,000,126 tokens, `check_bins` PASS, sha256 in `docs/evidence/physai_sha256_2026-11-09.txt`); on the Drive once Pankaj uploads it |
-| numsim (Domain 9) | 70M | Swaraj's 39.9M tokens not tokenized; Namit's NASA collection in progress; left out unless somebody delivers it |
+| numsim (Domain 9) | 70M asked; **39.9M available** | `numsim.train.bin` / `numsim.val.bin` (Swaraj's 4,368 CC BY / CC0 papers; train 39,135,773 + val 762,131 tokens, `check_bins` PASS, sha256 in `docs/evidence/numsim_sha256_2026-11-09.txt`); Namit's NASA collection will be added later |
 | gen_eng, exp_val, tech_comm | 60, 40, 20M | no data exists: left out |
 
 ## Final composition of the pilot (9 Nov, for Chandrika and Gokul)
-Domains with data today: cad, chem, code, engineering, sciqa, sciprog, math, physics, multistep, astro, finance, bio, earth, scidisc, physai = **730M of the 1,000M planned tokens**. Without data: eng_reasoning 80M, numsim 70M, gen_eng 60M, exp_val 40M, tech_comm 20M = 270M. `gpu_session.py` leaves them out and renormalises, so every present domain is drawn about 1.37 times its planned share (calculation, not run on the GPU). physai is then about 9.6% of the tokens = about 96M tokens drawn from 52.3M available, i.e. about 1.8 passes over the Domain 10 data. The 1.5B full-run composition stays open until Engineering Reasoning (Prabanjan), Domain 9 (Namit), Biology (+255M) and Earth (+152M) arrive.
+Domains with data today: cad, chem, code, engineering, sciqa, sciprog, math, physics, multistep, astro, finance, bio, earth, scidisc, physai = **800M of the 1,000M planned tokens** once numsim (39.9M available) is added. Without data: eng_reasoning 80M, gen_eng 60M, exp_val 40M, tech_comm 20M = 200M. `gpu_session.py` leaves them out and renormalises, so every present domain is drawn about 1.25 times its planned share (calculation, not run on the GPU). physai and numsim are then each about 8.75% of the tokens = about 87.5M drawn from 52.3M and 39.9M available, i.e. about 1.7 and 2.2 passes over those two domains. The 1.5B full-run composition stays open until Engineering Reasoning (Prabanjan), Domain 9 (Namit), Biology (+255M) and Earth (+152M) arrive.
 
 Also copy Ravi's `build_manifest.json` into `bins/` (preflight warns without it).
 

@@ -1,0 +1,6 @@
+numsim = PRANA-G Domain 9 (Numerical Simulation), pilot data from Swaraj's v7 set, tokenized 9 Nov 2026
+Tokenizer vocab32k_v2 sha256 10b3c5aecf6b81746bf86f8c18f8c576bf716a3620e7632e8fc2684006b51cdc (frozen). check_bins: PASS
+Train 39,135,773 tokens / 4,281 docs; validation 762,131 tokens / 87 docs; total 39,897,904 tokens / 4,368 docs
+Sources: 4,368 papers, licence CC BY (4,362) or CC0 (6); common-pile peS2o 3,673 + arXiv 695; per-paper licence and source in numsim_manifest.jsonl
+sha256  numsim.train.bin  5a1340a0683371b2c1a87d949e95d765b5c711f103d3a8c1c3d3428218e62817
+sha256  numsim.val.bin    2f6e8cdcba80d7235a683b58761bd0945efd89c9b7574bc85a339b14fc9edd3d

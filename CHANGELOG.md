@@ -4,6 +4,9 @@
 ### Added (9 Nov 2026)
 - `scripts/collect_domain10_openalex.py` (Domain 10 top-up from OpenAlex, CC BY / CC0 only, resumable, PDFs not stored), `configs/pilot_1b.json` (20-domain 1B pilot mix), `docs/PILOT_RUN_CHECKLIST_2026-11-09.md` (Gokul's command checklist), `docs/evidence/ravi_sciprog_sha256_2026-11-09.txt`; docs: sciprog verification, Ravi's licence reply checked, ledger owners of Domains 9 and 10.
 
+### Added (10 Nov 2026, early)
+- `docs/evidence/numsim_sha256_2026-11-09.txt`: Domain 9 `numsim` bin from Swaraj's 4,368 CC BY / CC0 papers (39,897,904 tokens; train 39,135,773 / val 762,131; `check_bins` PASS). Checklist and progress report: pilot composition now 16 domains = 800M of 1,000M planned tokens.
+
 ### Added (9 Nov 2026, night)
 - `docs/evidence/ravi_check_bins_table_2026-11-09.txt`; pilot final-composition section in `docs/PILOT_RUN_CHECKLIST_2026-11-09.md`; progress report rows.
 

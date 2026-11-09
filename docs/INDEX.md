@@ -15,6 +15,7 @@ from a measured number with the assumption stated. *Not done* = no evidence yet.
 | `PREPILOT_TASKS_STATUS_2026-11-04.md` | Raju's six pre-pilot tasks (4 Nov) and where each stands |
 | `PILOT_1B_TOKEN_DIVISION_2026-11-05.md` | Raju's request: tokens per domain for the 1B pilot (20 domains, passes over held data, which are short) |
 | `PILOT_PLAN_2026-11-04.md` | 1B to 3B-token pilot of the 1.5B model: compute, data feasibility, gates, success criteria, stop rules |
+| `PILOT_RUN_CHECKLIST_2026-11-09.md` | Gokul's command checklist for the 1B pilot (rent, data, preflight, 30-min check, run, watch); mix file `configs/pilot_1b.json` |
 | `DATA_PLAN_30B_2026-11-01.md` | From about 7B to 30B tokens; Raju's allocation of 2 Nov against the data held |
 | `ASSIGNMENT_LEDGER.md` | Who was given what, when, and whether it was delivered |
 | `TRAINING_PLAN_1p5B.md` | Recipe, budget and checklist for the 1.5B run (rev. 24 Oct; the GPU status lines are superseded by the pilot plan) |

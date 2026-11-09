@@ -1,0 +1,169 @@
+{
+  "notes": "1B-token pilot mix of the 1.5B model: weight = pilot tokens / 1000M (docs/PILOT_1B_TOKEN_DIVISION_2026-11-05.md; allocation / 30B x 1B). Domain names = <name>.train.bin / <name>.val.bin in the bins folder. 'engineering' is Ravi's agent-trajectory bin; 'numsim' = Domain 9 (Numerical Simulation) and 'physai' = Domain 10 (Physics + AI): rename the real files to these names. Domains whose train bin is missing are left out and the rest is renormalised (gpu_session prints which). Only name, weight and the vocab are read by scripts/gpu_session.py.",
+  "vocab": "tokenizers/vocab32k_v2/vocab32k.tok",
+  "out": "bins",
+  "plan_tokens": 1000000000,
+  "weights_sum": 1.0,
+  "domains": [
+    {
+      "name": "math",
+      "kind": "bin",
+      "paths": [
+        "bins/math.train.bin"
+      ],
+      "weight": 0.08
+    },
+    {
+      "name": "physics",
+      "kind": "bin",
+      "paths": [
+        "bins/physics.train.bin"
+      ],
+      "weight": 0.07
+    },
+    {
+      "name": "scidisc",
+      "kind": "bin",
+      "paths": [
+        "bins/scidisc.train.bin"
+      ],
+      "weight": 0.04
+    },
+    {
+      "name": "engineering",
+      "kind": "bin",
+      "paths": [
+        "bins/engineering.train.bin"
+      ],
+      "weight": 0.04
+    },
+    {
+      "name": "eng_reasoning",
+      "kind": "bin",
+      "paths": [
+        "bins/eng_reasoning.train.bin"
+      ],
+      "weight": 0.08
+    },
+    {
+      "name": "gen_eng",
+      "kind": "bin",
+      "paths": [
+        "bins/gen_eng.train.bin"
+      ],
+      "weight": 0.06
+    },
+    {
+      "name": "exp_val",
+      "kind": "bin",
+      "paths": [
+        "bins/exp_val.train.bin"
+      ],
+      "weight": 0.04
+    },
+    {
+      "name": "tech_comm",
+      "kind": "bin",
+      "paths": [
+        "bins/tech_comm.train.bin"
+      ],
+      "weight": 0.02
+    },
+    {
+      "name": "code",
+      "kind": "bin",
+      "paths": [
+        "bins/code.train.bin"
+      ],
+      "weight": 0.06
+    },
+    {
+      "name": "sciqa",
+      "kind": "bin",
+      "paths": [
+        "bins/sciqa.train.bin"
+      ],
+      "weight": 0.05
+    },
+    {
+      "name": "chem",
+      "kind": "bin",
+      "paths": [
+        "bins/chem.train.bin"
+      ],
+      "weight": 0.04
+    },
+    {
+      "name": "earth",
+      "kind": "bin",
+      "paths": [
+        "bins/earth.train.bin"
+      ],
+      "weight": 0.03
+    },
+    {
+      "name": "cad",
+      "kind": "bin",
+      "paths": [
+        "bins/cad.train.bin"
+      ],
+      "weight": 0.04
+    },
+    {
+      "name": "multistep",
+      "kind": "bin",
+      "paths": [
+        "bins/multistep.train.bin"
+      ],
+      "weight": 0.07
+    },
+    {
+      "name": "bio",
+      "kind": "bin",
+      "paths": [
+        "bins/bio.train.bin"
+      ],
+      "weight": 0.04
+    },
+    {
+      "name": "sciprog",
+      "kind": "bin",
+      "paths": [
+        "bins/sciprog.train.bin"
+      ],
+      "weight": 0.05
+    },
+    {
+      "name": "finance",
+      "kind": "bin",
+      "paths": [
+        "bins/finance.train.bin"
+      ],
+      "weight": 0.02
+    },
+    {
+      "name": "astro",
+      "kind": "bin",
+      "paths": [
+        "bins/astro.train.bin"
+      ],
+      "weight": 0.03
+    },
+    {
+      "name": "numsim",
+      "kind": "bin",
+      "paths": [
+        "bins/numsim.train.bin"
+      ],
+      "weight": 0.07
+    },
+    {
+      "name": "physai",
+      "kind": "bin",
+      "paths": [
+        "bins/physai.train.bin"
+      ],
+      "weight": 0.07
+    }
+  ]
+}

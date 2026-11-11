@@ -1,4 +1,4 @@
-# 1B pilot run: command checklist for Gokul (9 Nov 2026)
+# 1B pilot run: command checklist for the run owner (written 9 Nov 2026 for Gokul; on 11 Nov, 9:24 pm, Om Ahire wrote in the group that he will run the 1B pilot - owner-reported, still to be confirmed with Raju together with the GPU approval)
 
 **Evidence.** The commands are built from the repo's own command-line options (read: `scripts/gpu_session.py`, `src/llm/train.py`, `docs/PILOT_PLAN_2026-11-04.md`). The mix file `configs/pilot_1b.json` was parsed by `gpu_session.py preflight` on a CPU (run, 9 Nov). **Nothing here has been run on an H100 with the real bins.** Numbers that come from the 27 Oct smoke test (owner-reported): 1.5B model, micro-batch 4 fits (55 GB), micro-batch 8 does not, 25.4k tokens/s.
 
@@ -33,13 +33,15 @@ All 20 domains have a train and a validation bin on the Drive. With the verified
 
 Also copy Ravi's `build_manifest.json` into `bins/` (preflight warns without it).
 
-Check the files against the hashes (`docs/evidence/`); every line must say OK:
+**Single source (11 Nov, night):** Ravi built one Drive folder `pilot_bins` with the 40 files + `SHA256SUMS.txt` (https://drive.google.com/drive/folders/1Tos80Itd1NOBxz7Wm2Hhe_6Uj4CW_J3h). His `SHA256SUMS.txt` is identical to `docs/evidence/pilot_bins_sha256_2026-11-11.txt` on all 40 lines (read: compared line by line, 12 Nov). Download all 40 files from it into `bins/`.
+
+Check the files against the hashes; all 40 lines must say OK:
 ```
 cd bins
-grep -v sciprog ../docs/evidence/ravi_bins_sha256_2026-11-08.txt | sha256sum -c --ignore-missing
-sha256sum -c ../docs/evidence/ravi_sciprog_sha256_2026-11-09.txt     # both hashes match the files I downloaded on 9 Nov; if one differs on your machine the download is incomplete, download again
+sha256sum -c ../docs/evidence/pilot_bins_sha256_2026-11-11.txt
 cd ..
 ```
+(The older per-file hash lists `ravi_bins_sha256_2026-11-08.txt` and `ravi_sciprog_sha256_2026-11-09.txt` are superseded by this one.)
 
 ## D. Preflight (free, no training)
 ```

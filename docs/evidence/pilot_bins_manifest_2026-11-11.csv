@@ -11,8 +11,8 @@ code.train.bin,ravi bins,code.train.bin,3034845190,1517422577,True,
 code.val.bin,ravi bins,code.val.bin,15653534,7826749,True,
 earth.train.bin,Gokkul Bins/llm_dataset_bins,earth.train.bin,146414970,73207467,True,
 earth.val.bin,Gokkul Bins/llm_dataset_bins,earth.val.bin,620786,310375,True,
-eng_reasoning.train.bin,prabanjan/bins,engineering_reasoning.train.bin,1474462260,737231112,True,RENAME from engineering_reasoning; DEFECT (wrongly split build) - rebuild pending
-eng_reasoning.val.bin,prabanjan/bins,engineering_reasoning.val.bin,7595534,3797749,True,RENAME from engineering_reasoning; DEFECT (wrongly split build) - rebuild pending
+eng_reasoning.train.bin,eng_reasoning_upload (rebuilt 11 Nov),eng_reasoning.train.bin,1609922872,804961418,True,REBUILT; sha256 7f8e21d4f4c86a8e2cc101bd52d8689d8961b054b9e552f6521605966dc0221a
+eng_reasoning.val.bin,eng_reasoning_upload (rebuilt 11 Nov),eng_reasoning.val.bin,8370254,4185109,True,REBUILT; sha256 962934a636e96650723d6ae225e086dab78b44fbcd1ed66141584255b0950f6c
 engineering.train.bin,ravi bins,engineering.train.bin,5973432128,2986716046,True,
 engineering.val.bin,ravi bins,engineering.val.bin,36769830,18384897,True,
 exp_val.train.bin,prabanjan/bins,exp_val.train.bin,1257796852,628898408,True,
@@ -27,8 +27,8 @@ multistep.train.bin,prabanjan/bins,multistep.train.bin,176348326,88174145,True,
 multistep.val.bin,prabanjan/bins,multistep.val.bin,890174,445069,True,
 numsim.train.bin,namit bins,numsim.train.bin,236055050,118027507,True,
 numsim.val.bin,namit bins,numsim.val.bin,2903340,1451652,True,
-physai.train.bin,pankaj bins,physai.train.bin,102510116,51255040,True,
-physai.val.bin,pankaj bins,physai.val.bin,2000288,1000126,True,
+physai.train.bin,"domain10_v2_upload (version 2, 11 Nov)",physai.train.bin,137551546,68775755,True,VERSION 2; sha256 70b40a2ddcf1c39f2abb8695b642dc6d3d82c9ef3939213169c69639fc1e47fb
+physai.val.bin,"domain10_v2_upload (version 2, 11 Nov)",physai.val.bin,2661040,1330502,True,VERSION 2; sha256 8ef52426194ae3e2ddb1b0a748287477fa364c03810a957c996e6813cef16b80
 physics.train.bin,prabanjan/bins,physics.train.bin,1274409482,637204723,True,
 physics.val.bin,prabanjan/bins,physics.val.bin,6010948,3005456,True,
 scidisc.train.bin,Gokkul Bins/llm_dataset_bins,scidisc.train.bin,2003235636,1001617800,True,

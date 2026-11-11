@@ -1,0 +1,10 @@
+eng_reasoning = PRANA-G Engineering Reasoning, REBUILT 11 Nov 2026 from Prabanjan's original text engineering_reasoning_corpus_old.txt (3,114,429,124 bytes, Drive folder Prabanjan_LLM, shared by Raju Sir).
+Replaces the file engineering_reasoning.*.bin on the Drive (that file was the wrongly split build: 13,549,649 pieces, median 26 tokens).
+Command: scripts/tokenize_text.py eng_reasoning=engineering_reasoning_corpus_old.txt --eot-domains eng_reasoning --dedup --val-frac 0.005 --vocab tokenizers/vocab32k_v2/vocab32k.tok
+Tokenizer vocab32k_v2 sha256 10b3c5aecf6b81746bf86f8c18f8c576bf716a3620e7632e8fc2684006b51cdc (frozen). check_bins: PASS
+Train 804,961,418 tokens / 259,525 whole documents (mean 3,102); validation 4,185,109 tokens / 1,323 documents; total 809,146,527 tokens. 260,870 separator lines in, 22 exact duplicates dropped. Identical to the 31 Oct build recorded in the repository.
+Source datasets and licences of the text: still to be written by Prabanjan (the card he sent names mithulaartigala/reasoning-corpus-4K-5M-v1, OpenThoughts3, finemath, open-web-math, peS2o, FineWeb-Edu, Cosmopedia; upstream terms apply separately).
+sha256  eng_reasoning.train.bin  7f8e21d4f4c86a8e2cc101bd52d8689d8961b054b9e552f6521605966dc0221a
+sha256  eng_reasoning.val.bin    962934a636e96650723d6ae225e086dab78b44fbcd1ed66141584255b0950f6c
+
+stats: {"file": "engineering_reasoning_corpus_old.txt", "job": "eng_reasoning.engineering_reasoning_corpus_old", "fingerprint": "39d1b791696d50c245dfbb2c", "domain": "eng_reasoning", "in": 260870, "docs": 260848, "dup_dropped": 22, "short_dropped": 0, "chars": 3082526200, "train_tokens": 804961418, "val_tokens": 4185109}

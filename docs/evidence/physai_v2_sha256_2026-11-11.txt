@@ -1,0 +1,8 @@
+physai = PRANA-G Domain 10 (Physics + AI), VERSION 2, built 11 Nov 2026. Replaces physai.*.bin of 9 Nov (51.3M train tokens).
+Contents: the 3,704 CC BY papers of version 1 (51,255,040 train + 1,000,126 val tokens, unchanged) + 10,102 source/doc/notebook files from 1,043 permissively licensed GitHub repositories (MIT 8,363 files, Apache-2.0 1,387, BSD-3-Clause 312, BSD-2-Clause 40) on PINN / neural-operator / DeepONet / FNO / scientific-ML topics (17,520,715 train + 330,376 val tokens).
+Code selection: topic search, MIT/Apache/BSD only (GitHub licence field), forks skipped, notebook outputs stripped, at most 130,000 characters per repository, exact duplicates removed, 655 files dropped because at least 20% of their 32-token windows already occur in Ravi's code or sciprog bins.
+Tokenizer vocab32k_v2 sha256 10b3c5aecf6b81746bf86f8c18f8c576bf716a3620e7632e8fc2684006b51cdc (frozen). check_bins: PASS
+Train 68,775,755 tokens / 13,519 documents; validation 1,330,502 tokens / 287 documents; total 70,106,257 tokens (the 70M ask).
+Per-document licence and source: physai_manifest.jsonl (3,704 paper lines, then 10,102 code lines).
+sha256  physai.train.bin  70b40a2ddcf1c39f2abb8695b642dc6d3d82c9ef3939213169c69639fc1e47fb
+sha256  physai.val.bin    8ef52426194ae3e2ddb1b0a748287477fa364c03810a957c996e6813cef16b80

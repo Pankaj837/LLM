@@ -4,6 +4,9 @@
 ### Added (9 Nov 2026)
 - `scripts/collect_domain10_openalex.py` (Domain 10 top-up from OpenAlex, CC BY / CC0 only, resumable, PDFs not stored), `configs/pilot_1b.json` (20-domain 1B pilot mix), `docs/PILOT_RUN_CHECKLIST_2026-11-09.md` (Gokul's command checklist), `docs/evidence/ravi_sciprog_sha256_2026-11-09.txt`; docs: sciprog verification, Ravi's licence reply checked, ledger owners of Domains 9 and 10.
 
+### Added (11 Nov 2026, night)
+- `eng_reasoning` rebuilt from Prabanjan's original text (805.0M tokens, 259,525 documents, PASS; `docs/evidence/eng_reasoning_sha256_2026-11-11.txt`). `physai` version 2 = papers + permissively licensed GitHub code, 70.1M tokens, PASS (`physai_v2_sha256_2026-11-11.txt`, `physai_v2_code_manifest_2026-11-11.jsonl`). Checklist section C and `pilot_bins_manifest_2026-11-11.csv` updated.
+
 ### Added (11 Nov 2026)
 - `docs/evidence/drive_audit_2026-11-11.txt` (header probe of every file of the shared Drive, whole-file `check_bins` and hashes for numsim / finance / astro / engineering_reasoning, Namit's report, mix statistics). `docs/PILOT_RUN_CHECKLIST_2026-11-09.md` section C rewritten: all 40 files, Drive folders, token counts, rename `engineering_reasoning` to `eng_reasoning`, new finance/astro files, final composition (all 20 domains, 1,000M, nothing renormalised). Progress report row. Findings: Engineering Reasoning bin on the Drive is the wrongly split build (13.5M documents, median 26 tokens); finance is mostly price rows; Ravi's per-source engineering split is proportional; SWE-bench overlap scan of the engineering bin (see evidence).
 

@@ -1,0 +1,197 @@
+DRIVE AUDIT, 11 Nov 2026 (run by the team lead's verification desk). Folder: 1B pilot training (15rfwpGo3fhH8wvRYOhYQSaGJB7xEeLUX)
+Method: for every file, a ranged download of the first 36 bytes (header: magic, version, vocab, eos, token count) and four 256 KB samples (max token id must be <= 31936); file size must equal 2 x tokens + 36. Whole-file download + check_bins for numsim, finance, astro, eng_reasoning. Scripts: scratchpad tools/probe_drive.py, dl_check.sh.
+
+== 1. header probe (read)
+ravi            cad.train.bin                        1,681,212,222  ver=1 vocab=32000 eos=31936 header_tokens=840,606,093 size_matches=True sample_max_id=31936 eos_in_samples=747
+ravi            cad.val.bin                              8,127,814  ver=1 vocab=32000 eos=31936 header_tokens=4,063,889 size_matches=True sample_max_id=31936 eos_in_samples=606
+ravi            chem.train.bin                       1,091,332,848  ver=1 vocab=32000 eos=31936 header_tokens=545,666,406 size_matches=True sample_max_id=31936 eos_in_samples=4583
+ravi            chem.val.bin                             5,549,712  ver=1 vocab=32000 eos=31936 header_tokens=2,774,838 size_matches=True sample_max_id=31936 eos_in_samples=4489
+ravi            code.train.bin                       3,034,845,190  ver=1 vocab=32000 eos=31936 header_tokens=1,517,422,577 size_matches=True sample_max_id=31936 eos_in_samples=214
+ravi            code.val.bin                            15,653,534  ver=1 vocab=32000 eos=31936 header_tokens=7,826,749 size_matches=True sample_max_id=31936 eos_in_samples=275
+ravi            engineering.train.bin                5,973,432,128  ver=1 vocab=32000 eos=31936 header_tokens=2,986,716,046 size_matches=True sample_max_id=31936 eos_in_samples=12
+ravi            engineering.val.bin                     36,769,830  ver=1 vocab=32000 eos=31936 header_tokens=18,384,897 size_matches=True sample_max_id=31936 eos_in_samples=10
+ravi            sciprog.train.bin                    3,174,032,236  ver=1 vocab=32000 eos=31936 header_tokens=1,587,016,100 size_matches=True sample_max_id=31936 eos_in_samples=87
+ravi            sciprog.val.bin                         14,985,528  ver=1 vocab=32000 eos=31936 header_tokens=7,492,746 size_matches=True sample_max_id=31936 eos_in_samples=162
+ravi            sciqa.train.bin                      3,760,815,620  ver=1 vocab=32000 eos=31936 header_tokens=1,880,407,792 size_matches=True sample_max_id=31936 eos_in_samples=1911
+ravi            sciqa.val.bin                            18,950,650  ver=1 vocab=32000 eos=31936 header_tokens=9,475,307 size_matches=True (first probe hit a typo in the file id; re-probed OK)
+finastro        astro.train.bin                         56,330,738  ver=1 vocab=32000 eos=31936 header_tokens=28,165,351 size_matches=True sample_max_id=31936 eos_in_samples=3285
+finastro        astro.val.bin                              281,476  ver=1 vocab=32000 eos=31936 header_tokens=140,720 size_matches=True sample_max_id=31936 eos_in_samples=3264
+finastro        finance.train.bin                      163,938,590  ver=1 vocab=32000 eos=31936 header_tokens=81,969,277 size_matches=True sample_max_id=31936 eos_in_samples=13072
+finastro        finance.val.bin                            824,820  ver=1 vocab=32000 eos=31936 header_tokens=412,392 size_matches=True sample_max_id=31936 eos_in_samples=13170
+prabanjan_bins  astro.train.bin                         40,412,162  ver=1 vocab=32000 eos=31936 header_tokens=20,206,063 size_matches=True sample_max_id=31936 eos_in_samples=1788
+prabanjan_bins  astro.val.bin                              203,548  ver=1 vocab=32000 eos=31936 header_tokens=101,756 size_matches=True sample_max_id=-1 eos_in_samples=336
+prabanjan_bins  engineering_reasoning.train.bin      1,474,462,260  ver=1 vocab=32000 eos=31936 header_tokens=737,231,112 size_matches=True sample_max_id=31936 eos_in_samples=11291
+prabanjan_bins  engineering_reasoning.val.bin            7,595,534  ver=1 vocab=32000 eos=31936 header_tokens=3,797,749 size_matches=True sample_max_id=31936 eos_in_samples=9348
+prabanjan_bins  exp_val.train.bin                    1,257,796,852  ver=1 vocab=32000 eos=31936 header_tokens=628,898,408 size_matches=True sample_max_id=31936 eos_in_samples=80
+prabanjan_bins  exp_val.val.bin                          6,442,020  ver=1 vocab=32000 eos=31936 header_tokens=3,220,992 size_matches=True sample_max_id=31936 eos_in_samples=76
+prabanjan_bins  finance.train.bin                       34,256,260  ver=1 vocab=32000 eos=31936 header_tokens=17,128,112 size_matches=True sample_max_id=31936 eos_in_samples=7954
+prabanjan_bins  finance.val.bin                            172,772  ver=1 vocab=32000 eos=31936 header_tokens=86,368 size_matches=True sample_max_id=-1 eos_in_samples=1385
+prabanjan_bins  gen_eng.train.bin                    1,172,011,102  ver=1 vocab=32000 eos=31936 header_tokens=586,005,533 size_matches=True sample_max_id=31936 eos_in_samples=104
+prabanjan_bins  gen_eng.val.bin                          6,330,450  ver=1 vocab=32000 eos=31936 header_tokens=3,165,207 size_matches=True sample_max_id=31936 eos_in_samples=104
+prabanjan_bins  math.train.bin                       1,991,367,816  ver=1 vocab=32000 eos=31936 header_tokens=995,683,890 size_matches=True sample_max_id=31936 eos_in_samples=251
+prabanjan_bins  math.val.bin                             9,175,332  ver=1 vocab=32000 eos=31936 header_tokens=4,587,648 size_matches=True sample_max_id=31936 eos_in_samples=280
+prabanjan_bins  multistep.train.bin                    176,348,326  ver=1 vocab=32000 eos=31936 header_tokens=88,174,145 size_matches=True sample_max_id=31936 eos_in_samples=24443
+prabanjan_bins  multistep.val.bin                          890,174  ver=1 vocab=32000 eos=31936 header_tokens=445,069 size_matches=True sample_max_id=31936 eos_in_samples=25011
+prabanjan_bins  physics.train.bin                    1,274,409,482  ver=1 vocab=32000 eos=31936 header_tokens=637,204,723 size_matches=True sample_max_id=31936 eos_in_samples=93
+prabanjan_bins  physics.val.bin                          6,010,948  ver=1 vocab=32000 eos=31936 header_tokens=3,005,456 size_matches=True sample_max_id=31936 eos_in_samples=144
+prabanjan_bins  tech_comm.train.bin                  1,068,972,760  ver=1 vocab=32000 eos=31936 header_tokens=534,486,362 size_matches=True sample_max_id=31936 eos_in_samples=356
+prabanjan_bins  tech_comm.val.bin                        4,971,312  ver=1 vocab=32000 eos=31936 header_tokens=2,485,638 size_matches=True sample_max_id=31936 eos_in_samples=368
+gokul           bio.train.bin                           89,100,336  ver=1 vocab=32000 eos=31936 header_tokens=44,550,150 size_matches=True sample_max_id=31936 eos_in_samples=1044
+gokul           bio.val.bin                                433,490  ver=1 vocab=32000 eos=31936 header_tokens=216,727 size_matches=True sample_max_id=31936 eos_in_samples=841
+gokul           earth.train.bin                        146,414,970  ver=1 vocab=32000 eos=31936 header_tokens=73,207,467 size_matches=True sample_max_id=31936 eos_in_samples=541
+gokul           earth.val.bin                              620,786  ver=1 vocab=32000 eos=31936 header_tokens=310,375 size_matches=True sample_max_id=31936 eos_in_samples=552
+gokul           scidisc.train.bin                    2,003,235,636  ver=1 vocab=32000 eos=31936 header_tokens=1,001,617,800 size_matches=True sample_max_id=31936 eos_in_samples=262
+gokul           scidisc.val.bin                          9,714,720  ver=1 vocab=32000 eos=31936 header_tokens=4,857,342 size_matches=True sample_max_id=31936 eos_in_samples=86
+namit           numsim_sources.csv                       3,014,973
+namit           numsim.train.bin                       236,055,050  ver=1 vocab=32000 eos=31936 header_tokens=118,027,507 size_matches=True sample_max_id=31936 eos_in_samples=43
+namit           numsim.val.bin                           2,903,340  ver=1 vocab=32000 eos=31936 header_tokens=1,451,652 size_matches=True sample_max_id=31936 eos_in_samples=36
+namit           report.json                                  2,108
+namit           SHA256SUMS                                     164
+pankaj          physai_manifest.jsonl                    4,328,927
+pankaj          physai_README_and_sha256.txt                   940
+pankaj          physai.train.bin                       102,510,116  ver=1 vocab=32000 eos=31936 header_tokens=51,255,040 size_matches=True sample_max_id=31936 eos_in_samples=32
+pankaj          physai.val.bin                           2,000,288  ver=1 vocab=32000 eos=31936 header_tokens=1,000,126 size_matches=True sample_max_id=31936 eos_in_samples=37
+
+== 2. whole-file checks (run)
+== numsim train
+-rw-r--r-- 1 panka 197609 236055050 Nov 11 18:03 namit/numsim.train.bin
+numsim.train.bin: OK
+numsim.val.bin: OK
+frozen tokenizer: n_vocab=32000 eos_id=31936 sha256=10b3c5aecf6b81746bf86f8c18f8c576bf716a3620e7632e8fc2684006b51cdc
+file                                                      tokens        docs  mean doc  status
+numsim.train.bin                                     118,027,507      10,337     11418  ok
+numsim.val.bin                                         1,451,652         115     12623  ok
+RESULT: PASS
+== finance/astro
+3ba6c8a1a340f07e6a165a6b635da3118a847afded75a85043bc73fbd41ee12b *fa/astro.train.bin
+04156b7b6cfdf9b6155ac282419b49d6c3df9607064d499683c40ce9ac30ce4c *fa/astro.val.bin
+0290824ec5a9e7e70685cdeda007e509e8930b01a84d9b02809749611154e297 *fa/finance.train.bin
+8fc73328443270a3c3d59ee1836e043765b2126c5f3d9c84f4569bee6d08062b *fa/finance.val.bin
+frozen tokenizer: n_vocab=32000 eos_id=31936 sha256=10b3c5aecf6b81746bf86f8c18f8c576bf716a3620e7632e8fc2684006b51cdc
+file                                                      tokens        docs  mean doc  status
+astro.train.bin                                       28,165,351     175,574       160  ok
+astro.val.bin                                            140,720         879       160  ok
+finance.train.bin                                     81,969,277   2,058,299        40  ok
+finance.val.bin                                          412,392      10,340        40  ok
+RESULT: PASS
+== eng_reasoning
+total 1447328
+-rw-r--r-- 1 panka 197609 1474462260 Nov 11 18:04 engineering_reasoning.train.bin
+-rw-r--r-- 1 panka 197609    7595534 Nov 11 18:04 engineering_reasoning.val.bin
+395db121263297f2cad0a0733416edd28d4dd7ad83e93c4b5627009f8e73348a *er/engineering_reasoning.train.bin
+4dbf4861cb53c9a210ce2eb55ad1655cf3edb593500c1778e384e6c2c99f06ac *er/engineering_reasoning.val.bin
+frozen tokenizer: n_vocab=32000 eos_id=31936 sha256=10b3c5aecf6b81746bf86f8c18f8c576bf716a3620e7632e8fc2684006b51cdc
+file                                                      tokens        docs  mean doc  status
+engineering_reasoning.train.bin                      737,231,112  13,549,649        54  ok
+engineering_reasoning.val.bin                          3,797,749      68,386        56  ok
+RESULT: PASS
+ALLDONE
+
+== 3. engineering (Ravi) re-uploaded/copied 2:38 pm: whole-file sha256 of the Drive copy
+b914330e39e0afb6a85b78828c9f31e7ae66bbd3d10bde48b3b6a8778b8cd683 *eng/engineering.val.bin
+-rw-r--r-- 1 panka 197609 5973432128 Nov 11 18:11 eng/engineering.train.bin
+841f77e2d1c606bb8f2ab169d9c7670b0d7709e3492606a6ba60264373ed313c *eng/engineering.train.bin
+recorded on 8 Nov (docs/evidence/ravi_bins_sha256_2026-11-08.txt):
+841f77e2d1c606bb8f2ab169d9c7670b0d7709e3492606a6ba60264373ed313c *engineering.train.bin
+b914330e39e0afb6a85b78828c9f31e7ae66bbd3d10bde48b3b6a8778b8cd683 *engineering.val.bin
+
+== 4. Namit report.json (as posted on the Drive)
+{
+ "collected_documents": 13100,
+ "kept_documents": 10452,
+ "tokens": 119479159,
+ "tokenizer": "vocab32k_v2 (sha256 10b3c5aecf6b81746bf86f8c18f8c576bf716a3620e7632e8fc2684006b51cdc)",
+ "tokens_by_source": {
+  "nasa_ntrs": 38606479,
+  "doe_osti": 0,
+  "pmc_oa": 20279157,
+  "openwebmath": 60593523
+ },
+ "documents_by_source": {
+  "nasa_ntrs": 1904,
+  "openwebmath": 6122,
+  "pmc_oa": 2426
+ },
+ "deduplicated_against": [
+  "math.train.bin"
+ ],
+ "removed": {
+  "badly extracted": 189,
+  "too short after cutting boilerplate": 887,
+  "web listing page": 594,
+  "near-duplicate": 395,
+  "other version, same title": 156,
+  "already in math.train.bin": 427
+ },
+ "boilerplate_cut_in_documents": {
+  "report_documentation_form": 1264,
+  "references": 2282,
+  "figure_axis_text": 1937,
+  "sti_page": 332
+ },
+ "held_sources_not_included": {
+  "fineweb_edu": 1
+ },
+ "files_sha256": {
+  "09_numerical_simulation-00000.jsonl.gz": "598b2051aa348b30c4be8022c0114003d2d76b64b77bb436126a5158bc563c9e",
+  "09_numerical_simulation-00001.jsonl.gz": "b7cb8def9810549d2651288fc84520f21a97a89b29934de8dc53aebe3b374b79",
+  "09_numerical_simulation-00002.jsonl.gz": "bdba98d4c47986e6d0babb3e351a4350222833ff45f34b4e34090ba509142545",
+
+== 5. Engineering Reasoning document statistics (sample 146,707 documents): median 26 tokens, p90 95, p99 332, 90.8% shorter than 100 tokens, 17.7% of tokens in documents >= 1000 tokens. Whole file: 13,549,649 docs, mean 54.
+   31 Oct build recorded in docs/DATASET_CARDS_2026-11-05.md: 805.0M tokens, 259,525 documents, mean 3,102.
+
+== 6. Finance mix (random sample, 90,399 docs): historical stock-price rows 79.1% of docs / 70.9% of tokens; SEC XBRL fact rows 6.6% / 7.6%; ETHUSDT+BTCUSDT candles 4.1% / 6.3%; FRED series ~7% / ~6%
+   Astro mix (21,962 docs): Title/Abstract records 88.4% of docs; keyword estimate on 17,407 abstracts: 55.4% astronomy words, 8.8% aero/material words only, 35.8% neither
+
+== 7. SWE-bench overlap scan of engineering.train.bin / val.bin (run; scripts swe_scan.py, swe_scan2.py in scratchpad tools)
+Method: 2,294 SWE-bench test problem statements (HF princeton-nlp/SWE-bench, test split; contains Lite and Verified) tokenised with the frozen tokenizer; 32-token windows every 48 tokens (every 16 for the detailed pass); windows with fewer than 16 distinct tokens and windows shared by several statements dropped; 64-bit polynomial window hash scan of the bin.
+Positive control: 10 statements embedded in an agent-style prompt inside a dummy bin -> 10 of 10 found.
+eng/engineering.train.bin: tokens 2,986,716,046  statements with >=1 distinct matching window: 44, >=3 distinct windows: 2  (1268s)
+    django__django-16254 5
+    django__django-13925 3
+    pydata__xarray-6721 2
+    pydata__xarray-5362 2
+    pydata__xarray-6889 2
+    pydata__xarray-6999 2
+    pydata__xarray-4184 2
+    pydata__xarray-6599 2
+    pydata__xarray-6857 2
+    sphinx-doc__sphinx-11550 2
+    sphinx-doc__sphinx-9128 2
+    mwaskom__seaborn-2946 1
+    pytest-dev__pytest-7500 1
+    mwaskom__seaborn-2848 1
+    django__django-5158 1
+SCANDONE
+validation file: 0 statements with a matching window.
+Detailed pass on the 11 statements with >=2 windows (stride 16): best case django__django-16254 matched 11 of 79 windows (14%), django__django-13925 8 of 67 (12%), the rest 2 to 9%. Contexts of the hits: SQL schema lines, Django warnings, sphinx build logs, xarray issue template text, environment dumps = boilerplate.
+Conclusion: no SWE-bench test problem statement is present in the bin. Not covered: paraphrases, test patches.
+
+== 8. arXiv CC-licensed full text (Hugging Face common-pile/arxiv_papers_filtered, 8 files), streamed 11 Nov
+RESULT docs=42706 chars=2599902486 est_tokens(chars/3.6)=722M licences={'Creative Commons - Attribution - https:/': 34547, 'Creative Commons - Attribution Share-Ali': 3233, 'Creative Commons Zero - Public Domain - ': 3108, 'Public Domain': 1818}
+RESULT docs=40925 chars=2674095515 est_tokens(chars/3.6)=743M licences={'Creative Commons - Attribution - https:/': 37370, 'Creative Commons - Attribution Share-Ali': 1859, 'Creative Commons Zero - Public Domain - ': 1696}
+RESULT docs=40678 chars=2702761076 est_tokens(chars/3.6)=751M licences={'Creative Commons - Attribution - https:/': 37399, 'Creative Commons - Attribution Share-Ali': 1738, 'Creative Commons Zero - Public Domain - ': 1541}
+RESULT docs=40575 chars=2702495250 est_tokens(chars/3.6)=751M licences={'Creative Commons - Attribution - https:/': 37335, 'Creative Commons - Attribution Share-Ali': 1803, 'Creative Commons Zero - Public Domain - ': 1437}
+RESULT docs=40410 chars=2700096004 est_tokens(chars/3.6)=750M licences={'Creative Commons - Attribution - https:/': 37186, 'Creative Commons - Attribution Share-Ali': 1837, 'Creative Commons Zero - Public Domain - ': 1387}
+RESULT docs=40583 chars=2697004010 est_tokens(chars/3.6)=749M licences={'Creative Commons - Attribution - https:/': 37393, 'Creative Commons - Attribution Share-Ali': 1884, 'Creative Commons Zero - Public Domain - ': 1306}
+RESULT docs=39451 chars=2678971149 est_tokens(chars/3.6)=744M licences={'Creative Commons - Attribution - https:/': 36436, 'Creative Commons - Attribution Share-Ali': 1871, 'Creative Commons Zero - Public Domain - ': 1144}
+RESULT docs=10096 chars=669927777 est_tokens(chars/3.6)=186M licences={'Creative Commons - Attribution - https:/': 9368, 'Creative Commons - Attribution Share-Ali': 461, 'Creative Commons Zero - Public Domain - ': 263, 'Public Domain': 4}
+TOTAL docs=295,424 chars=19,425,253,267 -> est. 5.40B tokens at 3.6 chars/token (estimate)
+
+== 9. Ravi's engineering breakdown vs audit raw table (calculation)
+source rows_raw rows_final ratio tokens_raw(M) tokens_final(M) ratio
+opencode 25000 21341 0.854 1322.5 1038.8 0.785
+claudecode 8233 7028 0.854 600.0 471.1 0.785
+minisweagent 7147 6101 0.854 490.0 384.8 0.785
+openhands 6949 5932 0.854 490.1 384.9 0.785
+sweagent 5030 4294 0.854 360.7 283.4 0.786
+swe_smith_py 14026 11973 0.854 280.0 219.9 0.785
+swe_smith 12300 10499 0.854 210.0 164.9 0.785
+swe_gym 2438 2081 0.854 55.2 43.4 0.786
+swe_agent 830 711 0.857 17.4 13.9 0.801
+=> every source loses 14.3-14.6% of rows and ~21.5% of tokens; totals 81,953 -> 69,960 rows and 3,825.9M -> 3,005.1M tokens (final total equals the bin header exactly).
+
+== 10. HF card nvidia/Open-SWE-Traces (read 11 Nov via fetch): CC BY 4.0; generating models named: MiniMax, Qwen, DeepSeek, GLM; 'claudecode' = Claude-Code agent harness (rows list Qwen3.8-Flash-Next as teacher); no decontamination statement; tasks from Scale-SWE and SWE-rebench-V2.
+   Anthropic Commercial Terms (read): Section B outputs belong to the customer; D.4 forbids the customer to use the Services to build competing products including training competing models (not relevant here because no Claude model is named as generator).
+
+== 11. GitHub code lane sample (run): scripts/collect_domain10_github_code.py; 396 repositories for topic physics-informed-neural-networks (MIT/Apache/BSD); random 45 -> 42 with text, 1,432 files, 10.16M characters = 2.9M tokens (69k per repository, estimate).

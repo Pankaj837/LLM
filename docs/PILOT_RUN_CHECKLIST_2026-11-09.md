@@ -15,21 +15,21 @@ git clone https://github.com/Pankaj837/LLM.git && cd LLM
 pip install -e ".[dev]"
 ```
 
-## C. Data (put every file in `bins/`)
-Names must be `<name>.train.bin` and `<name>.val.bin`. Domains whose train file is missing are left out and the others are renormalised, so a missing bin does not stop the run, but it changes the mix: **write down which are missing**.
+## C. Data (put every file in `bins/`) - updated 11 Nov 2026 after the Drive audit
+Names must be `<name>.train.bin` and `<name>.val.bin`. Domains whose train file is missing are left out and the others are renormalised, so a wrong name does not stop the run but silently changes the mix: **write down which are missing**. All 40 files are on the shared Drive folder `1B pilot training` (`https://drive.google.com/drive/folders/15rfwpGo3fhH8wvRYOhYQSaGJB7xEeLUX`). Token counts are the file headers read on 11 Nov (run: header + 4 samples per file; whole-file `check_bins` where marked).
 
-| name | pilot tokens | where |
-|---|---|---|
-| cad, chem, code, engineering (agent trajectories), sciqa | 40M, 40M, 60M, 40M, 50M | Drive folder `1.5B Bins` (Ravi) |
-| sciprog | 50M | same Drive folder `1.5B Bins`, **new de-duplicated files of 9 Nov** (verified by me: sha256, `check_bins` PASS, 0 duplicates) |
-| math, physics, multistep, astro, finance, bio, earth, scidisc | 80, 70, 70, 30, 20, 40, 30, 40M | Prabanjan's and Gokul's earlier bins (the 34 files of the A100 run), renamed to these names |
-| eng_reasoning | 80M | **missing** (Prabanjan): the run goes ahead without it unless Raju says wait |
-| physai (Domain 10) | 70M asked; **52.3M available** | `physai.train.bin` / `physai.val.bin` (train 51,255,040 + val 1,000,126 tokens, `check_bins` PASS, sha256 in `docs/evidence/physai_sha256_2026-11-09.txt`); on the Drive once Pankaj uploads it |
-| numsim (Domain 9) | 70M asked; **39.9M available** | `numsim.train.bin` / `numsim.val.bin` (Swaraj's 4,368 CC BY / CC0 papers; train 39,135,773 + val 762,131 tokens, `check_bins` PASS, sha256 in `docs/evidence/numsim_sha256_2026-11-09.txt`); Namit's NASA collection will be added later |
-| gen_eng, exp_val, tech_comm | 60, 40, 20M | no data exists: left out |
+| name the program reads | pilot plan (M) | Drive sub-folder / file | train tokens | note |
+|---|---|---|---|---|
+| cad, chem, code, engineering, sciprog, sciqa | 40, 40, 60, 40, 50, 50 | `ravi bins` | 840.6M, 545.7M, 1,517.4M, 2,986.7M, 1,587.0M, 1,880.4M | whole-file hashes in `docs/evidence/ravi_*`; `engineering` hash identical to 8 Nov (run 11 Nov) |
+| bio, earth, scidisc | 40, 30, 40 | `Gokkul Bins/llm_dataset_bins` | 44.6M, 73.2M, 1,001.6M | header + samples |
+| math, physics, multistep, gen_eng, exp_val, tech_comm | 80, 70, 70, 60, 40, 20 | `prabanjan/bins` | 995.7M, 637.2M, 88.2M, 586.0M, 628.9M, 534.5M | header + samples |
+| **astro, finance** | 30, 20 | **`finance/astro updated`** (not the older files of the same name in `prabanjan/bins`) | 28.2M, 82.0M | whole-file `check_bins` PASS on 11 Nov; finance is about 94% numeric records, about half of astro is not astronomy |
+| **eng_reasoning** | 80 | `prabanjan/bins/engineering_reasoning.*.bin` **must be renamed** `eng_reasoning.*.bin` | 737.2M | **DEFECT (run 11 Nov): 13,549,649 "documents", median 26 tokens (the wrongly split build). Do not use for quality results; rebuild from the original text (259,525 documents, 805.0M tokens in the 31 Oct build). Without the rename the program leaves the domain out.** |
+| numsim | 70 | `namit bins` | 118.0M | whole-file hash and `check_bins` PASS on 11 Nov; 51% OpenWebMath (Raju approved 9 Nov, 10:15 pm) |
+| physai | 70 asked | `pankaj bins` | 51.3M | whole-file hash verified earlier; 1.37 passes |
 
-## Final composition of the pilot (9 Nov, for Chandrika and Gokul)
-Domains with data today: cad, chem, code, engineering, sciqa, sciprog, math, physics, multistep, astro, finance, bio, earth, scidisc, physai = **800M of the 1,000M planned tokens** once numsim (39.9M available) is added. Without data: eng_reasoning 80M, gen_eng 60M, exp_val 40M, tech_comm 20M = 200M. `gpu_session.py` leaves them out and renormalises, so every present domain is drawn about 1.25 times its planned share (calculation, not run on the GPU). physai and numsim are then each about 8.75% of the tokens = about 87.5M drawn from 52.3M and 39.9M available, i.e. about 1.7 and 2.2 passes over those two domains. The 1.5B full-run composition stays open until Engineering Reasoning (Prabanjan), Domain 9 (Namit), Biology (+255M) and Earth (+152M) arrive.
+## Final composition of the pilot (11 Nov, for Chandrika and the run owner)
+All 20 domains have a train and a validation bin on the Drive. With the verified train-token counts every domain supplies its planned share, so **nothing is renormalised and the mix is the planned 1,000M**. Highest repeats (calculation, not run on a GPU): physai 1.37 passes, astro 1.07, bio 0.90, multistep 0.79, numsim 0.59, earth 0.41; all others below 0.25. If `eng_reasoning` is left out (wrong name or no rebuild), the other 19 domains are drawn about 1.09 times their planned share (920M of 1,000M planned present). The 1.5B full-run composition stays open until Engineering Reasoning (rebuild), Biology (+255M), Earth (+152M), real finance text, on-topic astronomy and Physics + AI (+18.7M) arrive.
 
 Also copy Ravi's `build_manifest.json` into `bins/` (preflight warns without it).
 

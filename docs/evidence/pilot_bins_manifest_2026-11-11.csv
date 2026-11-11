@@ -1,0 +1,41 @@
+file_name_to_use,drive_folder,drive_file_name,bytes,tokens_from_header,size_matches_header,note
+astro.train.bin,finance/astro updated,astro.train.bin,56330738,28165351,True,"use this one (updated 11 Nov), not the old file in prabanjan/bins"
+astro.val.bin,finance/astro updated,astro.val.bin,281476,140720,True,"use this one (updated 11 Nov), not the old file in prabanjan/bins"
+bio.train.bin,Gokkul Bins/llm_dataset_bins,bio.train.bin,89100336,44550150,True,
+bio.val.bin,Gokkul Bins/llm_dataset_bins,bio.val.bin,433490,216727,True,
+cad.train.bin,ravi bins,cad.train.bin,1681212222,840606093,True,
+cad.val.bin,ravi bins,cad.val.bin,8127814,4063889,True,
+chem.train.bin,ravi bins,chem.train.bin,1091332848,545666406,True,
+chem.val.bin,ravi bins,chem.val.bin,5549712,2774838,True,
+code.train.bin,ravi bins,code.train.bin,3034845190,1517422577,True,
+code.val.bin,ravi bins,code.val.bin,15653534,7826749,True,
+earth.train.bin,Gokkul Bins/llm_dataset_bins,earth.train.bin,146414970,73207467,True,
+earth.val.bin,Gokkul Bins/llm_dataset_bins,earth.val.bin,620786,310375,True,
+eng_reasoning.train.bin,prabanjan/bins,engineering_reasoning.train.bin,1474462260,737231112,True,RENAME from engineering_reasoning; DEFECT (wrongly split build) - rebuild pending
+eng_reasoning.val.bin,prabanjan/bins,engineering_reasoning.val.bin,7595534,3797749,True,RENAME from engineering_reasoning; DEFECT (wrongly split build) - rebuild pending
+engineering.train.bin,ravi bins,engineering.train.bin,5973432128,2986716046,True,
+engineering.val.bin,ravi bins,engineering.val.bin,36769830,18384897,True,
+exp_val.train.bin,prabanjan/bins,exp_val.train.bin,1257796852,628898408,True,
+exp_val.val.bin,prabanjan/bins,exp_val.val.bin,6442020,3220992,True,
+finance.train.bin,finance/astro updated,finance.train.bin,163938590,81969277,True,"use this one (updated 11 Nov), not the old file in prabanjan/bins"
+finance.val.bin,finance/astro updated,finance.val.bin,824820,412392,True,"use this one (updated 11 Nov), not the old file in prabanjan/bins"
+gen_eng.train.bin,prabanjan/bins,gen_eng.train.bin,1172011102,586005533,True,
+gen_eng.val.bin,prabanjan/bins,gen_eng.val.bin,6330450,3165207,True,
+math.train.bin,prabanjan/bins,math.train.bin,1991367816,995683890,True,
+math.val.bin,prabanjan/bins,math.val.bin,9175332,4587648,True,
+multistep.train.bin,prabanjan/bins,multistep.train.bin,176348326,88174145,True,
+multistep.val.bin,prabanjan/bins,multistep.val.bin,890174,445069,True,
+numsim.train.bin,namit bins,numsim.train.bin,236055050,118027507,True,
+numsim.val.bin,namit bins,numsim.val.bin,2903340,1451652,True,
+physai.train.bin,pankaj bins,physai.train.bin,102510116,51255040,True,
+physai.val.bin,pankaj bins,physai.val.bin,2000288,1000126,True,
+physics.train.bin,prabanjan/bins,physics.train.bin,1274409482,637204723,True,
+physics.val.bin,prabanjan/bins,physics.val.bin,6010948,3005456,True,
+scidisc.train.bin,Gokkul Bins/llm_dataset_bins,scidisc.train.bin,2003235636,1001617800,True,
+scidisc.val.bin,Gokkul Bins/llm_dataset_bins,scidisc.val.bin,9714720,4857342,True,
+sciprog.train.bin,ravi bins,sciprog.train.bin,3174032236,1587016100,True,
+sciprog.val.bin,ravi bins,sciprog.val.bin,14985528,7492746,True,
+sciqa.train.bin,ravi bins,sciqa.train.bin,3760815620,1880407792,True,
+sciqa.val.bin,ravi bins,sciqa.val.bin,18950650,9475307,True,
+tech_comm.train.bin,prabanjan/bins,tech_comm.train.bin,1068972760,534486362,True,
+tech_comm.val.bin,prabanjan/bins,tech_comm.val.bin,4971312,2485638,True,

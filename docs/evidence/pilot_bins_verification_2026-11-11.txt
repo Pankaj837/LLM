@@ -1,0 +1,46 @@
+Final 40 pilot files, verified 11 Nov 2026. Check on the training machine inside bins/: sha256sum -c pilot_bins_sha256_2026-11-11.txt (every line must say OK).
+Sources: ravi bins (cad, chem, code, engineering, sciprog, sciqa); Gokkul Bins/llm_dataset_bins (bio, earth, scidisc); prabanjan/bins (math, physics, multistep, gen_eng, exp_val, tech_comm); finance/astro updated (astro, finance); namit bins (numsim); eng_reasoning_upload https://drive.google.com/drive/folders/13c0qTtHjc0WlhaNYTM7QC3cS36eGNij8 (eng_reasoning); domain10_v2_upload https://drive.google.com/drive/folders/1wa71m1WzhVjYOnuB923sY3NE-oPjVSn0 (physai). NOT these: engineering_reasoning.* and astro/finance in prabanjan/bins, physai.* in pankaj bins.
+Method: each file streamed from the Drive and checked end to end (sha256, header token count = counted tokens, every token id < 32,000, last token = end of text, number of documents = number of end-of-text tokens).
+
+astro.train.bin            tokens=28,165,351     docs=175574     OK  whole file streamed and checked 11 Nov
+astro.val.bin              tokens=140,720        docs=879        OK  whole file streamed and checked 11 Nov
+bio.train.bin              tokens=44,550,150     docs=79641      OK  whole file streamed and checked 11 Nov
+bio.val.bin                tokens=216,727        docs=359        OK  whole file streamed and checked 11 Nov
+cad.train.bin              tokens=840,606,093    docs=954150     OK  whole file streamed and checked 11 Nov
+cad.val.bin                tokens=4,063,889      docs=4647       OK  whole file streamed and checked 11 Nov
+chem.train.bin             tokens=545,666,406    docs=4839198    OK  whole file streamed and checked 11 Nov
+chem.val.bin               tokens=2,774,838      docs=24477      OK  whole file streamed and checked 11 Nov
+code.train.bin             tokens=1,517,422,577  docs=997104     OK  whole file streamed and checked 11 Nov
+code.val.bin               tokens=7,826,749      docs=4974       OK  whole file streamed and checked 11 Nov
+earth.train.bin            tokens=73,207,467     docs=62919      OK  whole file streamed and checked 11 Nov
+earth.val.bin              tokens=310,375        docs=303        OK  whole file streamed and checked 11 Nov
+eng_reasoning.train.bin    tokens=804,961,418    docs=259525     OK  downloaded back from the Drive 11 Nov, sha256 equals the built file, check_bins PASS
+eng_reasoning.val.bin      tokens=4,185,109      docs=1323       OK  downloaded back from the Drive 11 Nov, sha256 equals the built file, check_bins PASS
+engineering.train.bin      tokens=2,986,716,046  docs=-          OK  whole file downloaded 11 Nov, sha256 equal to 8 Nov; whole-file SWE-bench scan; header 2,986,716,046
+engineering.val.bin        tokens=18,384,897     docs=-          OK  whole file downloaded 11 Nov, sha256 equal to 8 Nov; header 18,384,897
+exp_val.train.bin          tokens=628,898,408    docs=88980      OK  whole file streamed and checked 11 Nov
+exp_val.val.bin            tokens=3,220,992      docs=455        OK  whole file streamed and checked 11 Nov
+finance.train.bin          tokens=81,969,277     docs=2058299    OK  whole file streamed and checked 11 Nov
+finance.val.bin            tokens=412,392        docs=10340      OK  whole file streamed and checked 11 Nov
+gen_eng.train.bin          tokens=586,005,533    docs=112113     OK  whole file streamed and checked 11 Nov
+gen_eng.val.bin            tokens=3,165,207      docs=596        OK  whole file streamed and checked 11 Nov
+math.train.bin             tokens=995,683,890    docs=540883     OK  whole file streamed and checked 11 Nov
+math.val.bin               tokens=4,587,648      docs=2680       OK  whole file streamed and checked 11 Nov
+multistep.train.bin        tokens=88,174,145     docs=4234933    OK  whole file streamed and checked 11 Nov
+multistep.val.bin          tokens=445,069        docs=21418      OK  whole file streamed and checked 11 Nov
+numsim.train.bin           tokens=118,027,507    docs=10337      OK  whole file streamed and checked 11 Nov
+numsim.val.bin             tokens=1,451,652      docs=115        OK  whole file streamed and checked 11 Nov
+physai.train.bin           tokens=68,775,755     docs=13519      OK  downloaded back from the Drive 11 Nov, sha256 equals the built file, check_bins PASS
+physai.val.bin             tokens=1,330,502      docs=287        OK  downloaded back from the Drive 11 Nov, sha256 equals the built file, check_bins PASS
+physics.train.bin          tokens=637,204,723    docs=158815     OK  whole file streamed and checked 11 Nov
+physics.val.bin            tokens=3,005,456      docs=795        OK  whole file streamed and checked 11 Nov
+scidisc.train.bin          tokens=1,001,617,800  docs=139297     OK  whole file streamed and checked 11 Nov
+scidisc.val.bin            tokens=4,857,342      docs=663        OK  whole file streamed and checked 11 Nov
+sciprog.train.bin          tokens=1,587,016,100  docs=420701     OK  whole file streamed and checked 11 Nov
+sciprog.val.bin            tokens=7,492,746      docs=2116       OK  whole file streamed and checked 11 Nov
+sciqa.train.bin            tokens=1,880,407,792  docs=4500344    OK  whole file streamed and checked 11 Nov
+sciqa.val.bin              tokens=9,475,307      docs=22738      OK  whole file streamed and checked 11 Nov
+tech_comm.train.bin        tokens=534,486,362    docs=449876     OK  whole file streamed and checked 11 Nov
+tech_comm.val.bin          tokens=2,485,638      docs=2292       OK  whole file streamed and checked 11 Nov
+
+Total training tokens in the 20 train files: 15,049,562,800

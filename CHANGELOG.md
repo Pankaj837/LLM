@@ -4,6 +4,9 @@
 ### Added (9 Nov 2026)
 - `scripts/collect_domain10_openalex.py` (Domain 10 top-up from OpenAlex, CC BY / CC0 only, resumable, PDFs not stored), `configs/pilot_1b.json` (20-domain 1B pilot mix), `docs/PILOT_RUN_CHECKLIST_2026-11-09.md` (Gokul's command checklist), `docs/evidence/ravi_sciprog_sha256_2026-11-09.txt`; docs: sciprog verification, Ravi's licence reply checked, ledger owners of Domains 9 and 10.
 
+### Added (11 Nov 2026, late night)
+- `docs/evidence/pilot_bins_sha256_2026-11-11.txt` (sha256 of the final 40 pilot files, `sha256sum -c` format) and `pilot_bins_verification_2026-11-11.txt` (whole-file check of every file from the Drive; 15,049,562,800 training tokens). Checklist section C links the two new upload folders.
+
 ### Added (11 Nov 2026, night)
 - `eng_reasoning` rebuilt from Prabanjan's original text (805.0M tokens, 259,525 documents, PASS; `docs/evidence/eng_reasoning_sha256_2026-11-11.txt`). `physai` version 2 = papers + permissively licensed GitHub code, 70.1M tokens, PASS (`physai_v2_sha256_2026-11-11.txt`, `physai_v2_code_manifest_2026-11-11.jsonl`). Checklist section C and `pilot_bins_manifest_2026-11-11.csv` updated.
 

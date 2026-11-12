@@ -35,6 +35,8 @@ Also copy Ravi's `build_manifest.json` into `bins/` (preflight warns without it)
 
 **Single source (11 Nov, night):** Ravi built one Drive folder `pilot_bins` with the 40 files + `SHA256SUMS.txt` (https://drive.google.com/drive/folders/1Tos80Itd1NOBxz7Wm2Hhe_6Uj4CW_J3h). His `SHA256SUMS.txt` is identical to `docs/evidence/pilot_bins_sha256_2026-11-11.txt` on all 40 lines (read: compared line by line, 12 Nov). Download all 40 files from it into `bins/`.
 
+**Engineering licence decision (12 Nov, owner-reported from the group chat):** the `engineering` bin contains SWE-smith trajectories (Claude 3.7 Sonnet according to the dataset card, read 12 Nov) and probably SWE-Gym trajectories (GPT-4o according to the card), about 14% of the file (428M of 3,005M tokens, proportional estimate from Ravi's table). Raju: original SWE-smith task instances are fine, the Claude/GPT-generated trajectories must be excluded; for the pilot he wrote "its completely okey for now" (option A: run the pilot with the file as it is, exclude in the 1.5B build). So `engineering.*.bin` stays unchanged for the pilot.
+
 Check the files against the hashes; all 40 lines must say OK:
 ```
 cd bins

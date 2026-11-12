@@ -14,8 +14,9 @@ seeded sampling in part 3, so a re-run gives the same numbers.
    top-1 and top-5 accuracy, and the calibration error of the top-1 prediction (do 60%-confident guesses come true 60% of the time?).
 3. ``generation``: held-out continuations and the fixed probes of ``sample_outputs.py``. Quality: probe pass rate. Repetition:
    share of repeated 4-grams (against the real continuation of the same documents), distinct 2-grams, repetition loops, for
-   greedy decoding and for one seeded sample (T=0.8) of the same prompt, which shows how much of the looping greedy decoding causes.
-   Consistency: greedy decoding twice gives identical text; three seeded samples (T=0.8) agree with each other on each probe;
+   greedy decoding and for one seeded sample of the same prompt, which shows how much of the looping greedy decoding causes.
+   Sampling is fixed (``SAMPLING``: temperature 0.8, top-k 50, top-p 0.95, seeds 1, 2, 3, own CPU random generator).
+   Consistency: greedy decoding twice gives identical text; the three seeded samples agree with each other on each probe;
    a multiple-choice answer survives reversing the order of the options.
 4. ``integrity``: SHA-256 of each file, all weights finite, parameter count, tokenizer hash, the step and validation loss stored in
    the checkpoint against ``metrics.jsonl``, the difference between the two checkpoints, identical logits on a repeated forward
@@ -123,19 +124,43 @@ def distinct(ids, n: int = 2) -> float:
     return 0.0 if not grams else len(set(grams)) / len(grams)
 
 
+# Fixed sampled decoding: the same settings for every checkpoint, recorded in the results. The random draw uses its own
+# CPU generator (not the global torch seed), so it does not depend on what ran before or on the device's random number
+# generator; the same checkpoint on the same kind of device gives identical samples. Across device types the logits can
+# differ in the last float bits, which very rarely changes a draw.
+SAMPLING = {"temperature": 0.8, "top_k": 50, "top_p": 0.95, "seeds": [1, 2, 3]}
+
+
 @torch.no_grad()
-def sample(model, prompt_ids, n, eos, device, seed, temperature=0.8) -> list:
-    torch.manual_seed(seed)
-    y = model.generate(torch.tensor([prompt_ids], device=device), max_new_tokens=n, temperature=temperature, eos_token_id=eos)
-    out = y[0, len(prompt_ids):].tolist()
-    return out[: out.index(eos)] if eos in out else out
+def sample(model, prompt_ids, n, eos, device, seed, temperature=SAMPLING["temperature"], top_k=SAMPLING["top_k"],
+           top_p=SAMPLING["top_p"]) -> list:
+    gen = torch.Generator(device="cpu").manual_seed(int(seed))
+    ctx = model.config.max_position_embeddings
+    ids, out = list(prompt_ids), []
+    for _ in range(n):
+        logits = model(torch.tensor([ids[-ctx:]], dtype=torch.long, device=device))[0, -1].double().cpu() / temperature
+        if top_k:
+            kth = torch.topk(logits, min(top_k, logits.numel())).values[-1]
+            logits[logits < kth] = float("-inf")
+        probs = torch.softmax(logits, -1)
+        if top_p and top_p < 1:
+            p, order = torch.sort(probs, descending=True)
+            drop = (torch.cumsum(p, 0) - p) >= top_p      # keep the smallest set whose mass reaches top_p
+            probs[order[drop]] = 0
+            probs = probs / probs.sum()
+        t = int(torch.multinomial(probs, 1, generator=gen))
+        if t == eos:
+            break
+        out.append(t)
+        ids.append(t)
+    return out
 
 
 @torch.no_grad()
 def generation_analysis(model, tok, vals: dict, items: list, device, per_domain: int, prompt_tokens: int, new_tokens: int,
-                        probe_tokens: int, seeds=(1, 2, 3), mcq_n: int = 400) -> dict:
+                        probe_tokens: int, seeds=tuple(SAMPLING["seeds"]), mcq_n: int = 400) -> dict:
     eos = tok.eos_id
-    out = {"domains": {}, "probes": [], "examples": []}
+    out = {"sampling": SAMPLING, "domains": {}, "probes": [], "examples": []}
     for name, path in vals.items():
         rows = []
         for prompt, ref in held_out_cases(path, tok, eos, prompt_tokens, new_tokens, per_domain):
@@ -200,8 +225,10 @@ def file_sha256(path: str) -> str:
 @torch.no_grad()
 def integrity(paths: list, vocab: str, metrics_path: str, device, sample_ids: list) -> dict:
     vsha = BPETokenizer.file_sha256(vocab)
-    with open(metrics_path, encoding="utf-8") as f:
-        val = {r["step"]: r.get("val_loss") for r in (json.loads(line) for line in f if line.strip())}
+    val = {}
+    if metrics_path:
+        with open(metrics_path, encoding="utf-8") as f:
+            val = {r["step"]: r.get("val_loss") for r in (json.loads(line) for line in f if line.strip())}
     out, states = {"checkpoints": {}}, []
     for p in paths:
         state, cfg, meta, raw = read_checkpoint(p)
@@ -243,10 +270,10 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--ckpt", required=True)
     ap.add_argument("--compare-ckpt", help="a second checkpoint of the same run, for the integrity comparison")
-    ap.add_argument("--metrics", required=True, help="metrics.jsonl of the training run")
-    ap.add_argument("--config", required=True, help="train_config.json of the training run")
+    ap.add_argument("--metrics", help="metrics.jsonl of the training run (needed for the loss part)")
+    ap.add_argument("--config", help="train_config.json of the training run (loss part; else seq_len comes from the checkpoint)")
     ap.add_argument("--vocab", required=True)
-    ap.add_argument("--val", nargs="+", required=True, metavar="NAME=PATH")
+    ap.add_argument("--val", nargs="*", default=[], metavar="NAME=PATH")
     ap.add_argument("--evals", default="evals")
     ap.add_argument("--out", default="analysis")
     ap.add_argument("--windows", type=int, default=100, help="validation windows per domain")
@@ -260,12 +287,19 @@ def main(argv=None) -> int:
     a = ap.parse_args(argv)
     parts = set(a.parts.split(","))
     dev = resolve_device(a.device)
-    with open(a.config, encoding="utf-8") as f:
-        tcfg = json.load(f)["train"]
-    seq_len = tcfg["seq_len"]
+    _, ckpt_cfg, _, _ = read_checkpoint(a.ckpt)
+    tcfg = None
+    if a.config:
+        with open(a.config, encoding="utf-8") as f:
+            tcfg = json.load(f)["train"]
+    seq_len = tcfg["seq_len"] if tcfg else ckpt_cfg.max_position_embeddings
+    if not (a.metrics and tcfg):
+        parts.discard("loss")          # no training log: skip the loss curves
     vals = dict(v.split("=", 1) for v in a.val)
+    if not vals:
+        parts.discard("next_token")    # no validation files
     tok = BPETokenizer.from_file(a.vocab)
-    res = {"checkpoint": os.path.abspath(a.ckpt), "device": str(dev), "seq_len": seq_len}
+    res = {"checkpoint": os.path.abspath(a.ckpt), "device": str(dev), "seq_len": seq_len, "parts": sorted(parts)}
     os.makedirs(os.path.dirname(os.path.abspath(a.out)), exist_ok=True)
 
     if "loss" in parts:

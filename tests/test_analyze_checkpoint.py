@@ -122,4 +122,42 @@ def test_val_overlap_and_tag_count(tmp_path):
     res = json.loads(out.read_text())
     r = res["overlap"]["d"]
     assert r["val_docs"] == 2 and r["exact_docs"] == 1 and 0 < r["window_share"] < 1
+    # the shared sentence occurs once in training, so every matched passage counts as rare (a copy), none as boilerplate
+    assert r["window_share_rare"] == r["window_share"] and r["window_share_common"] == 0
     assert res["tags"]["Benchmark source: data/CoT"]["d"] == 2
+
+
+def test_sampling_is_fixed_and_repeatable():
+    """Same seed -> same tokens, whatever ran before; different seeds differ; settings follow SAMPLING."""
+    model, cfg = tiny_model()
+    prompt = [5, 6, 7, 8]
+    a = ac.sample(model, prompt, 30, eos=-1, device="cpu", seed=1)
+    torch.manual_seed(12345)
+    torch.rand(1000)                  # the global random state must not matter
+    b = ac.sample(model, prompt, 30, eos=-1, device="cpu", seed=1)
+    c = ac.sample(model, prompt, 30, eos=-1, device="cpu", seed=2)
+    assert a == b and len(a) == 30 and a != c
+    assert ac.SAMPLING == {"temperature": 0.8, "top_k": 50, "top_p": 0.95, "seeds": [1, 2, 3]}
+    # top-k 1 is greedy decoding
+    g = ac.sample(model, prompt, 10, eos=-1, device="cpu", seed=3, top_k=1)
+    x = torch.tensor([prompt])
+    greedy = model.generate(x, max_new_tokens=10, temperature=0.0)[0, len(prompt):].tolist()
+    assert g == greedy
+
+
+def test_val_overlap_counts_boilerplate(tmp_path):
+    """A passage repeated in many training documents counts as common, not as a copy of the validation text."""
+    import check_val_overlap as cvo
+    tok = BPETokenizer.from_file(str(VOCAB))
+    enc = lambda s: tok.encode(s, allowed_special=set())   # noqa: E731
+    header = "Licensed under the Apache License, Version 2.0 (the License); you may not use this file except in compliance."
+    eos = tok.eos_id
+    val = enc(header) + [eos]
+    train = [i for k in range(12) for i in enc(header) + enc(f" file {k}") + [eos]]
+    write_bin(str(tmp_path / "d.val.bin"), np.array(val, dtype=np.uint16), 32000, eos)
+    write_bin(str(tmp_path / "d.train.bin"), np.array(train, dtype=np.uint16), 32000, eos)
+    out = tmp_path / "o.json"
+    assert cvo.main(["--bins", str(tmp_path), "--domains", "d", "--vocab", str(VOCAB), "--out", str(out), "--n", "8",
+                     "--windows", "10", "--tags"]) == 0
+    r = json.loads(out.read_text())["overlap"]["d"]
+    assert r["window_share"] > 0 and r["window_share_common"] == r["window_share"] and r["window_share_rare"] == 0

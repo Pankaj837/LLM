@@ -9,6 +9,8 @@ For every domain's ``<name>.val.bin`` and ``<name>.train.bin``:
 * ``exact_docs``: validation documents (split at the end-of-text token) that occur whole, token for token, in training.
 * ``window_share``: of ``--windows`` ``--n``-token passages spread evenly through the validation file, the share that occurs anywhere
   in training. Passages can be repeated boilerplate, so this measures overlap, not how much a validation loss is inflated.
+* ``window_share_rare`` / ``window_share_common``: the matched passages split by how often they occur in training: 1-2 times
+  (the same text copied, e.g. a near-duplicate document) or 10+ times (boilerplate shared by many documents).
 
 ``tags`` counts each ``--tags`` string in every training file, with and without a leading space (the tokenizer encodes the two
 differently, and inside a text the leading-space form is the usual one).
@@ -51,12 +53,13 @@ def overlap(val_path: str, train_path: str, n: int, windows: int, chunk: int) ->
     want = doc_hashes(va, hv.eos_id)
     idx = np.linspace(0, max(0, len(va) - n - 1), windows).astype(int)
     samples = np.unique(np.stack([ngram_hashes(va[i:i + n], n)[0] for i in idx]))
-    found, hit, prev = set(), set(), 0
+    found, hit, prev = set(), {}, 0
     for s in range(0, len(t), chunk):
         a = np.asarray(t[s:s + chunk + n - 1])
         h = ngram_hashes(a, n)
         j = np.minimum(np.searchsorted(samples, h), len(samples) - 1)
-        hit.update(h[samples[j] == h].tolist())
+        for k, c in zip(*np.unique(h[samples[j] == h], return_counts=True)):
+            hit[int(k)] = hit.get(int(k), 0) + int(c)
         for c in np.flatnonzero(a[:chunk] == ht.eos_id) + s:
             if c > prev:
                 k = hashlib.blake2b(np.asarray(t[prev:int(c)]).tobytes(), digest_size=12).digest()
@@ -67,7 +70,11 @@ def overlap(val_path: str, train_path: str, n: int, windows: int, chunk: int) ->
     same = sum(want[k][1] for k in found)
     return {"val_docs": docs, "exact_docs": same, "exact_doc_share": same / max(docs, 1),
             "exact_token_share": sum(want[k][0] * want[k][1] for k in found) / max(len(va), 1),
-            "windows": len(samples), "window_share": len(hit) / len(samples)}
+            "windows": len(samples), "window_share": len(hit) / len(samples),
+            # how often a matched passage occurs in training: once or twice points to a copy of the same text,
+            # 10+ times to boilerplate shared by many documents (licence headers, templates, standard phrasing)
+            "window_share_rare": sum(1 for c in hit.values() if c <= 2) / len(samples),
+            "window_share_common": sum(1 for c in hit.values() if c >= 10) / len(samples)}
 
 
 def count_tag(path: str, tok, text: str, chunk: int) -> int:
@@ -98,7 +105,8 @@ def main(argv=None) -> int:
         r = res["overlap"][d] = overlap(val, train, a.n, a.windows, a.chunk)
         for x in a.tags:
             res["tags"][x][d] = count_tag(train, tok, x, a.chunk)
-        print(f"{d}: {r['exact_docs']}/{r['val_docs']} whole documents, {r['window_share']:.1%} of {r['windows']} passages; "
+        print(f"{d}: {r['exact_docs']}/{r['val_docs']} whole documents, {r['window_share']:.1%} of {r['windows']} passages "
+              f"({r['window_share_rare']:.1%} found 1-2 times, {r['window_share_common']:.1%} found 10+ times); "
               f"tags {[res['tags'][x][d] for x in a.tags]}", flush=True)
     os.makedirs(os.path.dirname(os.path.abspath(a.out)), exist_ok=True)
     with open(a.out, "w", encoding="utf-8") as f:

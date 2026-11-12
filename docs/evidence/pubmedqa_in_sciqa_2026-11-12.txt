@@ -1,0 +1,6 @@
+PubMedQA (pqa_labeled, 1,000 items; HF qiaojin/PubMedQA) vs Ravi's sciqa bins - 12 Nov 2026 (run)
+Method: question + context + long answer of each item tokenised with the frozen vocab32k_v2; 32-token windows, stride 8; windows with fewer than 16 distinct tokens and windows shared by several items dropped; every window searched in the bin by a 64-bit hash (streamed from the Drive by HTTP Range, nothing stored). An item counts as "in the bin" when at least 50% of its windows are found.
+sciqa.val.bin   (18,950,650 B): 8 of 1000 items found, 0 partial
+sciqa.train.bin (3,760,815,620 B, Drive id as in Ravi's pilot_bins): 981 of 1000 items found, 11 partial (<50% of windows), 8 absent
+Meaning: Namit's statement (11-12 Nov, 1:11 pm) that the PubMedQA questions are in Ravi's sciqa bin is confirmed on the 1,000-item labelled set (981 in train). A PubMedQA score of 100% on the 100M model is leakage. Namit's wrapper flags such questions and does not score them. The pilot is not blocked; the sciqa build for the 1.5B run should be decontaminated against the frozen benchmark.
+Script: scratchpad pmqa_scan.py (not in the repo).

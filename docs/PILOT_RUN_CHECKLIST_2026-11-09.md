@@ -5,7 +5,7 @@
 **What the pilot is:** 1.5B model, 1,000M tokens, 1,907 steps of 524,288 tokens (256 sequences of 2,048 = micro-batch 4 x accumulation 64), learning rate 3e-4, evaluation every 477 steps (= 250M tokens), about 11 hours. The mix is the 20-domain split in `PILOT_1B_TOKEN_DIVISION_2026-11-05.md`.
 
 ## A. Rent the machine
-1 x H100 80 GB (not a MIG slice or A100 20 GB), on demand (spot can be reclaimed), at least 300 GB free disk (checkpoints are about 18 GB each, about 72 GB kept). Ubuntu image with CUDA and PyTorch. Raju asked for the amount before booking: about 13 GPU-hours at $2.98 = about $39, so $45.
+1 x H100 80 GB (not a MIG slice or A100 20 GB), on demand (spot can be reclaimed), at least 300 GB free disk (checkpoints are about 18 GB each, about 72 GB kept). Ubuntu image with CUDA and PyTorch. Raju asked for the amount before booking: about 13 GPU-hours at $2.98 = about $39, so $45 (9 Nov estimate, now out of date). **12 Nov update (group chat, owner-reported by Om Ahire, 7:06 pm):** Spheron on-demand H100 is $4.20/h (13 h = about $55; I read the Spheron page on 12 Nov: on-demand $4.20, spot $2.60, spot can be reclaimed so not for an 11-hour run); NeevCloud on-demand 1 x H100 is Rs 192.48/h (13 h = about Rs 2,500 + GST; the NeevCloud page returned HTTP 403 to me, so not checked). Om suggested NeevCloud if the account can be opened today, otherwise Spheron on-demand; H100 SXM 80 GB in both cases (PCIe may not reach the 20k tokens/s gate). Raju at 7:13 pm: "ok then book it and run". Billing starts when the machine is rented, so do Sections B-D first and copy `ckpt_best.pt`, `ckpt_last.pt` and the logs off the machine before releasing it.
 
 ## B. Set up (about 15 min)
 ```

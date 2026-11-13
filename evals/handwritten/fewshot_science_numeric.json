@@ -1,0 +1,17 @@
+{
+ "source": "hand-written worked examples, not part of the test",
+ "shots": [
+  {
+   "question": "A car travels 150 km in 2 hours. What is its average speed in km/h?",
+   "answer": 75
+  },
+  {
+   "question": "A 5 kg mass is lifted 2 m (g = 9.81 m/s²). What is the gain in potential energy in joules?",
+   "answer": 98.1
+  },
+  {
+   "question": "A 10 Ω resistor carries a current of 3 A. What is the voltage across it in volts?",
+   "answer": 30
+  }
+ ]
+}

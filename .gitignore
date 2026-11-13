@@ -18,3 +18,7 @@ data/*
 src/*.egg-info/
 build/
 !tokenizers/**/*.tok
+
+# evaluation report sources and generated tables (only reports/report.pdf is kept)
+reports/*
+!reports/report.pdf

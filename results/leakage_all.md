@@ -1,5 +1,7 @@
 # Train / evaluation leakage check
 
+> Run on 2026-11-03 against the older bins used for the 100M checkpoint (17 domains listed below). It does not cover Ravi's rebuilt bins: for those see `leakage_ravi_bins_2026-11-10.md` (267 leaked, including all 200 PubMedQA items in sciqa.train).
+
 - training files: astro.train.bin, bio.train.bin, cad.train.bin, chem.train.bin, code.train.bin, earth.train.bin, engineering.train.bin, exp_val.train.bin, finance.train.bin, gen_eng.train.bin, math.train.bin, multistep.train.bin, physics.train.bin, scidisc.train.bin, sciprog.train.bin, sciqa.train.bin, tech_comm.train.bin
 - 3619 questions; window 13 tokens (min 8); leaked = at least 20% (and 2) or 10 of a question's n-grams found
 - leaked 75, partial 83, clean 3354, too short to check 107

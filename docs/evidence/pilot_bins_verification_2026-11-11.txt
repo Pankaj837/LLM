@@ -44,3 +44,5 @@ tech_comm.train.bin        tokens=534,486,362    docs=449876     OK  whole file 
 tech_comm.val.bin          tokens=2,485,638      docs=2292       OK  whole file streamed and checked 11 Nov
 
 Total training tokens in the 20 train files: 15,049,562,800
+
+Update 14 Nov 2026: the 3 files that were quota-blocked on 12 Nov (engineering.train.bin, sciprog.train.bin, sciqa.train.bin in Ravi's pilot_bins folder) were streamed from Drive by HTTP Range (nothing stored) and hashed: all three equal the values in pilot_bins_sha256_2026-11-11.txt (engineering 841f77e2...ed313c, sciprog ba35843d...88f42, sciqa c2ca5c91...b36fa). With the 37 files checked on 12 Nov, all 40 files in Ravi's Drive folder now match. The VM's own check (Ravi, 14 Nov, owner-reported) also reported all 40 OK, and engineering.train.bin on the VM = 841f77e2...ed313c.

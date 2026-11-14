@@ -1,0 +1,42 @@
+git commit: 6490ecb1dec7d1ea15d69260bbe1e0fa7126e409
+python: 3.14.7  torch: 2.15.0
+54252dfec6573c82ec7124f745442b6ece933855151cd2a3f38039c3df867050  ../aikosh_download/aikosh/ckpt_best.pt
+2b72125a3bdb2cafaaaf87ca9f5b3a4ff24bb4a12770bedbedbe475b4551c531  ../aikosh_download/aikosh/ckpt_last.pt
+cb16a3ef4044723b47f844ee9b03dcd5dfff35ffe66374064083a8741a8c3970  ../aikosh_download/aikosh/metrics (3).jsonl
+10d3f4dce0c6228c2bac157910c7f2cd11d923e830eb3031049f98ce349717b8  ../aikosh_download/aikosh/train_config (2).json
+10b3c5aecf6b81746bf86f8c18f8c576bf716a3620e7632e8fc2684006b51cdc  tokenizers/vocab32k_v2/vocab32k.tok
+f3411aa1dad4fcf8b5a021895481c109bdab5e1d920e662d2cfc64adb4f57941  evals/MANIFEST.json
+030509bfd75d417a035e2c0e5f568a4461d491c0c698cc53eeec709fb892f9e8  ../team_bins/math.train.bin
+0e056d3d42d0d4cfb4f2479d4dde345750b10d1bedd7fd4d6371b48c4fbfb15a  ../team_bins/math.val.bin
+ef1b3bd67739bf2afaee774f62187cc9328fe28d98a4fb132df581f8c2516e33  ../team_bins/physics.train.bin
+4c0bc8a1c8940b577a8126322f9ff6b97d05b052a3757eeeb130b71c0386eacd  ../team_bins/physics.val.bin
+20032a9be9b9be9352f1b40ce2cac225870d6cb48679d71788441731b9362935  ../team_bins/chem.train.bin
+f4c9badd15153e132bf8818edfb3ad89ec68afd1cd0660abd19a4f93d255b576  ../team_bins/chem.val.bin
+0495309dc8d227f5208639612db4564c6bbabf65bc841097b2d6d2e621a22ed4  ../team_bins/bio.train.bin
+aa7761bf128d7b854afd963eab925b0735db3764f7e41826bdf3b9f9e5e0873f  ../team_bins/bio.val.bin
+b405b160741108cd2e4a35769b24d6e17376c79d1d1c76a37292a42df4ecc70e  ../team_bins/earth.train.bin
+2c15b6dc6c5eddf9e4c1ce4ea234955b010cff7ed19f32aea2dd16e3485c6656  ../team_bins/earth.val.bin
+dbe9869cb0b4d6e85e2a3756f9b419da39de7f82e317bb7f2a079914e35dfb57  ../team_bins/scidisc.train.bin
+fed3731f53134515477e34ba4d0735b9a10d462a98248283abbf00f48918b567  ../team_bins/scidisc.val.bin
+dcf193d6820aec0d3eabe93e20a16ca7aecfaac80045c50f20f8ae7fac31f80b  ../team_bins/sciqa.train.bin
+4923e4ca4205708e1a4ef614ca5821d0205c1b85232f1653e2b64dd4ba157a79  ../team_bins/sciqa.val.bin
+1639a997177bf277fcb76e1d48ac86fce772ab3c907f6cfdbe59b1516537abeb  ../team_bins/sciprog.train.bin
+002e0863b3fd57a01f02c73c4eb38101fe4ccf04a40c2350d7f697192e473281  ../team_bins/sciprog.val.bin
+3bf0efe09a1103079ec9c245445108f81ebb92b70fb90705fadeba1c3f6993f6  ../team_bins/code.train.bin
+586090986e7c8640e966cf9ac81d5346d96cbebf4d522ad91afadded82cae1f5  ../team_bins/code.val.bin
+b23b4cf4cc1aa1bcb8229c873fbcfa5323391e7991e5cd927d4f6bd5de345fa7  ../team_bins/cad.train.bin
+d29f28dbf2c4d8c65941d076a38a088d4b81d124258b70d8901807710694848d  ../team_bins/cad.val.bin
+6ad00788e84877a34443357aca5661fffd489cdc9ddfb89ac95d54c70baa6237  ../team_bins/multistep.train.bin
+221aba8fe1c74c9b6d8d67bde4693e2861f81d798d1e5e4e0e3e63d40e699189  ../team_bins/multistep.val.bin
+716c5b412535f46261e699690e44f1ea7fd7646561f48205bd0b71fc47cb5709  ../team_bins/astro.train.bin
+f58e1db7990ccdb7412dee077d3082944540a8281bd284d2d3be2dcb2e5b392d  ../team_bins/astro.val.bin
+0414d06fa54087e3403d11dc539b129e65f0cb43124ab5c6da9d53f8b3973ba7  ../team_bins/finance.train.bin
+8d97ef8f45456ffee73536324982ce1063aadd3e0ef7d52d6a0e105d2336be00  ../team_bins/finance.val.bin
+37712e5d6280b46f9460a8b4a9c4bf6b62da7bc4b79e0272d67dcb9278fe4797  ../team_bins/engineering.train.bin
+7c9653546246759507d92e931a79634c36696a99afa4458f72b30bff27d75e3f  ../team_bins/engineering.val.bin
+cdc15ab59f4757fa09bc69cb8e27b437646c7822718346ceb4ea691eb7dec561  ../team_bins/gen_eng.train.bin
+92aa6c92512ff50bbb29001d9e69be68324328e34e27711717eb5a9a3539a583  ../team_bins/gen_eng.val.bin
+0c8ca52294279a35935b20f2ebea86b46ec9260e2296579406b4a972b1020bf4  ../team_bins/exp_val.train.bin
+af999f53bc59e4a6893d14aedfa51fda32c0ae3acae256094aa01c5e1876dd04  ../team_bins/exp_val.val.bin
+b047572c8c0c0c7ad383897b3ad9eeaad5592c07ebfff2706027c06d94b877e8  ../team_bins/tech_comm.train.bin
+375814e641a13d00357a4505ec65454f46b7c3194c9cc3fa515fa32a1816732e  ../team_bins/tech_comm.val.bin

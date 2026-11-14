@@ -1,0 +1,979 @@
+{
+ "checkpoint": "/Users/namit/Downloads/pranag-ai/aikosh_download/aikosh/ckpt_best.pt",
+ "device": "mps",
+ "seq_len": 2048,
+ "loss": {
+  "logged_steps": 838,
+  "last_step": 8380,
+  "tokens_per_step": 262144,
+  "tokens_seen": 2196766720,
+  "train_loss_first": 10.1387679874897,
+  "train_loss_last_smoothed": 2.198821513626756,
+  "val_points": 33,
+  "val_loss_first": 5.375487518310547,
+  "val_loss_best": 2.165606972575188,
+  "val_best_step": 8250,
+  "val_ppl_best": 8.719893046841403,
+  "val_loss_last": 2.165606972575188,
+  "val_last_step": 8250,
+  "train_minus_val_at_last": 0.000850580558180436,
+  "val_change_per_1k_steps_at_end": -0.023135507106780917,
+  "grad_norm_median": 0.23372840881347656,
+  "grad_norm_max": 2.6040420532226562,
+  "grad_norm_spikes": 35,
+  "tokens_per_s_mean": 33458.31707002315,
+  "peak_mem_gb": 9.24971776,
+  "all_finite": true,
+  "val_curve": [
+   {
+    "step": 250,
+    "val_loss": 5.375487518310547,
+    "val_ppl": 216.04517261817116
+   },
+   {
+    "step": 500,
+    "val_loss": 3.6405976891517637,
+    "val_ppl": 38.11461060815391
+   },
+   {
+    "step": 750,
+    "val_loss": 3.1099959552288055,
+    "val_ppl": 22.420953712935205
+   },
+   {
+    "step": 1000,
+    "val_loss": 2.9062116980552672,
+    "val_ppl": 18.287389026465497
+   },
+   {
+    "step": 1250,
+    "val_loss": 2.77752366065979,
+    "val_ppl": 16.07915416454321
+   },
+   {
+    "step": 1500,
+    "val_loss": 2.6909755945205687,
+    "val_ppl": 14.74605507572141
+   },
+   {
+    "step": 1750,
+    "val_loss": 2.617182183265686,
+    "val_ppl": 13.69707331356679
+   },
+   {
+    "step": 2000,
+    "val_loss": 2.5669268906116485,
+    "val_ppl": 13.025733366858312
+   },
+   {
+    "step": 2250,
+    "val_loss": 2.5286348342895506,
+    "val_ppl": 12.536380213066133
+   },
+   {
+    "step": 2500,
+    "val_loss": 2.48349729180336,
+    "val_ppl": 11.983099616327074
+   },
+   {
+    "step": 2750,
+    "val_loss": 2.463600441813469,
+    "val_ppl": 11.747029989797076
+   },
+   {
+    "step": 3000,
+    "val_loss": 2.426711934804916,
+    "val_ppl": 11.321594670489858
+   },
+   {
+    "step": 3250,
+    "val_loss": 2.4130700528621674,
+    "val_ppl": 11.168195518124586
+   },
+   {
+    "step": 3500,
+    "val_loss": 2.389504587650299,
+    "val_ppl": 10.908088602411011
+   },
+   {
+    "step": 3750,
+    "val_loss": 2.364303156733513,
+    "val_ppl": 10.636624174453884
+   },
+   {
+    "step": 4000,
+    "val_loss": 2.348185878992081,
+    "val_ppl": 10.46656487616959
+   },
+   {
+    "step": 4250,
+    "val_loss": 2.328968232870102,
+    "val_ppl": 10.26734255958311
+   },
+   {
+    "step": 4500,
+    "val_loss": 2.3084131211042402,
+    "val_ppl": 10.058450441065286
+   },
+   {
+    "step": 4750,
+    "val_loss": 2.2959556758403776,
+    "val_ppl": 9.933925089530389
+   },
+   {
+    "step": 5000,
+    "val_loss": 2.286852553486824,
+    "val_ppl": 9.843905704362328
+   },
+   {
+    "step": 5250,
+    "val_loss": 2.266958826780319,
+    "val_ppl": 9.650008795297955
+   },
+   {
+    "step": 5500,
+    "val_loss": 2.2585964858531953,
+    "val_ppl": 9.569648599768021
+   },
+   {
+    "step": 5750,
+    "val_loss": 2.2467985689640044,
+    "val_ppl": 9.457410073211475
+   },
+   {
+    "step": 6000,
+    "val_loss": 2.2348557472229005,
+    "val_ppl": 9.345133693473501
+   },
+   {
+    "step": 6250,
+    "val_loss": 2.219437670707703,
+    "val_ppl": 9.202154769504196
+   },
+   {
+    "step": 6500,
+    "val_loss": 2.2149282187223434,
+    "val_ppl": 9.160751517559392
+   },
+   {
+    "step": 6750,
+    "val_loss": 2.204933080077171,
+    "val_ppl": 9.069644607630543
+   },
+   {
+    "step": 7000,
+    "val_loss": 2.1993385016918183,
+    "val_ppl": 9.019045442420362
+   },
+   {
+    "step": 7250,
+    "val_loss": 2.1887424796819688,
+    "val_ppl": 8.923983964583064
+   },
+   {
+    "step": 7500,
+    "val_loss": 2.181650200486183,
+    "val_ppl": 8.860916489199166
+   },
+   {
+    "step": 7750,
+    "val_loss": 2.1765866428613663,
+    "val_ppl": 8.816162131705152
+   },
+   {
+    "step": 8000,
+    "val_loss": 2.1710005581378935,
+    "val_ppl": 8.76705159860602
+   },
+   {
+    "step": 8250,
+    "val_loss": 2.165606972575188,
+    "val_ppl": 8.719893046841403
+   }
+  ]
+ },
+ "step": 8250,
+ "next_token": {
+  "math": {
+   "tokens": 204800,
+   "windows": 100,
+   "cross_entropy": 2.7725049924850462,
+   "perplexity": 15.99866038000805,
+   "top1": 0.47234375,
+   "top5": 0.678251953125,
+   "calibration_error": 0.007543741514080011
+  },
+  "physics": {
+   "tokens": 204800,
+   "windows": 100,
+   "cross_entropy": 2.7503651928901673,
+   "perplexity": 15.648345505359197,
+   "top1": 0.4600634765625,
+   "top5": 0.6753955078125,
+   "calibration_error": 0.0025935294179953417
+  },
+  "chem": {
+   "tokens": 204800,
+   "windows": 100,
+   "cross_entropy": 2.4448925375938417,
+   "perplexity": 11.529310564810613,
+   "top1": 0.502998046875,
+   "top5": 0.7213623046875,
+   "calibration_error": 0.006355425743820433
+  },
+  "bio": {
+   "tokens": 204800,
+   "windows": 100,
+   "cross_entropy": 1.306398804783821,
+   "perplexity": 3.6928510603006375,
+   "top1": 0.7366748046875,
+   "top5": 0.8512255859375,
+   "calibration_error": 0.007513139800666977
+  },
+  "earth": {
+   "tokens": 204800,
+   "windows": 100,
+   "cross_entropy": 1.9382593024522066,
+   "perplexity": 6.946648426377457,
+   "top1": 0.6318994140625,
+   "top5": 0.7739501953125,
+   "calibration_error": 0.0026287108555357007
+  },
+  "scidisc": {
+   "tokens": 204800,
+   "windows": 100,
+   "cross_entropy": 1.5659939488768577,
+   "perplexity": 4.787431033543576,
+   "top1": 0.6762255859375,
+   "top5": 0.8137548828125,
+   "calibration_error": 0.0035145220976619384
+  },
+  "sciqa": {
+   "tokens": 204800,
+   "windows": 100,
+   "cross_entropy": 2.4322899889945986,
+   "perplexity": 11.384923600973567,
+   "top1": 0.5084228515625,
+   "top5": 0.7269580078125,
+   "calibration_error": 0.008829477446970485
+  },
+  "sciprog": {
+   "tokens": 204800,
+   "windows": 100,
+   "cross_entropy": 1.7318961822986603,
+   "perplexity": 5.651359763440987,
+   "top1": 0.6556201171875,
+   "top5": 0.8260791015625,
+   "calibration_error": 0.011883902802260309
+  },
+  "code": {
+   "tokens": 204800,
+   "windows": 100,
+   "cross_entropy": 1.2758373129367828,
+   "perplexity": 3.581699157940522,
+   "top1": 0.7402734375,
+   "top5": 0.8761767578125,
+   "calibration_error": 0.00762050975252805
+  },
+  "cad": {
+   "tokens": 204800,
+   "windows": 100,
+   "cross_entropy": 0.21675109464675188,
+   "perplexity": 1.2420349145209886,
+   "top1": 0.9469189453125,
+   "top5": 0.98162109375,
+   "calibration_error": 0.0022384396415100127
+  },
+  "multistep": {
+   "tokens": 204800,
+   "windows": 100,
+   "cross_entropy": 1.8833029675483703,
+   "perplexity": 6.575186663510492,
+   "top1": 0.59806640625,
+   "top5": 0.75689453125,
+   "calibration_error": 0.007953217990423127
+  },
+  "astro": {
+   "tokens": 100352,
+   "windows": 49,
+   "cross_entropy": 2.982891943989968,
+   "perplexity": 19.744835115156466,
+   "top1": 0.42946827168367346,
+   "top5": 0.6481883769132653,
+   "calibration_error": 0.006497242425202599
+  },
+  "finance": {
+   "tokens": 86016,
+   "windows": 42,
+   "cross_entropy": 1.3625392502262479,
+   "perplexity": 3.906099283078269,
+   "top1": 0.738037109375,
+   "top5": 0.8170224144345238,
+   "calibration_error": 0.04697855442676547
+  },
+  "engineering": {
+   "tokens": 204800,
+   "windows": 100,
+   "cross_entropy": 1.4396724244952201,
+   "perplexity": 4.219313446861436,
+   "top1": 0.7027490234375,
+   "top5": 0.8456396484375,
+   "calibration_error": 0.004931379827337423
+  },
+  "gen_eng": {
+   "tokens": 204800,
+   "windows": 100,
+   "cross_entropy": 2.348517918586731,
+   "perplexity": 10.470040767163235,
+   "top1": 0.530380859375,
+   "top5": 0.737060546875,
+   "calibration_error": 0.012178937198834774
+  },
+  "exp_val": {
+   "tokens": 204800,
+   "windows": 100,
+   "cross_entropy": 2.6349348294734956,
+   "perplexity": 13.94240379975778,
+   "top1": 0.49392578125,
+   "top5": 0.693701171875,
+   "calibration_error": 0.006986026821641645
+  },
+  "tech_comm": {
+   "tokens": 204800,
+   "windows": 100,
+   "cross_entropy": 3.108366559743881,
+   "perplexity": 22.384450859056344,
+   "top1": 0.438759765625,
+   "top5": 0.6298046875,
+   "calibration_error": 0.0063313310851594905
+  }
+ },
+ "generation": {
+  "domains": {
+   "math": {
+    "n": 6,
+    "rep4": 0.6433691756272402,
+    "rep4_reference": 0.04659498207885306,
+    "distinct2": 0.3017543859649123,
+    "loops": 6,
+    "rep4_sampled": 0.050179211469534045,
+    "loops_sampled": 0,
+    "flagged": 6
+   },
+   "physics": {
+    "n": 6,
+    "rep4": 0.31899641577060933,
+    "rep4_reference": 0.005376344086021501,
+    "distinct2": 0.612280701754386,
+    "loops": 1,
+    "rep4_sampled": 0.05376344086021506,
+    "loops_sampled": 0,
+    "flagged": 1
+   },
+   "chem": {
+    "n": 6,
+    "rep4": 0.6756272401433692,
+    "rep4_reference": 0.020194072908471028,
+    "distinct2": 0.2596491228070176,
+    "loops": 6,
+    "rep4_sampled": 0.1603128054740958,
+    "loops_sampled": 0,
+    "flagged": 6
+   },
+   "bio": {
+    "n": 6,
+    "rep4": 0.18458781362007168,
+    "rep4_reference": 0.04659498207885302,
+    "distinct2": 0.731578947368421,
+    "loops": 1,
+    "rep4_sampled": 0.044802867383512524,
+    "loops_sampled": 0,
+    "flagged": 1
+   },
+   "earth": {
+    "n": 6,
+    "rep4": 0.2974910394265233,
+    "rep4_reference": 0.007168458781362001,
+    "distinct2": 0.6456140350877192,
+    "loops": 2,
+    "rep4_sampled": 0.06451612903225806,
+    "loops_sampled": 0,
+    "flagged": 2
+   },
+   "scidisc": {
+    "n": 6,
+    "rep4": 0.532258064516129,
+    "rep4_reference": 0.02150537634408602,
+    "distinct2": 0.40877192982456134,
+    "loops": 4,
+    "rep4_sampled": 0.08960573476702506,
+    "loops_sampled": 0,
+    "flagged": 4
+   },
+   "sciqa": {
+    "n": 6,
+    "rep4": 0.3960573476702509,
+    "rep4_reference": 0.045044500825580924,
+    "distinct2": 0.5435672514619884,
+    "loops": 3,
+    "rep4_sampled": 0.12186379928315412,
+    "loops_sampled": 0,
+    "flagged": 3
+   },
+   "sciprog": {
+    "n": 6,
+    "rep4": 0.7007168458781362,
+    "rep4_reference": 0.16129032258064516,
+    "distinct2": 0.24912280701754386,
+    "loops": 6,
+    "rep4_sampled": 0.23281199087650703,
+    "loops_sampled": 2,
+    "flagged": 6
+   },
+   "code": {
+    "n": 6,
+    "rep4": 0.550179211469534,
+    "rep4_reference": 0.156524926686217,
+    "distinct2": 0.37192982456140355,
+    "loops": 4,
+    "rep4_sampled": 0.2222222222222222,
+    "loops_sampled": 2,
+    "flagged": 4
+   },
+   "cad": {
+    "n": 6,
+    "rep4": 0.14516129032258063,
+    "rep4_reference": 0.16129032258064513,
+    "distinct2": 0.6543859649122806,
+    "loops": 0,
+    "rep4_sampled": 0.16487455197132614,
+    "loops_sampled": 0,
+    "flagged": 0
+   },
+   "multistep": {
+    "n": 6,
+    "rep4": 0.0,
+    "rep4_reference": 0.0,
+    "distinct2": 0.823529411764706,
+    "loops": 0,
+    "rep4_sampled": 0.0,
+    "loops_sampled": 0,
+    "flagged": 1
+   },
+   "astro": {
+    "n": 6,
+    "rep4": 0.49462365591397844,
+    "rep4_reference": 0.019713261648745522,
+    "distinct2": 0.37543859649122807,
+    "loops": 4,
+    "rep4_sampled": 0.019713261648745522,
+    "loops_sampled": 0,
+    "flagged": 4
+   },
+   "finance": {
+    "n": 6,
+    "rep4": 0.40501792114695334,
+    "rep4_reference": 0.07706093189964158,
+    "distinct2": 0.3684210526315789,
+    "loops": 4,
+    "rep4_sampled": 0.0878136200716846,
+    "loops_sampled": 0,
+    "flagged": 4
+   },
+   "engineering": {
+    "n": 6,
+    "rep4": 0.057347670250896064,
+    "rep4_reference": 0.0035842293906810005,
+    "distinct2": 0.8807017543859649,
+    "loops": 0,
+    "rep4_sampled": 0.005376344086021501,
+    "loops_sampled": 0,
+    "flagged": 0
+   },
+   "gen_eng": {
+    "n": 6,
+    "rep4": 0.5663082437275987,
+    "rep4_reference": 0.039426523297491044,
+    "distinct2": 0.38947368421052636,
+    "loops": 4,
+    "rep4_sampled": 0.039426523297491044,
+    "loops_sampled": 0,
+    "flagged": 4
+   },
+   "exp_val": {
+    "n": 6,
+    "rep4": 0.6326164874551972,
+    "rep4_reference": 0.007168458781362001,
+    "distinct2": 0.30526315789473685,
+    "loops": 5,
+    "rep4_sampled": 0.06810035842293909,
+    "loops_sampled": 0,
+    "flagged": 5
+   },
+   "tech_comm": {
+    "n": 6,
+    "rep4": 0.7168458781362008,
+    "rep4_reference": 0.00599968832787906,
+    "distinct2": 0.25438596491228066,
+    "loops": 6,
+    "rep4_sampled": 0.008960573476702502,
+    "loops_sampled": 0,
+    "flagged": 6
+   }
+  },
+  "probes": [
+   {
+    "domain": "arithmetic",
+    "prompt": "Question: What is 17 * 24?\nAnswer:",
+    "greedy": " 24",
+    "greedy_pass": false,
+    "sample_passes": [
+     false,
+     false,
+     false
+    ],
+    "samples_agree": true,
+    "loop": false
+   },
+   {
+    "domain": "arithmetic",
+    "prompt": "Question: What is 125 + 379?\nAnswer:",
+    "greedy": " -521",
+    "greedy_pass": false,
+    "sample_passes": [
+     false,
+     false,
+     false
+    ],
+    "samples_agree": true,
+    "loop": false
+   },
+   {
+    "domain": "math",
+    "prompt": "The derivative of x^2 with respect to x is",
+    "greedy": " given by:\n\nx^2 = x^2 - 2x + 1\n\nNow, we can find the derivative of x^2 with respect to x:\n\nx^2 = x^",
+    "greedy_pass": true,
+    "sample_passes": [
+     true,
+     false,
+     false
+    ],
+    "samples_agree": false,
+    "loop": false
+   },
+   {
+    "domain": "code",
+    "prompt": "def add(a, b):\n    return",
+    "greedy": " a + b\n\n\ndef get_a(a, b):\n    return a + b\n\n\ndef get_b(a, b):\n    return a + b\n\n\ndef get_c(a",
+    "greedy_pass": true,
+    "sample_passes": [
+     true,
+     false,
+     true
+    ],
+    "samples_agree": false,
+    "loop": false
+   },
+   {
+    "domain": "code",
+    "prompt": "def factorial(n):\n    if n == 0:\n        return 1\n    return",
+    "greedy": " 0\n\n\ndef _is_integer(n):\n    return n <= 0\n\n\ndef _is_integer_integer(n):\n    return n <= 0\n\n\ndef _is_integer_integer(",
+    "greedy_pass": false,
+    "sample_passes": [
+     false,
+     false,
+     false
+    ],
+    "samples_agree": true,
+    "loop": true
+   },
+   {
+    "domain": "chemistry",
+    "prompt": "The chemical formula of water is",
+    "greedy": " H 2 O. The chemical formula of water is H 2 O. The chemical formula of water is H 2 O. The chemical formula of water is H 2 O. The chemical formula of water is",
+    "greedy_pass": false,
+    "sample_passes": [
+     false,
+     false,
+     false
+    ],
+    "samples_agree": true,
+    "loop": true
+   },
+   {
+    "domain": "physics",
+    "prompt": "Newton's second law of motion states that",
+    "greedy": " the force of gravity is proportional to the square of the distance between the two points. This is a consequence of the fact that the force of gravity is propo",
+    "greedy_pass": true,
+    "sample_passes": [
+     false,
+     false,
+     true
+    ],
+    "samples_agree": false,
+    "loop": false
+   },
+   {
+    "domain": "physics",
+    "prompt": "The speed of light in vacuum is approximately",
+    "greedy": " 1.5 times the speed of light in vacuum. The speed of light in vacuum is approximately 1.5 times the speed of light in vacuum. The speed of light in vacuum is a",
+    "greedy_pass": false,
+    "sample_passes": [
+     false,
+     false,
+     false
+    ],
+    "samples_agree": true,
+    "loop": true
+   },
+   {
+    "domain": "biology",
+    "prompt": "DNA is made of four nucleotides:",
+    "greedy": " 2-deoxyribose, 2-deoxyribose, 2-deoxyribose, 2-deoxyribose, 2-deoxyribose, 2-deoxyribose, 2-deoxyribose, 2-deoxyribose,",
+    "greedy_pass": false,
+    "sample_passes": [
+     false,
+     false,
+     true
+    ],
+    "samples_agree": false,
+    "loop": true
+   },
+   {
+    "domain": "earth",
+    "prompt": "The three main types of rock are",
+    "greedy": " shown in Figure 2. The rock is composed of a single-phase rock, which is composed of a single-phase rock and a single-phase rock. The rock is composed of a sin",
+    "greedy_pass": false,
+    "sample_passes": [
+     false,
+     false,
+     false
+    ],
+    "samples_agree": true,
+    "loop": false
+   }
+  ],
+  "examples": [
+   {
+    "domain": "math",
+    "prompt": "ility 1. Apr 2, 2017 ### Konte Hi everybody, The tensor of first hyperpolarizability $\\beta_{ijk}$ is define as giving the second order or molecular polarization: $$\\mu_i^{(2)}=\\sum_{jk} \\, \\beta_{ijk",
+    "model": "} \\, \\beta_{ik} \\, \\beta_{jk}$$ The second order tensor is defined as: $$\\mu_i^{(2)}=\\sum_{jk} \\, \\beta_{ijk} \\, \\beta_{ik}$$ The second order tensor is defined as: $$\\mu_i^{(2)}=\\sum_{jk} \\, \\beta_{ijk} \\, \\beta_{ik}$$ The first order tensor is defined as: $$\\mu_i^{(2)}=\\sum",
+    "truth": "} E^j E^k$$ Now, I saw somewhere that an entity $\\beta_{tot}$ can be define as: $$\\beta_{tot}=\\left( (\\beta_{xxx}+\\beta_{xyy}+\\beta_{xzz})^2+(\\beta_{yyy}+\\beta_{yzz}+\\beta_{yxx})^2+(\\beta_{zzz}+\\beta_{zxx}+\\beta_{zyy})^2\\right)^{1/2}$$ What is the"
+   },
+   {
+    "domain": "math",
+    "prompt": "ETAIL: ### Paper: TR07-130 | 3rd December 2007 00:00 #### Hardness amplification proofs require majority TR07-130 Authors: Ronen Shaltiel, Emanuele Viola Publication: 9th December 2007 14:48 Keywords:",
+    "model": " TR07-130 | 3rd December 2007 11:00 #### Hardness amplification proofs require majority TR07-130 Authors: Ronen Shaltiel, Emanuele Viola Publication: 9th December 2007 11:00 #### Hardness amplification proofs require majority TR07-130 Authors: Ronen Shaltiel, Emanuele Viola Publication: 9th December",
+    "truth": " Abstract: Hardness amplification is the fundamental task of converting a $\\delta$-hard function $f : {0,1}^n -> {0,1}$ into a $(1/2-\\eps)$-hard function $Amp(f)$, where $f$ is $\\gamma$-hard if small circuits fail to compute $f$ on at least a $\\gamma$ fraction of the inputs. Typically, $\\eps,\\delta$"
+   },
+   {
+    "domain": "physics",
+    "prompt": " It has been published quarterly by Springer Verlag (Springer Netherlands) in print () and online () since 2002.\n\n\"Natural Computing refers to computational processes observed in nature, and human-des",
+    "model": "igned systems, and the human-computer system.\"\n\n\"Natural Computing is a scientific journal covering natural computing research. It has been published quarterly by Springer Verlag (Springer Netherlands) in print () and online () since 2002.\n\n\"Natural Computing refers to computational processes observ",
+    "truth": "igned computing inspired by nature ... molecular computing and quantum computing ... use of algorithms to consider evolution as a computational process, and neural networks in light of computational trends in brain research.\"\n\nIt includes 19 open access articles as of 19 June 2016 and has an impact "
+   },
+   {
+    "domain": "physics",
+    "prompt": "lativity\n\nGreetings, young scientists! In this section, we will embark on a thrilling journey through time as we explore the fascinating history of mechanics and special relativity. We promise it will",
+    "model": " be a thrilling journey through time as we explore the mysteries of the universe and its mysteries. So grab your thinking caps and let's dive right in!\n\nOur journey begins with the study of mechanics and special relativity. At its core, mechanics is the study of the motion of objects and their inter",
+    "truth": " be nothing short of exciting! So buckle up, grab your notebooks, and let's get started!\n\nOur adventure begins with the ancient Greeks who were fascinated by the natural world around them. They asked questions about how objects moved and why they stopped when pushed. These early thinkers laid the fo"
+   },
+   {
+    "domain": "chem",
+    "prompt": "we learned previously, double replacement reactions involve the reaction between ionic compounds in solution and, in the course of the reaction, the ions in the two reacting compounds are “switched” (",
+    "model": "Figure \\(\\PageIndex{1}\\)). The reaction of a compound with a metal ion in solution is called the metal-catalyzed reaction . The metal ion is the product of the reaction between the metal ion and the metal ion. The metal ion is the product of the reaction between the metal ion and the metal ion. The ",
+    "truth": "they replace each other). Because these reactions occur in aqueous solution, we can use the concept of molarity to directly calculate the number of moles of reactants or products that will be formed, and therefore their amounts (i.e. volume of solutions or mass of precipitates). As an example, lead "
+   },
+   {
+    "domain": "chem",
+    "prompt": " if self.compid in data:\n surn_list, pref_list, con_list, prims, origs =\\\n data[self.compid]\n handle = self.model.append()\n self.model.set_value(handle, 0, 1)\n self.model",
+    "model": ".set_value(handle, 1, 1)\n self.model.set_value(handle, 2, 1)\n self.model.set_value(handle, 3, 1)\n self.model.set_value(handle, 4, 1)\n self.model.set_value(handle, 5, 1)\n self.model.set_value(handle, 6, 1)\n self.model.set_value(handle",
+    "truth": ".set_value(handle, 1, gid)\n self.model.set_value(handle, 2, _('Compound surname'))\n newval = ''\n for sur, pre, con in zip(surn_list, pref_list, con_list):\n if newval:\n newval += '-['\n else:\n newval = '['\n newval += pre + ',' + sur\n if con:\n new"
+   },
+   {
+    "domain": "bio",
+    "prompt": "NA strand breaks and 1-beta-D-arabinofuranosylcytosine-detectable sites in 40-75 kVp X-irradiated compared to 60Co gamma-irradiated human cell lines.\nDomain: biology\nType: genomics\nSource: pes2o\nTags:",
+    "model": " biology, genomics\n\nInduction and repair of DNA strand breaks and 1-beta-D-arabinofuranosylcytosine-detectable sites in 40-75 kVp X-irradiated compared to 60Co gamma-irradiated human cell lines.\n\nBACKGROUND\nThe use of DNA strand breaks (DNA-DNA) is a promising approach to the treatment of cancer. Th",
+    "truth": " biology, genomics\n\nInduction and repair of DNA strand breaks and 1-beta-D-arabinofuranosylcytosine-detectable sites in 40-75 kVp X-irradiated compared to 60Co gamma-irradiated human cell lines.\n\nWe have compared the initial yield and subsequent enzymatic repair of DNA strand breaks and 1-beta-D-ara"
+   },
+   {
+    "domain": "bio",
+    "prompt": " biology\nType: protein_annotation\nSource: uniprot_swissprot\nTags: biology, protein_annotation\n\nEntry: Q8IVJ1\nProtein names: Solute carrier family 41 member 1\nGene Names: SLC41A1\nOrganism: Homo sapiens",
+    "model": " (Human)\nFunction [CC]: FUNCTION: Catalyzes the synthesis of the soluble soluble soluble soluble soluble soluble soluble soluble soluble soluble soluble soluble soluble soluble soluble soluble soluble soluble soluble soluble soluble soluble soluble soluble soluble soluble soluble soluble soluble sol",
+    "truth": " (Human)\nFunction [CC]: FUNCTION: Na(+)/Mg(2+) ion exchanger that acts as a predominant Mg(2+) efflux system at the plasma membrane (PubMed:18367447, PubMed:22031603, PubMed:23661805, PubMed:23976986). Transporter activity is driven by the inwardly directed electrochemical gradient for Na(+) ions, t"
+   },
+   {
+    "domain": "earth",
+    "prompt": "th_environment\nType: atmosphere\nSource: pes2o\nTags: earth_environment, atmosphere\n\nAerosols: Connection between regional climate change and air quality (IUPAC Technical Report)\n\nAbstract Aerosols play",
+    "model": " a crucial role in the global climate system. The main objective of this study is to investigate the role of air quality in the global climate system. The main objective of this study is to investigate the role of air quality in the global climate system. The main objective of this study is to inves",
+    "truth": " an important role in all problems connected with air pollution, ranging from very local effects and human health problems to regional problems such as acid deposition and eutrophication up to continental and global questions such as stratospheric ozone loss and climatic change. In this report, an e"
+   },
+   {
+    "domain": "earth",
+    "prompt": "Aurora Australis\nDomain: earth_environment\nType: earth_observation_datasets\nSource: nasa_cmr\nTags: earth_environment, earth_observation_datasets\n\nTitle: Chlorophyll a data collected on the 1991 WOCE v",
+    "model": "oyage of the Aurora Australis\nShort name: AAS_4269_WOCE_Voyage\nVersion: 1\nAbstract: This data set contains chlorophyll a data collected on the 1991 WOCE voyage of the Aurora Australis. The data were collected by the Aurora Australis Research Center (AAS) in the Aurora Australis, Aurora Australis, an",
+    "truth": "oyage of the Aurora Australis\nShort name: WOCE91_Chlorophyll\nVersion: 1\nAbstract: Chloropyll a data were collected along the WOCE transect on voyage 1 of the Aurora Australis, during October of 1991.\n\nThese data were collected as part of ASAC project 40 (The role of antarctic marine protists in trop"
+   },
+   {
+    "domain": "scidisc",
+    "prompt": "ery\nType: physics\nSource: pes2o\nTags: scientific_discovery, physics\n\nSymmetry-free large-mode area rod-type photonic crystal fibers\n\nRecently, rare-earth doped fiber lasers become an attractive option",
+    "model": " for the development of high-power laser sources. In this work, we report the fabrication of a large-mode area rod-type photonic crystal fiber (PCF) laser with a large-mode area rod-type photonic crystal fiber (PCF-PCF) laser. The PCF-PCF laser is fabricated by a simple and low-cost process. The PCF",
+    "truth": " for several applications requiring emission of high power radiation in different spectral regions [1]. The development of active fibers capable of providing large mode area is needed for power scaling of these systtems, as well as excellent beam quality, which can be obtained in the Single-Mode (SM"
+   },
+   {
+    "domain": "scidisc",
+    "prompt": "ubmed_central\nTags: scientific_discovery, chemistry\n\nRelated literature {#sec1}\n==================\n\nFor the use of related compounds in fluorescence analysis, see: Weiner *et al.* (2001[@bb9]); Gabe *",
+    "model": "et al.* (2004[@bb10]); Krause *et al.* (2004[@bb11]); Krause *et al.* (2004[@bb12]); Krause *et al.* (2004[@bb13]); Krause *et al.* (2004[@bb14]); Krause *et al.* (2004[@bb15]); Krause *et al.* (2004[@bb16]); Krause *et al.* (2004",
+    "truth": "et al.* (2004[@bb5]). For related structures, see: Euler *et al.* (2002*a* [@bb3],*b* [@bb4]); Cui *et al.* (2006[@bb2]). For the synthetic procedure, see: Kollmannsberger *et al.* (1998[@bb6]).\n\nExperimental {#sec2}\n============\n\n {#sec2.1}\n\n### Crystal data {#sec2.1.1}"
+   },
+   {
+    "domain": "sciqa",
+    "prompt": "s\n- no\n- maybe\n\nAnswer: Decision: yes\n\nThe inclusion of industry and public results registries as an information source in SRs is still insufficient and may result in publication and outcome reporting",
+    "model": " errors.\n\nExplanation: The purpose of this study was to evaluate the impact of inclusion of industry and public results registries as an information source for systematic reviews. A total of 5,588 SRs were included in the SRs. The inclusion of industry and public results registries was assessed by t",
+    "truth": " bias. In addition to an essential search in ClinicalTrials.gov, authors of SRs should consider searching industry results registries.\n\nExplanation: Clinical trial results registries may contain relevant unpublished information. Our main aim was to investigate the potential impact of the inclusion o"
+   },
+   {
+    "domain": "sciqa",
+    "prompt": "plains of epigastric pain, radiating to back off and on. The investigation of choice is –\n\nOptions:\n- A: MRI\n- B: CT scan\n- C: USG\n- D: Radio nucleotide scan\n\nAnswer: CT scan\n\nExplanation: Options:\nA:",
+    "model": " MRI\nB: CT scan\nC: USG\nD: Radio nucleotide scan\n\nExplanation: Ans. is 'a' i.e., CT scan",
+    "truth": " MRI\nB: CT scan\nC: USG\nD: Radio nucleotide scan\n\nExplanation: Epigastric pain radiating to back suggests the diagnosis of acute pancreatitis. CECT is the investigation of choice for pancreatitis."
+   },
+   {
+    "domain": "sciprog",
+    "prompt": "pyright (c) 2017-2018 The C0 developers\n// Distributed under the MIT/X11 software license, see the accompanying\n// file COPYING or http://www.opensource.org/licenses/mit-license.php.\n\n#if defined(HAVE",
+    "model": "_CONFIG_H)\n#include <boost/test/unit_test.hpp>\n#include <boost/test/unit_test.hpp>\n#include <boost/test/unit_test.hpp>\n#include <boost/test/unit_test.hpp>\n#include <boost/test/unit_test.hpp>\n#include <boost/test/unit_test.hpp>\n#include <boost/test/unit_test.hpp>",
+    "truth": "_CONFIG_H)\n#include \"config/carbonzero-config.h\"\n#endif\n\n#include \"optionsdialog.h\"\n#include \"ui_optionsdialog.h\"\n\n#include \"bitcoinunits.h\"\n#include \"guiutil.h\"\n#include \"obfuscation.h\"\n#include \"optionsmodel.h\"\n\n#include \"main.h\" // for MAX_SCRIPTCHECK_THREADS\n#include \""
+   },
+   {
+    "domain": "sciprog",
+    "prompt": "udioFilterBank.cpp\n//  libraries/audio/src\n//\n//  Created by Craig Hansen-Sturm on 8/10/14.\n//  Copyright 2014 High Fidelity, Inc.\n//\n//  Distributed under the Apache License, Version 2.0.\n//  See the",
+    "model": " accompanying LICENSE file in the root directory or http://www.apache.org/licenses/LICENSE-2.0.\n//  For complete information about license terms please refer to the\n//  file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.\n//  For complete information about license terms please refer to the\n//",
+    "truth": " accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html\n//\n\n#include \"AudioFilterBank.h\"\n\ntemplate<>\nAudioFilterLSF1s::FilterParameter \nAudioFilterLSF1s::_profiles[ AudioFilterLSF1s::_profileCount ][ AudioFilterLSF1s::_filterCount ] = {\n    //  Freq        Gain    Slope\n    {"
+   },
+   {
+    "domain": "code",
+    "prompt": "func (cache *schedCache) putOffer(offer *mesos.Offer, pid *upid.UPID) {\n\tif offer == nil || pid == nil {\n\t\tlog.V(3).Infoln(\"WARN: Offer not cached. The offer or pid cannot",
+    "model": " be empty.\")\n\t}\n\tnow := time.Now()\n\tnow.Add(1)\n\tnow.Add(2)\n\tnow.Add(3)\n\tnow.Add(4)\n\tnow.Add(5)\n\tnow.Add(6)\n\tnow.Add(7)\n\tnow.Add(8)\n\tnow.Add(9)\n\tnow.Add(10)\n\tnow",
+    "truth": " be nil\")\n\t\treturn\n\t}\n\tlog.V(3).Infoln(\"Caching offer \", offer.Id.GetValue(), \" with slavePID \", pid.String())\n\tcache.lock.Lock()\n\tcache.savedOffers[offer.Id.GetValue()] = &cachedOffer{offer: offer, slavePid: pid}\n\tcache.lock.Unlock()\n}"
+   },
+   {
+    "domain": "code",
+    "prompt": "package translate\n\nimport (\n\t\"cmp\"\n\t\"encoding/json\"\n\t\"fmt\"\n\t\"path\"\n\t\"path/filepath\"\n\t\"regexp\"\n\t\"sort\"\n\t\"strconv\"\n\t\"strings\"\n\n\t\"github.com/loft-sh/vcluster/pkg/controllers/",
+    "model": "cluster\"\n\t\"github.com/loft-sh/vcluster/pkg/syncer/sync\"\n\t\"github.com/loft-sh/vcluster/pkg/syncer/sync\"\n\t\"github.com/loft-sh/vcluster/pkg/syncer/sync/testutil\"\n\t\"github.com/loft-sh/vcluster/pkg/syncer/sync\"\n\t\"github.com/loft-sh/v",
+    "truth": "resources/pods/scheduling\"\n\tsatoken \"github.com/loft-sh/vcluster/pkg/controllers/resources/pods/token\"\n\t\"github.com/loft-sh/vcluster/pkg/mappings\"\n\t\"github.com/loft-sh/vcluster/pkg/syncer/synccontext\"\n\t\"github.com/loft-sh/vcluster/pkg/util/loghelper\"\n\t\""
+   },
+   {
+    "domain": "cad",
+    "prompt": "ogical properties and engineering reasoning QA.\n\nimport cadquery as cq\n\n# Parametric definition for clevis_fork\nscale_factor = 80.0\nnominal_dia = 62.0\ntotal_length = 104.0\nbolt_holes = 8\n\n# Build base",
+    "model": " geometry\nresult = (\n    cq.Workplane(\"XY\")\n    .box(total_length, nominal_dia, scale_factor)\n    .faces(\">Z\")\n    .workplane()\n    .hole(nominal_dia * 0.4)\n    .faces(\">X\")\n    .workplane()\n    .rect(scale_factor * 0.5, nominal_dia * 0.6)\n    .extrude(scale_factor * 0.3)\n)\n\nISO-10303",
+    "truth": " geometry\nresult = (\n    cq.Workplane(\"XY\")\n    .box(total_length, nominal_dia * 1.5, scale_factor)\n    .faces(\">Z\")\n    .workplane()\n    .hole(nominal_dia * 0.5)\n    .faces(\">Z\")\n    .workplane()\n    .rect(total_length * 0.7, nominal_dia * 0.6)\n    .cutThruAll()\n    .edges(\"|Z\")\n    .fillet"
+   },
+   {
+    "domain": "cad",
+    "prompt": "ical properties and engineering reasoning QA.\n\nimport cadquery as cq\n\n# Parametric definition for manifold_block\nscale_factor = 20.0\nnominal_dia = 41.0\ntotal_length = 62.0\nbolt_holes = 4\n\n# Build base",
+    "model": " geometry\nresult = (\n    cq.Workplane(\"XY\")\n    .box(total_length, nominal_dia, scale_factor)\n    .faces(\">Z\")\n    .workplane()\n    .hole(nominal_dia * 0.4)\n    .faces(\">X\")\n    .workplane()\n    .rect(scale_factor * 0.5, nominal_dia * 0.6)\n    .extrude(scale_factor * 0.3)\n)\n\nISO-10303",
+    "truth": " geometry\nresult = (\n    cq.Workplane(\"XY\")\n    .box(total_length, nominal_dia * 1.5, scale_factor)\n    .faces(\">Z\")\n    .workplane()\n    .hole(nominal_dia * 0.5)\n    .faces(\">Z\")\n    .workplane()\n    .rect(total_length * 0.7, nominal_dia * 0.6)\n    .cutThruAll()\n    .edges(\"|Z\")\n    .fillet"
+   },
+   {
+    "domain": "multistep",
+    "prompt": ": -2 times -98.3836\nAnswer: 196.7672<|endoftext|>Question: -0.0439153 times -0.1\nAnswer: 0.00439153<|endoftext|>Question: Work out -27.376 * -0.4.\nAnswer: 10.9504<|endoftext|>Question: Calculate 169*-",
+    "model": "0.065.\nAnswer: -14.985",
+    "truth": ""
+   },
+   {
+    "domain": "multistep",
+    "prompt": "hat is -1922 minus -58097?\nAnswer: 56175<|endoftext|>Question: Work out -802 + -112181.\nAnswer: -112983<|endoftext|>Question: Add 47.03 and 534268.\nAnswer: 534315.03<|endoftext|>Question: 1387.69885+0",
+    "model": ".2\nAnswer: 1387.69885",
+    "truth": ""
+   },
+   {
+    "domain": "astro",
+    "prompt": "f blazars that have direct implications on the GLAST detection of extragalactic sources from two different perspectives: microwave selection and a combined deep X-ray/radio selection. The first one is",
+    "model": " based on the WMAP and Swift observations of the first two blazars, and the second one is based on the Swift observations of the first two blazars. The first two are the first of two new observations of the first blazar, and the second one is the first of two new observations of the first blazar. Th",
+    "truth": " a 41 GHz flux-limited sample extracted from the WMAP 3-yr catalog of microwave point sources. This is a statistically well defined sample of about 200 blazars and radio galaxies, most of which are expected to be detected by GLAST. The second one is a new deep survey of Blazars selected among the ra"
+   },
+   {
+    "domain": "astro",
+    "prompt": "a 2006gz at Late Phases\nAbstract: Recently, a few peculiar Type Ia supernovae (SNe) that show exceptionally large peak luminosity have been discovered. Their luminosity requires more than 1 Msun of 56",
+    "model": " per cent of the total luminosity of the progenitor star. We present a detailed analysis of the light curves of the SNe Ia and the Keck/ACS images of the host galaxy NGC 4993. We find that the light curves of the SNe Ia are consistent with the SNe Ia being the most luminous SNe in the host galaxy. T",
+    "truth": "Ni ejected during the explosion, suggesting that they might have originated from super-Chandrasekhar mass white dwarfs. However, the nature of these objects is not yet well understood. In particular, no data have been taken at late phases, about one year after the explosion. We report on Subaru and "
+   },
+   {
+    "domain": "finance",
+    "prompt": "Ken French 25_Portfolios_5x5_CSV 195309: SMALL LoBM=-1.9180, ME1 BM2=-3.8666, ME1 BM3=-1.1260, ME1 BM4=-1.7722, SMALL HiBM=-3",
+    "model": ".0991, ME2 BM1=-1.0991, ME2 BM2=-1.0991, ME2 BM3=-1.0991, ME2 BM4=-1.0991, ME2 BM5=-1.0991, ME3 BM1=-1.0991, ME3 BM2=-1.0991, ME3 BM3=-1.0991, ME3 BM4=-1.0991, ME3",
+    "truth": ".3028, ME2 BM1=2.4620, ME2 BM2=-0.9670, ME2 BM3=-0.9686, ME2 BM4=-0.7162, ME2 BM5=-2.3087, ME3 BM1=1.0484, ME3 BM2=-0.9142, ME3 BM3=-0.8231, ME3 BM4=-2.0299, ME3"
+   },
+   {
+    "domain": "finance",
+    "prompt": "Ken French 25_Portfolios_5x5_CSV 198211: SMALL LoBM=8.0412, ME1 BM2=10.2199, ME1 BM3=12.5962, ME1 BM4=12.5084, SMALL HiBM=12",
+    "model": ".5103, ME2 BM1=9.0375, ME2 BM2=9.5103, ME2 BM3=10.5103, ME2 BM4=10.5103, ME2 BM5=9.5103, ME3 BM1=9.0375, ME3 BM2=9.5962, ME3 BM3=10.5962, ME3 BM4=10.5103, ME3",
+    "truth": ".3039, ME2 BM1=8.3482, ME2 BM2=8.5114, ME2 BM3=7.0658, ME2 BM4=6.3595, ME2 BM5=8.6136, ME3 BM1=10.2229, ME3 BM2=7.6122, ME3 BM3=6.3800, ME3 BM4=5.2495, ME3"
+   },
+   {
+    "domain": "engineering",
+    "prompt": ".\n\n<ROLE>\nYour primary role is to assist users by executing commands, modifying code, and solving technical problems effectively. You should be thorough, methodical, and prioritize quality over speed.",
+    "model": "\n* If the user asks a question, like \"why is X happening\", don't try to fix the problem. Just give an answer to the question.\n</ROLE>\n\n<EFFICIENCY>\n* Each action you take is somewhat expensive. Wherever possible, combine multiple actions into a single action, e.g. combine multiple bash commands into",
+    "truth": "\n* If the user asks a question, like \"why is X happening\", don't try to fix the problem. Just give an answer to the question.\n</ROLE>\n\n<EFFICIENCY>\n* Each action you take is somewhat expensive. Wherever possible, combine multiple actions into a single action, e.g. combine multiple bash commands into"
+   },
+   {
+    "domain": "engineering",
+    "prompt": ".\n\n<ROLE>\nYour primary role is to assist users by executing commands, modifying code, and solving technical problems effectively. You should be thorough, methodical, and prioritize quality over speed.",
+    "model": "\n* If the user asks a question, like \"why is X happening\", don't try to fix the problem. Just give an answer to the question.\n</ROLE>\n\n<EFFICIENCY>\n* Each action you take is somewhat expensive. Wherever possible, combine multiple actions into a single action, e.g. combine multiple bash commands into",
+    "truth": "\n* If the user asks a question, like \"why is X happening\", don't try to fix the problem. Just give an answer to the question.\n</ROLE>\n\n<EFFICIENCY>\n* Each action you take is somewhat expensive. Wherever possible, combine multiple actions into a single action, e.g. combine multiple bash commands into"
+   },
+   {
+    "domain": "gen_eng",
+    "prompt": "re particularly, a submerged single point mooring system fixed to the seabed and which is particularly adapted for use in arctic waters having surface hazards such as pack ice or icebergs.\n\nBACKGROUND",
+    "model": " OF THE INVENTION\n1. Field of the Invention\nThe present invention relates to a mooring system for anchoring sea going ships, such as storage or production tanker vessels, and more particularly, to a mooring system for anchoring sea going ships, such as storage or production tanker vessels, and more ",
+    "truth": " OF THE INVENTION\n1. Field of the Invention\nThe present invention relates to a mooring system for anchoring sea going ships, such as storage or production tanker vessels, and more particularly, relates to a submerged single point mooring system fixed to the seabed and which is particularly adapted f"
+   },
+   {
+    "domain": "gen_eng",
+    "prompt": "t one end of the pull cable and at least one electric wire disposed inside the pull cable, wherein the electric wire or wires enables electrical connection between the transmitter and the transmission",
+    "model": " means for transmitting radiation to the transmitter.\n\nBRIEF DESCRIPTION OF THE DRAWINGS\n[0016] FIG. 1 is a schematic diagram of a prior art system for testing concealed ducts including a pull cable and a transmitter.\n[0017] FIG. 2 is a schematic diagram of a prior art system for testing concealed d",
+    "truth": " means, and a receiver for receiving signals from the transmission means and for indicating strength of the received signals. The scope of the invention includes methods of finding blockage within a conduit pipe and finding the path of a conduit pipe, built into a partition, by inserting a pull cabl"
+   },
+   {
+    "domain": "exp_val",
+    "prompt": "ncentration was developed. The thermoelectric sensor is integrated into a micro-calorimeter which measures the heat produced by biochemical reactions. The device contains a single flow channel that is",
+    "model": " connected to a thermometer. The thermometer is connected to a thermometer-based temperature sensor which measures the temperature of the sample. The thermometer is connected to a thermometer-based temperature sensor which measures the temperature of the sample. The thermometer is connected to a the",
+    "truth": " 120 µm high and 10 mm wide with two fluid inlets and one fluid outlet. An antimony-bismuth (Sb-Bi) thermopile with high common mode rejection ratio is attached to the lower channel wall and measures the dynamic changes in the temperature when L-glutamate undergoes oxidative deamination in the prese"
+   },
+   {
+    "domain": "exp_val",
+    "prompt": "dvanced to investigate new materials that can be used for blast mitigation, strengthening, or for general repair-retrofit applications. This research activity focused on assessing the effectiveness of",
+    "model": " the proposed approach in terms of the performance of the proposed approach. The results of this research are presented in this paper. The results of this research are presented in this paper. The results of this research are presented in this paper. The results of this research are presented in thi",
+    "truth": " various blast mitigation coating technologies to be used for enhancing the blast resistance of structural members. This study examined the behavior of reduced scale standard reinforced concrete (RC) panels coated with various polyurea systems under blast loading. The finite element program LS-DYNA "
+   },
+   {
+    "domain": "tech_comm",
+    "prompt": "plorer (WINTER) is a new infrared time-domain survey instrument which will be deployed on a dedicated 1 meter robotic telescope at Palomar Observatory. WINTER will perform a seeing-limited time domain",
+    "model": " survey of the WINTER, which will be used to determine the location of the WINTER. The WINTER will be equipped with a high-resolution, high-resolution, high-resolution, and high-resolution spectrograph, which will be used to determine the location of the WINTER. The WINTER will be equipped with a hi",
+    "truth": " survey of the infrared (IR) sky, with a particular emphasis on identifying r-process material in binary neutron star (BNS) merger remnants detected by LIGO. We describe the scientific goals and survey design of the WINTER instrument. With a dedicated trigger and the ability to map the full LIGO O4 "
+   },
+   {
+    "domain": "tech_comm",
+    "prompt": "elay coil and few small leds (max 3A) with a low voltage input. Now the input is variable voltage 1.1v to 5v produced by a hall sensor pot. I want the circuit to be switched on when my input reaches 1",
+    "model": ".1v.\n\nI am using a 3.3v supply to supply the input to the relay coil. I want the output to be 1.1v.\n\nI am using a 3.3v supply to supply the input to the relay coil. I want the output to be 1.1v.\n\nI am using a 3.3v supply to supply the input to the relay coil. I want the output to be 1.1v.\n\nI",
+    "truth": ".2 or 1.3v to switch a relay with 12vdc. Also the 1.1v to 5v values can not be affected by this additional circuit. Any help greatly appreciated .\n\nAnswer:\n\nAny suggestion on it , diagram ? Im coming from auto elec. field and\nnot too familiar with IC chips. thanks\n\nThere are plenty of examples on th"
+   }
+  ],
+  "probe_summary": {
+   "probes": 10,
+   "greedy_pass": 3,
+   "sample_pass_rate": 0.16666666666666666,
+   "samples_agree": 6,
+   "greedy_loops": 4,
+   "greedy_identical_twice": 10
+  },
+  "order_consistency": {
+   "items": 400,
+   "same_answer": 1.0,
+   "acc_original": 0.31,
+   "acc_reversed": 0.31,
+   "random_picker": 0.25
+  }
+ },
+ "integrity": {
+  "checkpoints": {
+   "ckpt_best.pt": {
+    "sha256": "54252dfec6573c82ec7124f745442b6ece933855151cd2a3f38039c3df867050",
+    "bytes": 1201242501,
+    "format_version": 1,
+    "keys": [
+     "config",
+     "format_version",
+     "meta",
+     "model",
+     "optimizer"
+    ],
+    "has_optimizer": true,
+    "step": 8250,
+    "params": 100092672,
+    "tensors": 110,
+    "all_finite": true,
+    "vocab_matches": true,
+    "untrained": false,
+    "val_loss_in_checkpoint": 2.165606972575188,
+    "val_loss_in_metrics": 2.165606972575188,
+    "val_loss_matches": true,
+    "torch_version": "2.10.0+cu128",
+    "config": {
+     "vocab_size": 32000,
+     "hidden_dim": 768,
+     "num_layers": 12,
+     "num_query_heads": 12,
+     "num_kv_heads": 4,
+     "head_dim": 64,
+     "intermediate_dim": 2048,
+     "max_position_embeddings": 2048,
+     "rope_theta": 10000.0,
+     "use_yarn": false,
+     "yarn_scale_factor": 1.0,
+     "yarn_original_max_position": 2048,
+     "yarn_beta_fast": 32.0,
+     "yarn_beta_slow": 1.0,
+     "use_dynamic_ntk": false,
+     "attention_dropout": 0.0,
+     "rms_norm_eps": 1e-06
+    }
+   },
+   "ckpt_last.pt": {
+    "sha256": "2b72125a3bdb2cafaaaf87ca9f5b3a4ff24bb4a12770bedbedbe475b4551c531",
+    "bytes": 1201242501,
+    "format_version": 1,
+    "keys": [
+     "config",
+     "format_version",
+     "meta",
+     "model",
+     "optimizer"
+    ],
+    "has_optimizer": true,
+    "step": 8200,
+    "params": 100092672,
+    "tensors": 110,
+    "all_finite": true,
+    "vocab_matches": true,
+    "untrained": false,
+    "val_loss_in_checkpoint": null,
+    "val_loss_in_metrics": null,
+    "val_loss_matches": null,
+    "torch_version": "2.10.0+cu128",
+    "config": {
+     "vocab_size": 32000,
+     "hidden_dim": 768,
+     "num_layers": 12,
+     "num_query_heads": 12,
+     "num_kv_heads": 4,
+     "head_dim": 64,
+     "intermediate_dim": 2048,
+     "max_position_embeddings": 2048,
+     "rope_theta": 10000.0,
+     "use_yarn": false,
+     "yarn_scale_factor": 1.0,
+     "yarn_original_max_position": 2048,
+     "yarn_beta_fast": 32.0,
+     "yarn_beta_slow": 1.0,
+     "use_dynamic_ntk": false,
+     "attention_dropout": 0.0,
+     "rms_norm_eps": 1e-06
+    }
+   }
+  },
+  "pair": {
+   "same_config": true,
+   "same_tensor_names": true,
+   "relative_l2_difference": 0.011693940667382205,
+   "max_abs_difference": 0.0028381794691085815
+  },
+  "forward": {
+   "tokens": 221,
+   "device": "mps",
+   "repeat_max_abs_diff": 0.0,
+   "cpu_vs_device_max_abs_diff": 2.193450927734375e-05,
+   "cpu_vs_device_argmax_agreement": 1.0
+  }
+ }
+}

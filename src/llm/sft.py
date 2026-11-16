@@ -22,14 +22,14 @@ What this module guarantees (each point has a test in ``tests/test_sft.py``):
   * ``mode="full"`` updates every weight; ``mode="lora"`` freezes the base and trains low-rank adapters on the attention and
     feed-forward projections. Checkpoints of both modes are ordinary full checkpoints (LoRA is merged on the way out), so
     ``scripts/evaluate.py``, ``sample_outputs.py``, ``export_weights.py`` and :func:`load_base_weights` read them unchanged.
-  * The base checkpoint is verified (config, vocabulary hash, optional SHA-256) and is only ever read, never written.
+  * The base checkpoint is verified (config, vocabulary hash, optional SHA-256) and is only ever read, never written. The three role
+    markers were never seen in pretraining (measured), so their embeddings start from the word embeddings (``init_markers``, on by default).
   * Optimizer state is not saved: an SFT run is short (about an hour on one H100 for 20-50k examples); a failed run is repeated.
   * Training stops on a non-finite loss. The base model's loss on the validation responses and on pretraining validation files
     (``retain_val``: forgetting check) is measured before training and again at the end.
 """
 from __future__ import annotations
 
-import contextlib
 import hashlib
 import json
 import math
@@ -287,6 +287,31 @@ def load_base_model(path: str, device: torch.device, expected_vocab_sha256: Opti
     return model, info
 
 
+MARKER_WORDS = {ROLE_SYSTEM: " system", ROLE_USER: " user", ROLE_ASSISTANT: " assistant"}
+
+
+@torch.no_grad()
+def init_marker_embeddings(model: nn.Module, tok: BPETokenizer, end_token: str = DEFAULT_END) -> Dict[str, List[int]]:
+    """Give the three role markers a meaningful starting embedding: the mean of the embeddings of the ordinary tokens of the word
+    (" user", " assistant", " system").
+
+    Measured on 150M tokens sampled from three pilot training files, ``<|endoftext|>`` occurs and the ids 31937-31999 (``<|pad|>``,
+    ``<|bos|>``, the role markers) never do, so the model has never seen the markers and their rows are still the random initial ones
+    (std 0.02). Starting them from the word embeddings costs nothing, touches no token the base model ever reads, and lets the first
+    steps teach "this is where the user / assistant speaks" instead of first teaching what the marker is. Only the marker rows change;
+    the output head is tied to the same rows, and a marker is never a training target (it is masked), so generation is not pushed
+    towards emitting one. Returns ``{marker: source token ids}`` for the report.
+    """
+    sp = special_ids(tok, end_token)
+    emb = model.tok_embeddings.weight
+    used: Dict[str, List[int]] = {}
+    for marker, word in MARKER_WORDS.items():
+        ids = encode_plain(tok, word)
+        emb[sp[marker]] = emb[ids].mean(dim=0)
+        used[marker] = ids
+    return used
+
+
 # ------------------------------------------------------------------ training
 @dataclass
 class SFTConfig:
@@ -319,6 +344,7 @@ class SFTConfig:
     device: str = "auto"
     dtype: str = "auto"
     end_token: str = DEFAULT_END
+    init_markers: bool = True              # start the role-marker embeddings from the word embeddings (see init_marker_embeddings)
     base_sha256: Optional[str] = None      # expected SHA-256 of the base checkpoint file
     hash_base: bool = True                 # compute and record the SHA-256 of the base file (reads it once)
     retain_val: List[str] = field(default_factory=list)   # NAME=PATH pretraining validation .bin files (forgetting check)
@@ -390,6 +416,7 @@ def sft_train(cfg: SFTConfig) -> Dict[str, Any]:
         print("[sft] WARNING: the base weights are bf16 (a weights-only export). Initial weights are rounded; start from the fp32 "
               "training checkpoint when exactness matters.", flush=True)
 
+    marker_init = init_marker_embeddings(model, tok, cfg.end_token) if cfg.init_markers else None
     lora_info = None
     if cfg.mode == "lora":
         lora_info = apply_lora(model, cfg.lora_r, cfg.lora_alpha, cfg.lora_dropout)
@@ -422,7 +449,7 @@ def sft_train(cfg: SFTConfig) -> Dict[str, Any]:
 
     sft_meta = {"base_checkpoint": os.path.basename(cfg.base), "base_sha256": base_sha, "base_step": base_info["step"], "mode": cfg.mode,
                 "lora": {"r": cfg.lora_r, "alpha": cfg.lora_alpha, "dropout": cfg.lora_dropout} if cfg.mode == "lora" else None,
-                "end_token": cfg.end_token, "special_ids": sp, "train_file": os.path.basename(cfg.train),
+                "end_token": cfg.end_token, "special_ids": sp, "marker_init": marker_init, "train_file": os.path.basename(cfg.train),
                 "train_sha256": sha256_file(cfg.train), "epochs": cfg.epochs, "lr": cfg.lr, "seed": cfg.seed}
 
     def write(name: str, step: int, train_loss: Optional[float], val_loss: Optional[float]) -> str:
@@ -493,7 +520,7 @@ def sft_train(cfg: SFTConfig) -> Dict[str, Any]:
         after["val"] = evaluate_sft(model, val_data, cfg.batch_size, sp["pad"], device, amp_dtype)
     if cfg.retain_val:
         after["retain"] = _retain_losses(model, cfg.retain_val, cfg, vocab_size, device, amp_dtype)
-    report = {"config": asdict(cfg), "base": {**base_info, "sha256": base_sha}, "lora": lora_info, "trainable_parameters": n_train_params,
+    report = {"config": asdict(cfg), "base": {**base_info, "sha256": base_sha}, "lora": lora_info, "marker_init": marker_init, "trainable_parameters": n_train_params,
               "train_data": train_data.stats(), "val_data": val_data.stats() if val_data else None,
               "steps_done": done, "steps_planned": total_steps, "stopped": stopped,
               "before": before, "after": after, "best_val_loss": None if best_val == float("inf") else best_val,

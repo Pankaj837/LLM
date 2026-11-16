@@ -9,7 +9,7 @@ import sys
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 LIB = os.path.join(ROOT, "src", "llm")
-ALLOWED_PRINT = {"train.py", "train_reward.py", "train_bpe.py", "preferences.py"}   # CLIs / __main__ demos report on stdout
+ALLOWED_PRINT = {"train.py", "train_reward.py", "train_bpe.py", "preferences.py", "sft.py"}   # CLIs / __main__ demos report on stdout
 SKIP = {os.path.join("scripts", "smoke_test.py"), os.path.join("tests", "legacy")}   # the team's original scripts, kept verbatim
 
 

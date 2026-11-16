@@ -2,7 +2,6 @@
 import hashlib
 import json
 import sys
-from collections import Counter
 from pathlib import Path
 
 import numpy as np
@@ -18,6 +17,7 @@ from llm.tokenizer import BPETokenizer
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
+import sft_check_run  # noqa: E402
 import sft_generate  # noqa: E402
 import sft_make_verified  # noqa: E402
 import sft_prepare  # noqa: E402
@@ -185,7 +185,10 @@ def test_lora_training_gives_a_plain_checkpoint_and_leaves_frozen_weights_alone(
     assert rep["after"]["val"]["loss"] < rep["before"]["val"]["loss"]
     state = read_checkpoint(rep["final_checkpoint"])[0]
     assert set(state) == set(base_model.state_dict())
-    assert torch.equal(state["tok_embeddings.weight"], base_model.state_dict()["tok_embeddings.weight"])   # frozen
+    marker_rows = [tok.special_to_id[m] for m in ("<|system|>", "<|user|>", "<|assistant|>")]
+    keep = [i for i in range(cfg.vocab_size) if i not in marker_rows]
+    assert torch.equal(state["tok_embeddings.weight"][keep], base_model.state_dict()["tok_embeddings.weight"][keep])   # frozen except the marker rows
+    assert not torch.equal(state["tok_embeddings.weight"][marker_rows], base_model.state_dict()["tok_embeddings.weight"][marker_rows])
     assert not torch.equal(state["layers.0.attn.q_proj.weight"], base_model.state_dict()["layers.0.attn.q_proj.weight"])   # merged adapter
     load_checkpoint(rep["final_checkpoint"], TransformerModel(cfg))
 
@@ -336,3 +339,41 @@ def test_synthetic_examples_are_correct_by_construction_and_pass_the_pipeline(to
     out = sft_prepare.prepare(rows, tok, max_len=700, val_frac=0.1, test_frac=0.1, verify_code=True)
     assert sum(out["reasons"].values()) == 0                                       # answers re-checked and every code test executed
     assert sum(len(s) for s in out["splits"].values()) == 160
+
+
+# ------------------------------------------------------------------ marker initialisation and run check
+def test_role_markers_start_from_their_word_embeddings_and_nothing_else_changes(tok):
+    torch.manual_seed(0)
+    model = TransformerModel(tiny_cfg(tok))
+    before = model.tok_embeddings.weight.detach().clone()
+    used = sft.init_marker_embeddings(model, tok)
+    after = model.tok_embeddings.weight.detach()
+    rows = [tok.special_to_id[m] for m in ("<|system|>", "<|user|>", "<|assistant|>")]
+    for marker, word in sft.MARKER_WORDS.items():
+        ids = sft.encode_plain(tok, word)
+        assert used[marker] == ids
+        assert torch.allclose(after[tok.special_to_id[marker]], before[ids].mean(0))
+    others = [i for i in range(before.shape[0]) if i not in rows]
+    assert torch.equal(after[others], before[others])                              # no other token is touched
+    assert not torch.equal(after[rows], before[rows])
+
+
+def test_check_run_passes_a_good_run_and_flags_each_kind_of_damage(tmp_path, tok, tok_path):
+    base, _, _ = make_base(tmp_path, tok, tok_path)
+    sha_base = sha(base)
+    tr, va = write_jsonl(tmp_path / "train.jsonl", fixed_rows()), write_jsonl(tmp_path / "val.jsonl", fixed_rows(4))
+    rep = sft.sft_train(make_cfg(tmp_path, tok_path, base, tr, va, max_steps=20, eval_interval=10, base_sha256=sha_base))
+    run = rep["config"]["out_dir"]
+    res = sft_check_run.check_run(run, base, sha_base, hash_base=True, require_improvement=True)
+    assert all(ok for ok, _ in res), [m for ok, m in res if not ok]
+    assert sft_check_run.main(["--run", run, "--base", base, "--base-sha256", sha_base, "--require-improvement"]) == 0
+    wrong = sft_check_run.check_run(run, base, "0" * 64)
+    assert not dict((m, ok) for ok, m in wrong)["report's base SHA-256 equals the expected one"]
+    with open(Path(run) / "sft_metrics.jsonl", "a", encoding="utf-8") as f:        # a NaN loss appears in the log
+        f.write(json.dumps({"step": 21, "loss": float("nan"), "grad_norm": 1.0}) + "\n")
+    assert not all(ok for ok, _ in sft_check_run.check_run(run, base, sha_base))
+    assert not all(ok for ok, _ in sft_check_run.check_run(str(tmp_path / "missing"), base))       # nothing there
+    state, cfg, meta, raw = read_checkpoint(str(Path(run) / "ckpt_last.pt"))
+    raw["optimizer"] = {"state": {}, "param_groups": []}                              # an optimizer sneaks into the checkpoint
+    torch.save(raw, Path(run) / "ckpt_last.pt")
+    assert "ckpt_last.pt has no optimizer state" in [m for ok, m in sft_check_run.check_run(run, base, sha_base) if not ok]

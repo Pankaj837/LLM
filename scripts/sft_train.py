@@ -45,6 +45,8 @@ def main(argv=None) -> int:
     ap.add_argument("--device", default=d.device)
     ap.add_argument("--dtype", default=d.dtype, choices=["auto", "fp32", "bf16"])
     ap.add_argument("--end-token", default=DEFAULT_END)
+    ap.add_argument("--no-init-markers", dest="init_markers", action="store_false",
+                    help="keep the role-marker embeddings as they are in the base (default: start them from the word embeddings)")
     ap.add_argument("--base-sha256", help="expected SHA-256 of --base; training refuses to start on a mismatch")
     ap.add_argument("--skip-hash", dest="hash_base", action="store_false", help="do not hash the base file (it is hashed once by default)")
     ap.add_argument("--retain-val", nargs="*", default=[], metavar="NAME=PATH",
@@ -55,7 +57,7 @@ def main(argv=None) -> int:
                         warmup_ratio=a.warmup_ratio, weight_decay=a.weight_decay, beta1=a.beta1, beta2=a.beta2, grad_clip=a.grad_clip,
                         epochs=a.epochs, max_steps=a.max_steps, batch_size=a.batch_size, grad_accum=a.grad_accum, max_len=a.max_len,
                         eval_interval=a.eval_interval, save_interval=a.save_interval, log_interval=a.log_interval, patience=a.patience,
-                        seed=a.seed, device=a.device, dtype=a.dtype, end_token=a.end_token, base_sha256=a.base_sha256,
+                        seed=a.seed, device=a.device, dtype=a.dtype, end_token=a.end_token, init_markers=a.init_markers, base_sha256=a.base_sha256,
                         hash_base=a.hash_base, retain_val=a.retain_val, retain_batches=a.retain_batches, retain_seq_len=a.retain_seq_len))
     return 0
 

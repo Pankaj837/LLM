@@ -109,3 +109,30 @@ Ravi: Generative Engineering; verifiable cleaned files; his domains' token files
 the 15-capability mapping; the 1M-row sample for the PINN tests. Om: the architecture and benchmark deliverables. Gokul: the H100 session, cleaned-folder
 links, token files for his three domains. Swaraj: two more gaps, the `scientific_ir` examples, capabilities 9 and 10 if Raju confirms. Prabanjan: physics token
 file, math rerun with `spread`. Raju: the shared Drive folder, Afnan's reassignment, owners for the engineering sources.
+
+## 17 Nov 2026 board: audit fixes, SFT pilot, data (set after Raju's `auditing.pdf` 15 Nov, `report1.pdf` and `sft.pdf` 16 Nov)
+Deadlines are IST. "Proof" is what must be posted for the item to count as delivered (otherwise: not delivered). Every owner replies "ACK + ETA" in the group within 2 hours of the board and posts a blocker the moment there is one. Source of the plan: `docs/SFT_GUIDE_2026-11-17.md` (code: commit 74bd1b9; run gate and marker start in the next push).
+
+| Owner | Item | Due | Proof |
+|---|---|---|---|
+| Raju | D1 approve GPU credit Rs 1,500 for the SFT runs (estimate Rs 1,000-1,200 compute); D2 keep or delete the 500M/750M full checkpoints on the paused VM (about Rs 155/day); D3 approve the pilot design (v1 about 6,000 verified examples first, full and LoRA both, start from the fp32 `ckpt_1b_full_best.pt`) | Tue 17 Nov 6 pm | a yes/no per point in the group |
+| Ravi | R1 wallet screenshot; confirm `eval_domains.json`, `session_report.md`, `train.log`, `session.json` saved (name + sha256); instance stays paused, not deleted | Tue 17 Nov 12 pm | screenshot + 4 lines |
+| Ravi | R2 corrected reports (all points of the 17 Nov list), `eval_domains.json` for 250M/500M/1B from one script, `check_val_overlap` on all 20 domains, strict-scored probes, decoding table (greedy / repetition penalty / no-repeat n-gram / sampling) on the same prompts | Wed 18 Nov 12 pm | files + numbers in the group |
+| Ravi | R3 Gate S1 (8-step run, full and LoRA) after the credit is visible | Wed 18 Nov | full output of `sft_check_run.py` |
+| Ravi | R4 full and LoRA SFT on dataset v1 | Thu 19 Nov 8 pm | `sft_report.json`, `sft_check_run.py` output for both |
+| Ravi | R5 base vs full vs LoRA (`sft_generate.py` + `evaluate.py`), regressions listed, GPU hours and cost, instance paused | Fri 20 Nov 12 pm | the two result files + wallet screenshot |
+| Om | O1 bug list of Ravi's 3 deliverables and Stage 1-3 (file/line, evidence, fix), checking the 17 Nov points | Tue 17 Nov 6 pm | the list in the group |
+| Om | O2 independently re-hash `ckpt_1b_weights_bf16.pt` (link posted by Ravi) and load it on the CPU | Thu 19 Nov 6 pm | hash and a forward-pass result |
+| Avinash | A1 first 1,000 verified examples in the repo format | Tue 17 Nov EOD | `manifest.json` from `sft_prepare.py` |
+| Avinash | A2 merge all contributions into dataset v1 (`sft_prepare.py --evals evals`) | Thu 19 Nov 8 pm | `manifest.json`, sha256 of train/val/test |
+| Avinash | A3 astro cleanup (templated rows) and per-source licences/counts (owed) | Fri 20 Nov | files |
+| Prabanjan | at least 200 verified examples: math, multistep, finance; and the exact upstream dataset list/counts for `engineering_reasoning_corpus_old.txt` (owed) | examples Thu 19 Nov 6 pm; list Wed 18 Nov | `raw/prabanjan.jsonl` + `sft_prepare` line; the list |
+| Prem | at least 150 verified examples: physics; and what physai tokens can be added and by when | Thu 19 Nov 6 pm; plan Fri 20 Nov | `raw/prem.jsonl` + line; the plan |
+| Chandrika | at least 150 verified examples: chemistry and biology | Thu 19 Nov 6 pm | `raw/chandrika.jsonl` + line |
+| Srikar | at least 150 verified examples: engineering and electrical calculations | Thu 19 Nov 6 pm | `raw/srikar.jsonl` + line |
+| Shourya | at least 150 verified examples: earth science and astronomy | Thu 19 Nov 6 pm | `raw/shourya.jsonl` + line |
+| Afnan | at least 150 verified examples: code and scientific programming with tests | Thu 19 Nov 6 pm | `raw/afnan.jsonl` + line |
+| Namit | independent contamination check of dataset v1 against `evals/` (3,619 items) and PubMedQA/MMLU; commit the pilot-bins leakage JSON (owed) | from his exams: result Fri 20 Nov 12 pm | report in the group |
+| Gokul | delivery dates for Biology +255M and Earth +152M tokens; deliver on those dates | dates Fri 20 Nov | dates in the group |
+
+Rules for the examples: the answer is computed independently (script or calculator, not a model) and put in `answer` (or code in `tests`); nothing copied from `evals/`; licensed material only, named in `source`; the author runs `scripts/sft_prepare.py` on the file and posts its summary line, and explains every removed example. Check on delivery: the same command is re-run on the posted file by the verifier and the numbers are compared.

@@ -1,6 +1,9 @@
 # Changelog
 
 ## Unreleased
+### Added (17 Nov 2026)
+- SFT: `src/llm/sft.py` (chat format with the tokenizer's real `<|system|>/<|user|>/<|assistant|>` markers, response-only loss, full and LoRA training, forgetting check, decoding with repetition controls), `scripts/sft_prepare.py` (checked train/val/test + manifest, decontamination against `evals/`), `scripts/sft_train.py`, `scripts/sft_generate.py` (base vs SFT on identical prompts), `scripts/sft_verify.py`, `scripts/sft_make_verified.py` (examples correct by construction), `tests/test_sft.py` (16 tests), `docs/SFT_GUIDE_2026-11-17.md`. Not run on the 1.5B model yet.
+
 ### Added (9 Nov 2026)
 - `scripts/collect_domain10_openalex.py` (Domain 10 top-up from OpenAlex, CC BY / CC0 only, resumable, PDFs not stored), `configs/pilot_1b.json` (20-domain 1B pilot mix), `docs/PILOT_RUN_CHECKLIST_2026-11-09.md` (Gokul's command checklist), `docs/evidence/ravi_sciprog_sha256_2026-11-09.txt`; docs: sciprog verification, Ravi's licence reply checked, ledger owners of Domains 9 and 10.
 

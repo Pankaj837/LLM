@@ -377,3 +377,20 @@ def test_check_run_passes_a_good_run_and_flags_each_kind_of_damage(tmp_path, tok
     raw["optimizer"] = {"state": {}, "param_groups": []}                              # an optimizer sneaks into the checkpoint
     torch.save(raw, Path(run) / "ckpt_last.pt")
     assert "ckpt_last.pt has no optimizer state" in [m for ok, m in sft_check_run.check_run(run, base, sha_base) if not ok]
+
+
+def test_training_can_start_from_the_bf16_weights_only_export_and_pass_the_gate(tmp_path, tok, tok_path):
+    import export_weights
+    full, _, _ = make_base(tmp_path, tok, tok_path)
+    slim = str(tmp_path / "base_bf16.pt")
+    export_weights.export(full, slim, "bf16")
+    sha_slim = sha(slim)
+    tr, va = write_jsonl(tmp_path / "train.jsonl", fixed_rows()), write_jsonl(tmp_path / "val.jsonl", fixed_rows(4))
+    rep = sft.sft_train(make_cfg(tmp_path, tok_path, slim, tr, va, max_steps=20, eval_interval=10, base_sha256=sha_slim))
+    assert "bfloat16" in rep["base"]["weights_dtype"]
+    run = rep["config"]["out_dir"]
+    state, cfg, meta, raw = read_checkpoint(str(Path(run) / "ckpt_last.pt"))
+    assert {str(v.dtype) for v in state.values() if v.is_floating_point()} == {"torch.float32"}     # trained and saved in fp32
+    res = sft_check_run.check_run(run, slim, sha_slim, hash_base=True, require_improvement=True)
+    assert all(ok for ok, _ in res), [m for ok, m in res if not ok]
+    assert sha(slim) == sha_slim

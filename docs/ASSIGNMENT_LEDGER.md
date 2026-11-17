@@ -110,26 +110,24 @@ the 15-capability mapping; the 1M-row sample for the PINN tests. Om: the archite
 links, token files for his three domains. Swaraj: two more gaps, the `scientific_ir` examples, capabilities 9 and 10 if Raju confirms. Prabanjan: physics token
 file, math rerun with `spread`. Raju: the shared Drive folder, Afnan's reassignment, owners for the engineering sources.
 
-## 17 Nov 2026 board (v4, final): one person, one complete category (Raju Sir, 17 Nov 4:45, 5:29, 5:38 pm)
-Earlier versions of this board split work across people; Raju Sir asked for no overlap and no redistribution, so they were withdrawn. Files: `docs/share/ASSIGNMENT_BOARD_2026-11-17.docx`, `docs/share/ASSIGNMENT_TRACKER_2026-11-17.xlsx`.
+## 17 Nov 2026 board (final): one person, one complete category
+Files: `docs/share/ASSIGNMENT_BOARD_2026-11-17.docx`, `docs/share/ASSIGNMENT_TRACKER_2026-11-17.xlsx`.
 
-| Owner | Category | Owns | Final outcome (reported directly) | Due |
-|---|---|---|---|---|
-| Avinash | SFT dataset (complete) | All required domains and categories. Verify answers, sources, licences and code tests. Remove duplicates and evaluation leakage. Run sft_prepare.py. | dataset_v1, manifest, SHA-256 and validation report | Wed 18 Nov (Raju Sir: by tomorrow); ETA now |
-| Om | SFT execution | Verify the original checkpoint and its configuration. Confirm the SFT pipeline loads the existing 1.5B model. First run the smoke test (Raju Sir, 5:29 pm). Then run the SFT once Avinash delivers the dataset. | Training logs, checkpoint and baseline-versus-SFT evaluation | Wed 18 Nov: checkpoint verified and smoke test; SFT after the dataset |
-| Ravi | 1B pilot checkpoint and its reports | Hand the 3 GB weights file to Om: exact file path, SHA-256, model configuration, confirmation that it loads and matches the 1.5B architecture. Corrected reports (Deliverables 1-3 and the 500M/750M/1B comparison) with the evaluation files. | Handover to Om; corrected reports | Handover tonight 9 pm; reports Wed 18 Nov |
-| Prabanjan | His domains: mathematics, physics, multistep, astronomy, finance | Final token status per domain (delivered / remaining / date) and the upstream dataset list for engineering_reasoning_corpus_old.txt (both owed). | The status table and the list | Wed 18 Nov |
-| Gokul | His domains: biology, earth and environment, scientific discovery | Delivery dates for Biology +255M and Earth +152M tokens, then the delivery on those dates. Available from the 20th, as he said. | Dates now; files and counts on the dates | Dates by Fri 20 Nov |
-| Chandrika | Monitoring (management; no work items) | Make sure every task above is completed by tomorrow (Raju Sir, 4:48 pm). Check the board at 12 pm and 8 pm and post one status line. A late or silent owner is reported to Raju Sir and Pankaj; nobody's work is moved without Raju Sir's OK. | One status line twice a day | Daily 12 pm and 8 pm |
+| Owner | Category | Final outcome | Due |
+|---|---|---|---|
+| Avinash | SFT dataset | dataset_v1 complete: all domains; answers, sources, licences and code tests verified; duplicates and evaluation leakage removed (sft_prepare.py). Manifest, SHA-256, validation report. | Wed 18 Nov |
+| Om | SFT execution | Checkpoint and configuration verified; pipeline loads the 1.5B model; smoke test first; then SFT on Avinash's dataset. Logs, checkpoint, baseline-vs-SFT evaluation. | Wed 18 Nov: checkpoint and smoke test; SFT after the dataset |
+| Ravi | 1B checkpoint + 6 domains: code, scientific Q&A, scientific programming, CAD, chemistry, agent trajectories (8.4B of the 30B) | Hand the 3 GB weights file to Om (path, SHA-256, configuration, load check). Corrected reports. Domain tokens complete to the 30B plan, unnecessary tokens removed (known: sciqa answer labels, code licence banners, general code in scientific programming), sources updated in the repo. | Handover: tonight 9 pm. Reports: Wed 18 Nov. Data: ETA now |
+| Prabanjan | 6 domains: math, physics, engineering reasoning, multistep, astronomy, finance (10.5B of the 30B) | Domain tokens complete to the 30B plan, unnecessary tokens removed (known: catalogue-style astronomy rows, very short multistep records), sources updated in the repo, upstream list for engineering_reasoning_corpus_old.txt. | ETA now |
+| Gokul | 3 domains: biology, earth, scientific discovery (3.3B of the 30B). From the 20th. | Domain tokens complete to the 30B plan (Biology +255M, Earth +152M), unnecessary tokens removed (pending: language check, near-duplicates), sources updated in the repo. | ETA by Fri 20 Nov |
+| Chandrika | Monitoring | Every task completed by tomorrow; one status line at 12 pm and 8 pm. A late or silent owner is reported to Raju Sir and Pankaj. | Daily |
 
-Decisions for Raju Sir:
-- Wallet: Rs 155.24 (Ravi's screenshot, Tue 17 Nov). The paused VM costs about Rs 6.48/h (computed), so the wallet reaches zero about 8 am Wed 18 Nov (estimate) and the VM is released; the 500M/750M full checkpoints exist only there. Top up (about Rs 1,500 covers the SFT runs, about Rs 450-500, and four days of storage) or let it go?
-- Where does Om run the SFT (Ravi's JarvisLabs instance or another GPU)? The first run is the smoke test.
-- Namit has left. His open items have no owner: the numerical simulation token plan (Domain 9) and the pilot-bins leakage JSON. Who owns them, as one complete category? Until you say, nobody starts them.
+For Raju Sir to decide:
+- Wallet is Rs 155.24 and the paused VM costs about Rs 6.48/h, so it reaches zero about 8 am Wed 18 Nov (estimate) and the VM is released (500M/750M full checkpoints are only there). Top up (about Rs 1,500 covers the SFT runs and four days of storage) or let it go?
+- Where does Om run the SFT?
+- Namit has left: Domains 9, 11, 12 and 14 (5.7B of the 30B) and the pilot-bins leakage JSON need one owner.
 
 Rules:
-- Raju Sir, 4:45 pm: Avinash completes the SFT dataset; Om is the one person for SFT execution; Ravi hands over the checkpoint. Share the result by tomorrow.
-- Raju Sir, 4:53 pm: share the 3 GB weights file only, for now. 5:29 pm: first run the smoke test.
-- Raju Sir, 5:38 pm: each person owns one complete category and reports its final outcome directly; no overlap and no unnecessary redistribution of tasks.
-- Reply "ACK + ETA" within 2 hours. Post a blocker the moment there is one. An outcome counts when its proof is posted in the group.
-- Tools and instructions for Avinash and Om (reference, not extra tasks): docs/SFT_GUIDE_2026-11-17.md in the repo (data preparation, full and LoRA training, run gate, comparison).
+- Each person owns one complete category and reports its final outcome directly in the group.
+- Reply "ACK + ETA" within 2 hours; post a blocker at once. An outcome counts when its proof is posted.
+- Data sources: every owner updates the LLMs-Datasets repository in detail (source, link, licence, tokens, cleaning, bin SHA-256).

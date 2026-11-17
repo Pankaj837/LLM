@@ -124,37 +124,38 @@ Deadlines are IST. Plan and code: `docs/SFT_GUIDE_2026-11-17.md`. Tracker with a
 | R4 | Ravi | Pilot-bins leakage: run check_leakage on the pilot bins and commit the JSON (was Namit's); be reachable for evaluate.py errors. | Wed 18 Nov 6 pm | Commit link | 2 |
 | R5 | Ravi | Decoding table (greedy / repetition penalty / no-repeat n-gram / sampling) on the same prompts, strict-scored; uses the GPU after Om's Gate S1. | Thu 19 Nov 12 pm | Table in the group | 2 |
 | R6 | Ravi | Token plan for numerical simulation: delivered / remaining / date (was Namit's). | Thu 19 Nov 6 pm | The plan | 2 |
+| R7 | Ravi | Independently verify Avinash's astronomy, scientific-reasoning and chemistry examples (recompute answers, check sources and licences; at least 30 each); post findings. | Thu 19 Nov 12 pm | Findings in the group | 1.5 |
 | O2 | Om | Confirm the SFT pipeline loads the existing 1.5B model (CPU) and runs sft_prepare.py on Avinash's generated file; read docs/SFT_GUIDE_2026-11-17.md first. | Wed 18 Nov 12 pm | Output in the group | 1 |
 | O3 | Om | Strict test set evals/strict_v1.jsonl: at least 40 unseen questions (math, code, science, engineering, multistep), each with a computable answer or tests; contamination-checked with sft_prepare.py --evals evals. | Wed 18 Nov 9 pm | The file + its manifest line | 4 |
 | O4 | Om | First run the smoke test, as Raju Sir said (5:29 pm): gate S1: 8-step smoke run, full and LoRA, on the GPU once D1 and D2 are settled (commands in the guide, base = the 3 GB file and its hash). | Wed 18 Nov 6 pm | Full output of scripts/sft_check_run.py | 1.5 |
-| O5 | Om | Full and LoRA SFT on dataset v1 once Avinash delivers it (settings in the guide). | Thu 19 Nov 6 pm | sft_report.json + sft_check_run output for both | 1.5 |
+| O5 | Om | Full and LoRA SFT on dataset v1 once Avinash delivers it (settings in the guide). | Thu 19 Nov 8 pm | sft_report.json + sft_check_run output for both | 1.5 |
 | O6 | Om | Report: training logs, checkpoints, base vs full vs LoRA on identical held-out questions (sft_generate.py, evaluate.py, strict_v1), regressions listed, GPU hours and cost, instance paused. | Fri 20 Nov 12 pm | Result files + wallet screenshot | 2.5 |
-| O7 | Om | 50 verified examples: engineering and electrical calculations. | Wed 18 Nov 9 pm | raw/om.jsonl + sft_prepare line | 1.5 |
+| O7 | Om | List sources for physics, engineering/electrical and code examples for Avinash (name, licence, link, size, how answers are verified); put them in LLMs-Datasets. | Wed 18 Nov 12 pm | Commit link | 1.5 |
+| O8 | Om | Independently verify Avinash's physics, engineering/electrical and code examples (recompute answers, run the tests, check licences); post findings. | Thu 19 Nov 12 pm | Findings in the group | 1 |
 | A1 | Avinash | Run sft_make_verified.py --per-kind 500 and sft_prepare.py on it (format check, 2,000 examples). | Tue 17 Nov EOD | manifest.json | 1 |
-| A2 | Avinash | 150 verified examples: astronomy 50, scientific reasoning 50, code with tests 50. | Wed 18 Nov 9 pm | raw/avinash.jsonl + sft_prepare line | 5 |
-| A3 | Avinash | 50 verified examples: chemistry (was Namit's). | Wed 18 Nov 9 pm | raw/avinash_chem.jsonl + sft_prepare line | 1.5 |
-| A4 | Avinash | Complete dataset v1 (Raju Sir 4:43 pm): merge every contribution, remove duplicates and evaluation leakage (sft_prepare.py --evals evals), table of domains and counts showing every gap, manifest, SHA-256 of train/val/test, validation report. | Thu 19 Nov 10 am | Files + manifest + sha256 in the group | 2 |
-| A5 | Avinash | Astro cleanup (templated rows) and per-source licences and counts (owed). | Fri 20 Nov 12 pm | Files | 3 |
-| A6 | Avinash | Add your data sources to the LLMs-Datasets repository. | Wed 18 Nov 12 pm | Commit link | 0.5 |
+| A2 | Avinash | COLLECT ALL SFT EXAMPLES (Raju Sir, 4:45 and 5:34 pm): astronomy, scientific reasoning, code with tests, chemistry, math, multistep, finance, physics, engineering/electrical (biology, earth and numerical simulation follow in v1.1). Use the sources the others list for you, and your own; answers computed independently, tests for code, licence named. Two drops: drop 1 (astronomy, scientific reasoning, code, chemistry) Wed 9 pm; drop 2 (math, multistep, finance, physics, engineering) Thu 10 am. Run sft_prepare.py on each drop and post the line. | Wed 18 Nov 9 pm / Thu 19 Nov 10 am | raw files + sft_prepare line for each drop | 12 |
+| A3 | Avinash | Complete dataset v1: merge every drop, remove duplicates and evaluation leakage (sft_prepare.py --evals evals), table of domains and counts showing every gap, manifest, SHA-256 of train/val/test, validation report. | Thu 19 Nov 2 pm | Files + manifest + sha256 in the group | 2 |
+| A4 | Avinash | Add your data sources to the LLMs-Datasets repository. | Wed 18 Nov 12 pm | Commit link | 0.5 |
 | P1 | Prabanjan | Exact upstream dataset list and counts for engineering_reasoning_corpus_old.txt (owed). | Wed 18 Nov 12 pm | The list | 1 |
-| P2 | Prabanjan | 150 verified examples: math 100, multistep 25, finance 25. | Wed 18 Nov 9 pm | raw/prabanjan.jsonl + sft_prepare line | 5 |
-| P3 | Prabanjan | Cross-check 100 random examples from the other files: re-run sft_prepare, recompute the answers by hand; post findings. | Thu 19 Nov 10 am | Findings in the group | 3 |
+| P2 | Prabanjan | List sources for math, multistep and finance examples for Avinash (name, licence, link, size, how answers are verified); put them in LLMs-Datasets. | Wed 18 Nov 12 pm | Commit link | 1.5 |
+| P3 | Prabanjan | Independently verify Avinash's math, multistep and finance examples plus 100 random examples from all drops (recompute answers by hand or script, check licences); post findings. | Thu 19 Nov 12 pm | Findings in the group | 3.5 |
 | P4 | Prabanjan | Token plan for astro, multistep, finance: delivered / remaining / date. | Thu 19 Nov 6 pm | The plan | 2 |
-| P5 | Prabanjan | Independent contamination check of dataset v1 against evals/ (3,619 items) and PubMedQA/MMLU (was Namit's). | Thu 19 Nov 12 pm | Report in the group | 2.5 |
+| P5 | Prabanjan | Independent contamination check of dataset v1 against evals/ (3,619 items) and PubMedQA/MMLU. | Thu 19 Nov 4 pm | Report in the group | 2.5 |
 | P6 | Prabanjan | Add your data sources to the LLMs-Datasets repository. | Wed 18 Nov 12 pm | Commit link | 0.5 |
+| P7 | Prabanjan | Astro cleanup (templated rows) and per-source licences and counts (owed; was Avinash's). | Fri 20 Nov 12 pm | Files | 3 |
 | G1 | Gokul | Delivery dates for Biology +255M and Earth +152M tokens. (starts from the 20th) | Fri 20 Nov | Dates in the group | 0.5 |
-| G2 | Gokul | 100 verified examples: biology 50, earth science 50 (goes into v1.1). (starts from the 20th) | Mon 23 Nov | raw/gokul.jsonl + sft_prepare line | 3 |
+| G2 | Gokul | List sources for biology, earth science, numerical simulation and chemistry examples for Avinash (name, licence, link, size, how answers are verified); put them in LLMs-Datasets. Avinash adds the examples in v1.1. (starts from the 20th) | Fri 20 Nov | Commit link | 1.5 |
 | G3 | Gokul | Deliver the Biology and Earth tokens on the committed dates. (starts from the 20th) | on the dates he commits | Files + counts | 7 |
-| G4 | Gokul | 100 verified examples: physics 50, numerical simulation 50 (was Namit's; goes into v1.1). (starts from the 20th) | Mon 23 Nov | raw/gokul2.jsonl + sft_prepare line | 3 |
+| G4 | Gokul | Independently verify Avinash's biology, earth science and numerical simulation examples (v1.1): recompute answers, check licences; post findings. (starts from the 20th) | Mon 23 Nov | Findings in the group | 3 |
 | G5 | Gokul | Reply to Raju Sir with your GitHub id (asked 4:08 pm) and add your data sources to the LLMs-Datasets repository. (starts from the 20th) | Fri 20 Nov | Commit link | 0.5 |
 
-Load per person (items, hours): Ravi 6, 13 h; Om 6, 12 h; Avinash 6, 13 h; Prabanjan 6, 14 h; Gokul 5, 14 h.
+Load per person (items, hours): Ravi 7, 14.5 h; Om 7, 13 h; Avinash 4, 15.5 h; Prabanjan 7, 14 h; Gokul 5, 12.5 h.
 
 Monitoring and reassignment:
 - Reply rule: every owner posts "ACK + ETA" within 2 hours of the board and a blocker the moment there is one. An item counts as delivered only when its proof is posted in the group.
 - Chandrika (management, monitoring only) checks the board at 12 pm and 8 pm every day, posts one status line (open items per person) and the list of items that are late or without ACK.
-- If an owner has not ACKed within 2 hours, or an item is more than 6 hours past its due time, Chandrika reassigns that item to the available person with the fewest open items (ties in this order: Om, Avinash, Prabanjan, Gokul), posts the change and updates the tracker. The aim is equal load: each person has about 13-14 hours of work on the board.
-- O1 (bug list) was delivered by Om on 17 Nov 5:23 pm and is closed. Deadlines were tightened on 17 Nov evening. Roles (Raju Sir, 17 Nov 4:45 pm): Avinash owns the SFT dataset; Om is the one person who runs the SFT; Ravi hands over the checkpoint. Availability: Gokul's items start on the 20th. Raju Sir's three points are decisions, not work.
+- If an owner has not ACKed within 2 hours, or an item is more than 6 hours past its due time, Chandrika reassigns that item to the available person with the fewest open items (ties in this order: Om, Avinash, Prabanjan, Gokul), posts the change and updates the tracker. The aim is equal load: each person has about 13-14 hours of work on the board (Avinash about 15.5, because he is the sole collector).
+- O1 (bug list) was delivered by Om on 17 Nov 5:23 pm and is closed. Deadlines were tightened and, on Raju Sir's 5:34 pm instruction, Avinash alone collects all SFT examples; the others list sources for him and independently verify his drops (a writer never checks his own work). Avinash's load is higher for that reason. Roles (Raju Sir, 17 Nov 4:45 pm): Avinash owns the SFT dataset; Om is the one person who runs the SFT; Ravi hands over the checkpoint. Availability: Gokul's items start on the 20th. Raju Sir's three points are decisions, not work.
 
 Rules for the examples:
 - The answer is computed independently (script or calculator, not a model) and put in "answer"; code goes with its asserts in "tests".
